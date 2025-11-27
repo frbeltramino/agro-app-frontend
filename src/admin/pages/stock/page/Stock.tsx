@@ -1,4 +1,4 @@
-import { StockTable } from "../components/stockTable"
+import { StockTable } from "../components/TableStock"
 
 export default function Stock() {
   return (
