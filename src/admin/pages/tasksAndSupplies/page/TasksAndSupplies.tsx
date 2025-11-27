@@ -40,7 +40,7 @@ export const TasksAndSupplies = () => {
       return isNaN(n) ? 0 : n;
     };
     const totalCostTasks = tasksData?.tasks.reduce(
-      (acc, work) => acc + safeNum(work.total_price),
+      (acc, work) => acc + safeNum(work.laborCost),
       0
     );
     const totalCostSupplies = suppliesData?.supplies.reduce(
