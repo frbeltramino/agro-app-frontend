@@ -18,6 +18,7 @@ import { CustomFullScreenLoading } from "./components/custom/CustomFullScreenLoa
 import { useAuthStore } from "./auth/store/auth.store";
 import { TasksAndSupplies } from "./admin/pages/tasksAndSupplies/page/TasksAndSupplies";
 import { Lots } from "./admin/pages/lots/page/Lots";
+import Stock from "./admin/pages/stock/page/Stock";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,14 @@ export const App = () => (
             element={
               <PrivateRouteWithSidebar>
                 <TasksAndSupplies />
+              </PrivateRouteWithSidebar>
+            }
+          />
+          <Route
+            path="/admin/stock"
+            element={
+              <PrivateRouteWithSidebar>
+                <Stock />
               </PrivateRouteWithSidebar>
             }
           />

@@ -9,6 +9,8 @@ interface SelectWithCreateProps {
   register: any; // del react-hook-form
   errors: any;
   onCreate?: (newValue: string) => Promise<void>;
+  mb?: string
+  selectHeight?: string
 }
 
 export const CustomSelectWithCreate = ({
@@ -18,6 +20,8 @@ export const CustomSelectWithCreate = ({
   register,
   errors,
   onCreate,
+  mb,
+  selectHeight
 }: SelectWithCreateProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState("");
@@ -31,7 +35,7 @@ export const CustomSelectWithCreate = ({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <div className={`flex items-center justify-between ${mb ? `mb-${mb}` : "mb-2"}`}>
         <label className="block text-sm font-medium">{label} *</label>
 
         {onCreate && (
@@ -82,7 +86,7 @@ export const CustomSelectWithCreate = ({
 
       <select
         {...register(name, { required: `${label} es requerida` })}
-        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent ${selectHeight ? selectHeight : ""}`}
       >
         <option value="">Selecciona {label.toLowerCase()}</option>
         {options.map((opt) => (
