@@ -378,7 +378,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                           >
                             <option value="">Selecciona un suministro</option>
                             {stockSupplies?.map((supply) => (
-                              <option key={supply.id} value={supply.id}>
+                              <option key={supply.id} value={supply.id?.toString()}>
                                 {supply.name} — <span>({supply.quantity_available} {supply.unit} disponibles)</span>
                               </option>
                             ))}

@@ -6,17 +6,19 @@ interface Options {
   page?: number | string;
   limit?: number | string;
   search?: string;
+  categoryId?: string;
 }
 
 export const getStockAction = async (options: Options): Promise<StockResponse> => {
 
-  const { page, limit, search } = options;
+  const { page, limit, search, categoryId } = options;
 
   const { data } = await agroApi.get<StockResponse>('/stock', {
     params: {
       page,
       limit,
-      search
+      search,
+      category_id: categoryId
     }
   });
 

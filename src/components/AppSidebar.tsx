@@ -1,4 +1,4 @@
-import { Home, Truck, Settings, LogOut, Flag } from "lucide-react";
+import { Home, Truck, Settings, LogOut, Flag, Warehouse } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ import { useAuthStore } from "@/auth/store/auth.store";
 const menuItems = [
   { title: "Dashboard", url: "/admin/dashboard", icon: Home },
   { title: "Campañas", url: "/admin/campaigns", icon: Flag },
+  { title: "Control de Stock", url: "/admin/stock", icon: Warehouse },
   { title: "Ventas", url: "/admin/sales", icon: Truck },
   { title: "Configuración", url: "/admin/settings", icon: Settings },
 
