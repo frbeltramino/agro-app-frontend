@@ -25,6 +25,8 @@ import { ConfirmDialog } from "../../campaigns/components/ConfirmDialog";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { StockCard } from "@/admin/components/StockCard";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
+import { PageHeader } from "@/admin/components/PageHeader";
+import { useStockStats } from "@/admin/hooks/useStockStats";
 
 
 export const StockTable = () => {
@@ -37,6 +39,7 @@ export const StockTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: categoriesData } = useSupplyCategories();
   const categories = categoriesData?.categories || [];
+  const { data: statsData, isLoading: isStatsLoading, isError: isStatsError } = useStockStats();
 
   const stock = stokData?.stock || [];
 
@@ -87,11 +90,6 @@ export const StockTable = () => {
     return <Badge className="bg-red-600">Bajo</Badge>
   }
 
-  const totalValue = () => {
-    const activeStock = stock.filter(s => s.status === "active")
-    return activeStock.reduce((acc, item) => acc + item.quantity_available * item.price_per_unit, 0);
-  }
-
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
 
@@ -120,8 +118,10 @@ export const StockTable = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Control de Stock</h1>
-          <p className="text-muted-foreground">Gestiona tus suministros y productos</p>
+          <PageHeader
+            title="Control de Stock"
+            subtitle="Gestiona tus suministros y productos"
+          />
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
@@ -133,27 +133,30 @@ export const StockTable = () => {
         <Card>
           <StockCard
             title="Total Suministros"
-            value={stock.length}
+            value={statsData?.active_count ? statsData.active_count : 0}
             description="Productos registrados"
-            isLoading={isLoading}
+            isLoading={isStatsLoading}
+            isStatsError={isStatsError}
           />
         </Card>
 
         <Card>
           <StockCard
             title="Stock Total"
-            value={stock.reduce((acc, item) => acc + item.quantity_available, 0)}
+            value={statsData?.total_quantity ? statsData.total_quantity : 0}
             description="Unidades disponibles"
-            isLoading={isLoading}
+            isLoading={isStatsLoading}
+            isStatsError={isStatsError}
           />
         </Card>
 
         <Card>
           <StockCard
             title="Valor Total"
-            value={currencyFormatter(totalValue())}
+            value={currencyFormatter(statsData?.total_value ? statsData.total_value : 0)}
             description="Inventario valuado"
-            isLoading={isLoading}
+            isLoading={isStatsLoading}
+            isStatsError={isStatsError}
           />
         </Card>
       </div>
