@@ -12,7 +12,6 @@ export const getSupplyByCropIdAction = async (options: Options): Promise<CropSup
   const { cropId, page, limit, search } = options;
 
   if (!cropId) throw new Error('Campaign id is required');
-  await new Promise(resolve => setTimeout(resolve, 500));
 
   const { data } = await agroApi.get<CropSupplyResponse>(`/supplies/crop/${cropId}`, {
     params: {

@@ -22,6 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories";
 import { ConfirmDialog } from "../../campaigns/components/ConfirmDialog";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
+import { StockCard } from "@/admin/components/StockCard";
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 
 
 export const StockTable = () => {
@@ -30,7 +33,7 @@ export const StockTable = () => {
   const [stockToDelete, setStockToDelete] = useState<any | null>(null);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
-  const { data: stokData, deleteStock, mutation } = useStock();
+  const { data: stokData, deleteStock, mutation, isLoading } = useStock();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: categoriesData } = useSupplyCategories();
   const categories = categoriesData?.categories || [];
@@ -128,37 +131,35 @@ export const StockTable = () => {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Suministros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stock.length}</div>
-            <p className="text-xs text-muted-foreground">Productos registrados</p>
-          </CardContent>
+          <StockCard
+            title="Total Suministros"
+            value={stock.length}
+            description="Productos registrados"
+            isLoading={isLoading}
+          />
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Stock Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stock.reduce((acc, item) => acc + item.quantity_available, 0)}</div>
-            <p className="text-xs text-muted-foreground">Unidades disponibles</p>
-          </CardContent>
+          <StockCard
+            title="Stock Total"
+            value={stock.reduce((acc, item) => acc + item.quantity_available, 0)}
+            description="Unidades disponibles"
+            isLoading={isLoading}
+          />
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{currencyFormatter(totalValue())}</div>
-            <p className="text-xs text-muted-foreground">Inventario valuado</p>
-          </CardContent>
+          <StockCard
+            title="Valor Total"
+            value={currencyFormatter(totalValue())}
+            description="Inventario valuado"
+            isLoading={isLoading}
+          />
         </Card>
       </div>
 
       <Card>
+
         <CardHeader>
           <CardTitle>Suministros</CardTitle>
           <CardDescription>Lista completa de productos en stock</CardDescription>
@@ -191,65 +192,73 @@ export const StockTable = () => {
                 ))}
               </SelectContent>
             </Select>
-
-            {/* <CustomSelectWithCreate
-              label="Categoría"
-              name="category_id"
-              options={categories || []}
-              register={register}
-              errors={errors}
-              onCreate={async (name: string) => {
-                await createCategory(name);
-                // opcional: actualizar estado local si lo necesitas
-              }}
-            /> */}
           </div>
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Cantidad</TableHead>
-                  <TableHead>Unidad</TableHead>
-                  <TableHead>Nivel</TableHead>
-                  <TableHead>Precio/U</TableHead>
-                  <TableHead>Vencimiento</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stock.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.category_name}</TableCell>
-                    <TableCell>{item.quantity_available}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
-                    <TableCell className="font-bold">${item.price_per_unit.toFixed(2)}</TableCell>
-                    <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => {
-                          setStockToDelete(item);
-                          setIsDeleteOpen(true);
-                        }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <CustomPagination totalPages={Number(stokData?.totalPages) || 0} />
+            {isLoading && <CustomLoadingCard />}
+
+            {!isLoading && stock.length === 0 &&
+              <CustomNoResultsCard
+                title="No se encontraron suministros"
+                message="Prueba cambiando la búsqueda o los filtros."
+              />
+            }
+
+            {
+              !isLoading && stock.length > 0 && (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Categoría</TableHead>
+                        <TableHead>Cantidad</TableHead>
+                        <TableHead>Unidad</TableHead>
+                        <TableHead>Nivel</TableHead>
+                        <TableHead>Precio/U</TableHead>
+                        <TableHead>Vencimiento</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stock.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell>{item.category_name}</TableCell>
+                          <TableCell>{item.quantity_available}</TableCell>
+                          <TableCell>{item.unit}</TableCell>
+                          <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
+                          <TableCell className="font-bold">${item.price_per_unit.toFixed(2)}</TableCell>
+                          <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{getStatusBadge(item.status)}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button variant="destructive" size="sm" onClick={() => {
+                                setStockToDelete(item);
+                                setIsDeleteOpen(true);
+                              }}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {
+                    stock.length > 10 && <CustomPagination totalPages={Number(stokData?.totalPages) || 0} />
+                  }
+
+                </>
+              )}
+
+
           </div>
         </CardContent>
+
       </Card>
 
       <StockModal
