@@ -32,6 +32,7 @@ export const useStock = () => {
     mutationFn: adjustStockAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["stockStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -42,6 +43,7 @@ export const useStock = () => {
     mutationFn: deleteStockAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["stockStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -55,6 +57,7 @@ export const useStock = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["stockStats"] });
     },
     onError: (error) => {
       console.log(error);
