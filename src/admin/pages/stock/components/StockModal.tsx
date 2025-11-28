@@ -17,6 +17,7 @@ import { Stock } from "@/interfaces/stock/stock.interface";
 import { UNITS } from "@/constants/units";
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 import { toast } from "sonner";
+import { currencyFormatter } from "@/lib/currency-formatter";
 
 
 interface FormValues {
@@ -42,12 +43,20 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
     const [isSaving, setIsSaving] = useState(false)
     const { data: categoriesData, createCategory } = useSupplyCategories();
     const categories = categoriesData?.categories || [];
+    const [formatAmount, setFormatAmount] = useState("0,00");
+
+    const formatPrice = (price: number) => {
+      setFormatAmount(
+        currencyFormatter(price)
+      );
+    };
 
     const {
       register,
       handleSubmit,
       formState: { errors },
       reset,
+      watch
     } = useForm<FormValues>({
       defaultValues: {
         name: initialData?.name || "",
@@ -108,6 +117,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
       }
     }
 
+    const unitValue = watch("unit");
+
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent ref={ref} className="sm:max-w-[600px]">
@@ -142,7 +153,6 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                   errors={"error en categoria"}
                   onCreate={async (name: string) => {
                     await createCategory(name);
-                    // opcional: actualizar estado local si lo necesitas
                   }}
                   mb="0"
                   selectHeight="h-10"
@@ -162,14 +172,13 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                     </option>
                   ))}
                 </select>
-                {/* {errors.unit && <p className="text-destructive text-sm mt-1">{errors.unit.message}</p>} */}
               </div>
 
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Cantidad Disponible *</label>
+                <label className="block text-sm font-medium mb-2">Cantidad Disponible ({unitValue})*</label>
                 <input
                   type="number"
                   step="1"
@@ -179,6 +188,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                   })}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="0"
+
+
                 />
                 {errors.quantity_available && (
                   <p className="text-destructive text-sm mt-1">{errors.quantity_available.message}</p>
@@ -197,7 +208,9 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                   })}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="0.00"
+                  onChange={(e) => { formatPrice(Number(e.target.value)) }}
                 />
+                <p className="text-muted-foreground text-xs">{formatAmount}</p>
                 {errors.price_per_unit && (
                   <p className="text-destructive text-sm mt-1">{errors.price_per_unit.message}</p>
                 )}

@@ -89,6 +89,7 @@ export const TasksAndSupplies = () => {
           title="Costo Total"
           value={calcultateTotalCost()}
           icon={<Coins className="h-4 w-4 text-muted-foreground" />}
+          tooltipContent="Incluye mano de obra + insumos utilizados en las tareas"
         />
       </div>
 

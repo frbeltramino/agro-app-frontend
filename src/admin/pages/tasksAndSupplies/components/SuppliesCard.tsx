@@ -15,6 +15,7 @@ import { useCropStore } from "@/admin/store/crop.store"
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
 import { SupplyForm } from "./FormSupply"
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 
 
 export const SuppliesCard = () => {
@@ -29,10 +30,15 @@ export const SuppliesCard = () => {
     q: searchTerm,
   });
   const { data: categoriesData } = useSupplyCategories();
-  const filteredSupplies = suppliesData?.supplies.filter((supply) =>
-    supply.supply_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supply.category_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const normalized = searchTerm.toLowerCase();
+
+  const filteredSupplies =
+    suppliesData?.supplies?.filter((supply) => {
+      const name = supply.supply_name?.toLowerCase() || "";
+      const category = supply.category_name?.toLowerCase() || "";
+
+      return name.includes(normalized) || category.includes(normalized);
+    }) || [];
   const calculateTotalCostBySupply = (pricePerUnit: number, quantity: number) => {
     return currencyFormatter((Number(pricePerUnit) * Number(quantity)))
   }
@@ -42,7 +48,7 @@ export const SuppliesCard = () => {
     setCurrentPage(1);
   };
 
-  if (isLoading) return <CustomLoadingCard />;
+
 
   return (
     <>
@@ -63,7 +69,7 @@ export const SuppliesCard = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar productos por nombre o categoría..."
+                placeholder="Buscar productos por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
@@ -73,66 +79,85 @@ export const SuppliesCard = () => {
         </CardHeader>
 
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Producto</TableHead>
-                  <TableHead>Categoría</TableHead>
-                  <TableHead>Dosis/ha</TableHead>
-                  <TableHead>Cant/h</TableHead>
-                  <TableHead>Cantidad total</TableHead>
-                  <TableHead>Precio unitario</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSupplies?.map((supply, index) => (
-                  <TableRow key={supply.crop_supply_id ?? `supply-${index}`}>
-                    <TableCell className="font-medium">{supply.supply_name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{supply.category_name}</Badge>
-                    </TableCell>
+          {
+            isLoading && <CustomLoadingCard />
+          }
+          {
+            !isLoading && filteredSupplies.length === 0 &&
+            <CustomNoResultsCard
+              title="No se encontraron suministros"
+              message="Prueba cambiando la búsqueda o los filtros."
+            />
+          }
+          {
+            !isLoading && filteredSupplies.length > 0 && (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Producto</TableHead>
+                      <TableHead>Categoría</TableHead>
+                      <TableHead>Dosis/ha</TableHead>
+                      <TableHead>Cant/h</TableHead>
+                      <TableHead>Cantidad total</TableHead>
+                      <TableHead>Precio unitario</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSupplies?.map((supply, index) => (
+                      <TableRow key={supply.crop_supply_id ?? `supply-${index}`}>
+                        <TableCell className="font-medium">{supply.supply_name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{supply.category_name}</Badge>
+                        </TableCell>
 
-                    <TableCell>{supply.dose_per_ha} {supply.supply_unit}</TableCell>
-                    <TableCell>{supply.hectares}</TableCell>
-                    <TableCell>
-                      {(supply.dose_per_ha * supply.hectares).toFixed(2)} {supply.supply_unit}
-                    </TableCell>
-                    <TableCell>${supply.unit_price.toLocaleString()}</TableCell>
-                    <TableCell className="font-medium">
-                      {calculateTotalCostBySupply(supply.unit_price, (supply.dose_per_ha * supply.hectares))}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toast.info("Función de editar próximamente")}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toast.info("Función de eliminar próximamente")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="mt-4">
-              <CustomTasksSuppliesPagination
-                totalPages={suppliesData?.totalPages || 1}
-                currentPage={page}
-                onPageChange={(newPage) => setPage(newPage)} />
-            </div>
-          </div>
+                        <TableCell>{supply.dose_per_ha} {supply.supply_unit}</TableCell>
+                        <TableCell>{supply.hectares}</TableCell>
+                        <TableCell>
+                          {(supply.dose_per_ha * supply.hectares).toFixed(2)} {supply.supply_unit}
+                        </TableCell>
+                        <TableCell>${supply.unit_price.toLocaleString()}</TableCell>
+                        <TableCell className="font-medium">
+                          {calculateTotalCostBySupply(supply.unit_price, (supply.dose_per_ha * supply.hectares))}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => toast.info("Función de editar próximamente")}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => toast.info("Función de eliminar próximamente")}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="mt-4">
+                  {
+                    filteredSupplies.length > 10 && <CustomTasksSuppliesPagination
+                      totalPages={suppliesData?.totalPages || 1}
+                      currentPage={page}
+                      onPageChange={(newPage) => setPage(newPage)}
+                    />
+                  }
+
+                </div>
+              </div>
+
+            )}
+
         </CardContent>
       </Card>
       <SupplyForm

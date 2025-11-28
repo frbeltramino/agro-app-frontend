@@ -104,7 +104,6 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     })
 
     const watchSupplies = watch("supplies");
-
     const handleAddSupply = () => {
       append({
         supplyType: "stock",
@@ -335,8 +334,9 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
               <div className="space-y-4">
                 {fields.map((field, index) => {
                   const supplyType = watchSupplies[index]?.supplyType
+                  const selectedStockId = watch(`supplies.${index}.stockId`);
+                  const selectedStock = stock?.find((s) => s.id === Number(selectedStockId));
                   const stockSupplies = stock
-                  //const purchaseSupplies = supplies.filter((s) => s.type === "purchase")
 
                   return (
                     <div key={field.id} className="border rounded-lg p-4 bg-secondary/5 space-y-3">
@@ -471,8 +471,14 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       {/* Dosis por Hectárea y Cantidad de Hectáreas */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
+                          {/*TODO mostrar la unidad del stock seleccionado si es stock*/}
                           <label className="block text-sm font-medium mb-2">
-                            Dosis por Hectárea ({watchSupplies[index]?.unit || "unidad"}) *
+                            Dosis por Hectárea (
+                            {supplyType === "stock"
+                              ? selectedStock?.unit ?? "unidad"
+                              : watchSupplies[index]?.unit ?? "unidad"
+                            }
+                            ) *
                           </label>
                           <input
                             type="number"

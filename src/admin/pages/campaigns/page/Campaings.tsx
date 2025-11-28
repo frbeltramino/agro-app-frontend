@@ -232,7 +232,9 @@ export const Campaigns = () => {
                 ))}
               </TableBody>
             </Table>
-            <CustomPagination totalPages={Number(data?.pagination.totalPages) || 0} />
+            {
+              filteredCampaigns.length > 10 && <CustomPagination totalPages={Number(data?.pagination.totalPages) || 0} />
+            }
           </div>
         </CardContent>
       </Card>
