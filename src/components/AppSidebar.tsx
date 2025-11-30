@@ -23,7 +23,7 @@ const menuItems = [
   { title: "Dashboard", url: "/admin/dashboard", icon: Home },
   { title: "Campañas", url: "/admin/campaigns", icon: Flag },
   { title: "Control de Stock", url: "/admin/stock", icon: Warehouse },
-  { title: "Ventas", url: "/admin/sales", icon: Truck },
+  { title: "Venta de Semillas", url: "/admin/sales", icon: Truck },
   { title: "Configuración", url: "/admin/settings", icon: Settings },
 
 ];

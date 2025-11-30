@@ -21,12 +21,12 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input";
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories";
-import { ConfirmDialog } from "../../campaigns/components/ConfirmDialog";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { StockCard } from "@/admin/components/StockCard";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { useStockStats } from "@/admin/hooks/useStockStats";
+import { DeleteDialog } from "@/admin/components/DeleteDialog";
 
 
 export const StockTable = () => {
@@ -42,7 +42,12 @@ export const StockTable = () => {
   const { data: statsData, isLoading: isStatsLoading, isError: isStatsError } = useStockStats();
 
   const stock = stokData?.stock || [];
-
+  const stockPagination = {
+    page: stokData?.page || 1,
+    limit: stokData?.limit || 10,
+    total: stokData?.total || 0,
+    totalPages: stokData?.totalPages || 1,
+  }
   const handleAdd = () => {
     setEditingItem(null)
     setIsModalOpen(true)
@@ -252,7 +257,7 @@ export const StockTable = () => {
                     </TableBody>
                   </Table>
                   {
-                    stock.length > 10 && <CustomPagination totalPages={Number(stokData?.totalPages) || 0} />
+                    stockPagination.totalPages > 1 && <CustomPagination totalPages={Number(stockPagination.totalPages) || 0} />
                   }
 
                 </>
@@ -271,24 +276,18 @@ export const StockTable = () => {
         initialData={editingItem}
       />
 
-      <ConfirmDialog
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
-        title="Eliminar Suministro del stock"
-        description={`Eliminarás el suministro "${stockToDelete?.name}"`}
-        onConfirm={() => handleDelete(Number(stockToDelete?.id))}
-        children={
-          <div className="flex items-center gap-2">
-            <div className="p-4 border rounded-md bg-muted mb-4">
-              <p>
-                <strong>Categoría:</strong> {stockToDelete?.category_name}
-              </p>
-              <p>
-                <strong>Fecha de caducidad:</strong> {stockToDelete?.expiration_date ? new Date(stockToDelete.expiration_date).toLocaleDateString() : "No hay fecha de caducidad"}
-              </p>
-            </div>
-          </div>
-        }
+      <DeleteDialog
+        title="Eliminar suministro"
+        description="Esta acción no se puede deshacer."
+        itemData={[
+          { label: "Nombre", value: stockToDelete?.name || "" },
+          { label: "Categoría", value: stockToDelete?.category_name || "" },
+          { label: "Fecha de caducidad", value: stockToDelete?.expiration_date ? new Date(stockToDelete.expiration_date).toLocaleDateString() : "No hay fecha de caducidad" },
+        ]}
+        isOpen={isDeleteOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setIsDeleteOpen(false)}
+        itemId={stockToDelete?.id}
       />
     </div>
   )
