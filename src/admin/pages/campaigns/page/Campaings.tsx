@@ -76,6 +76,12 @@ export const Campaigns = () => {
   if (isLoading) return <CustomFullScreenLoading />;
 
   const filteredCampaigns = data?.campaigns ?? [];
+  const campaignsPagination = data?.pagination || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  };
 
   type CampaignStatus = "active" | "inactive";
 
@@ -233,7 +239,7 @@ export const Campaigns = () => {
               </TableBody>
             </Table>
             {
-              filteredCampaigns.length > 10 && <CustomPagination totalPages={Number(data?.pagination.totalPages) || 0} />
+              campaignsPagination.totalPages > 1 && <CustomPagination totalPages={Number(campaignsPagination.totalPages) || 0} />
             }
           </div>
         </CardContent>

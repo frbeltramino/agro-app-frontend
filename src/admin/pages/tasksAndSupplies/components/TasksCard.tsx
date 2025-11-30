@@ -39,6 +39,12 @@ export const TasksCard = () => {
   });
   const [expandedWorks, setExpandedWorks] = useState<number[]>([]);
   const filteredTasks = tasksData?.tasks || [];
+  const tasksPagination = {
+    page: tasksData?.page || 1,
+    limit: tasksData?.limit || 10,
+    total: tasksData?.total || 0,
+    totalPages: tasksData?.totalPages || 1,
+  };
 
   const toggleWorkExpansion = (workId: number) => {
     setExpandedWorks(prev =>
@@ -59,7 +65,7 @@ export const TasksCard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitleSummary title="Lista de Trabajos" count={tasksData?.tasks.length || 0} label="trabajos registrados" />
+              <CardTitleSummary title="Lista de Trabajos" count={tasksPagination.total || 0} label="trabajos registrados" />
             </div>
             <Button
               onClick={() => setOpenTaskForm(true)}
@@ -230,8 +236,8 @@ export const TasksCard = () => {
                 </Table>
                 <div className="mt-4">
                   {
-                    filteredTasks.length > 10 && <CustomTasksSuppliesPagination
-                      totalPages={Number(tasksData?.totalPages) || 1}
+                    tasksPagination.totalPages > 1 && <CustomTasksSuppliesPagination
+                      totalPages={Number(tasksPagination?.totalPages) || 1}
                       currentPage={page}
                       onPageChange={(newPage) => setPage(newPage)}
                     />

@@ -30,7 +30,7 @@ import { Crop } from "@/interfaces/crops/crop.interface";
 import { StatCard } from "../../../components/StatCard";
 import { PageHeader } from "../../../components/PageHeader";
 import { CropForm } from "../components/CropForm";
-import { ConfirmDialog } from "../../campaigns/components/ConfirmDialog";
+import { DeleteDialog } from "@/admin/components/DeleteDialog";
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -254,24 +254,18 @@ export const Crops = () => {
         cropToEdit={selectedCrop}
         mode={formMode}
       />
-      <ConfirmDialog
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
+
+      <DeleteDialog
         title="Eliminar Cultivo"
-        description={`Eliminarás el cultivo "${selectedCrop?.crop_name}"`}
+        description="Esta acción no se puede deshacer."
+        itemData={[
+          { label: "Nombre", value: selectedCrop?.crop_name || "" },
+          { label: "Fecha de siembra", value: selectedCrop?.start_date ? new Date(selectedCrop.start_date).toLocaleDateString() : "No hay fecha de siembra" },
+        ]}
+        isOpen={isDeleteOpen}
         onConfirm={() => handleDeleteCrop(Number(selectedCrop?.id))}
-        children={
-          <div className="flex items-center gap-2">
-            <div className="p-4 border rounded-md bg-muted mb-4">
-              <p>
-                <strong>Variedad:</strong> {selectedCrop?.seed_type}
-              </p>
-              <p>
-                <strong>Fecha de siembra:</strong> {selectedCrop?.start_date ? new Date(selectedCrop.start_date).toLocaleDateString() : "No hay fecha de siembra"}
-              </p>
-            </div>
-          </div>
-        }
+        onCancel={() => setIsDeleteOpen(false)}
+        itemId={selectedCrop?.id}
       />
     </div>
   );

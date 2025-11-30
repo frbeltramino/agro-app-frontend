@@ -29,6 +29,13 @@ export const SuppliesCard = () => {
     page,
     q: searchTerm,
   });
+
+  const suppliesPagination = {
+    page: suppliesData?.page || 1,
+    limit: suppliesData?.limit || 10,
+    total: suppliesData?.total || 0,
+    totalPages: suppliesData?.totalPages || 1,
+  };
   const { data: categoriesData } = useSupplyCategories();
   const normalized = searchTerm.toLowerCase();
 
@@ -56,7 +63,7 @@ export const SuppliesCard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitleSummary title="Productos Utilizados" count={filteredSupplies?.length || 0} label="productos" />
+              <CardTitleSummary title="Productos Utilizados" count={suppliesPagination.total || 0} label="productos" />
             </div>
             <Button
               onClick={() => setOpenSupplyForm(true)}
@@ -146,8 +153,8 @@ export const SuppliesCard = () => {
                 </Table>
                 <div className="mt-4">
                   {
-                    filteredSupplies.length > 10 && <CustomTasksSuppliesPagination
-                      totalPages={suppliesData?.totalPages || 1}
+                    suppliesPagination.totalPages > 1 && <CustomTasksSuppliesPagination
+                      totalPages={suppliesPagination.totalPages || 1}
                       currentPage={page}
                       onPageChange={(newPage) => setPage(newPage)}
                     />

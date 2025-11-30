@@ -6,7 +6,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 interface StatCardProps {
   title: string;
   value: number | string;
-  icon: ReactNode;
+  icon?: ReactNode;
   description?: string;
   tooltipContent?: string | ReactNode;
   isLoading?: boolean;

@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 // import Login from "./pages/Login";
 import { Dashboard } from "./admin/pages/Dashboard";
 import { Login } from "./auth/login/Login";
-import { Sales } from "./admin/pages/Sales";
+import { SeedSalesPage } from "./admin/pages/seedSales/page/SeedSales";
 import { Settings } from "./admin/pages/settings/page/Settings";
 import { Crops } from "./admin/pages/crops/page/Crops";
 import { Campaigns } from "./admin/pages/campaigns/page/Campaings";
@@ -94,7 +94,7 @@ export const App = () => (
             path="/admin/sales"
             element={
               <PrivateRouteWithSidebar>
-                <Sales />
+                <SeedSalesPage />
               </PrivateRouteWithSidebar>
             }
           />
