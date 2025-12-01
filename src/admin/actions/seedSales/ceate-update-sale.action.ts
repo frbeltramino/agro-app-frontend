@@ -7,7 +7,7 @@ export const createUpdateSaleAction = async (seedSaleItem: SeedSale): Promise<Se
   const { id, waybill_number, sale_date, destination, kg_delivered, kg_sold, status } = seedSaleItem;
   const isCreating = !id
   const { data } = await agroApi<SeedSaleCreateResponse>({
-    url: isCreating ? '/seed/sales/new' : `/seed/sales/${id}`,
+    url: isCreating ? 'sales/seed/new' : `sales/seed/${id}`,
     method: isCreating ? 'POST' : 'PATCH',
     data: {
       waybill_number,
