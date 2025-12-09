@@ -19,6 +19,7 @@ import React from "react";
 import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
 import { toast } from "sonner"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
+import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
 
 
 
@@ -31,7 +32,7 @@ export const TasksCard = () => {
   const { data: taskTypesData } = useTaskTypes();
   const [workTypeFilter, setWorkTypeFilter] = useState("all");
   const { selectedCrop } = useCropStore();
-  const { data: tasksData, isLoading } = useTasks({
+  const { data: tasksData, isLoading, deleteTask } = useTasks({
     cropId: selectedCrop?.id || 0,
     page,
     search: searchTerm,
@@ -56,6 +57,16 @@ export const TasksCard = () => {
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleDeleteTask = async (task: CropTask) => {
+
+    await deleteTask.mutateAsync({
+      crop_id: selectedCrop?.id,
+      task_id: task.id,
+    });
+
     setCurrentPage(1);
   };
 
@@ -120,7 +131,7 @@ export const TasksCard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Productos usados</TableHead>
+                      <TableHead>Suministros usados</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Descripción</TableHead>
                       <TableHead>Fecha de realización</TableHead>
@@ -166,7 +177,7 @@ export const TasksCard = () => {
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="icon"
-                                  onClick={() => { toast.success("Función de eliminar próximamente") }}
+                                  onClick={() => { handleDeleteTask(task) }}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -181,50 +192,56 @@ export const TasksCard = () => {
                                 <div className="p-4">
                                   <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                     <Package className="h-4 w-4" />
-                                    Productos utilizados en este trabajo
+                                    Suministros utilizados en este trabajo
                                   </h4>
-
-                                  <Table>
-                                    <TableHeader>
-                                      <TableRow>
-                                        <TableHead>Producto</TableHead>
-                                        <TableHead>Tipo</TableHead>
-                                        <TableHead>Dosis/h</TableHead>
-                                        <TableHead>Cant/h</TableHead>
-                                        <TableHead>Costo/Unidad</TableHead>
-                                        <TableHead className="text-right">Costo Total</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
-
-                                    <TableBody>
-                                      {task.supplies.map((product) => (
-
-                                        <TableRow key={product.supply_id ?? product.stock_id}>
-                                          <TableCell className="font-medium">
-                                            {product.supply_name}
-                                          </TableCell>
-                                          <TableCell>
-                                            <Badge variant="outline">{product.category_name}</Badge>
-                                          </TableCell>
-                                          <TableCell>
-                                            {product.dose_per_ha} {product.unit}
-                                          </TableCell>
-                                          <TableCell>
-                                            {product.hectares}
-                                          </TableCell>
-                                          <TableCell>
-                                            ${product.price_per_unit.toLocaleString()}
-                                          </TableCell>
-                                          <TableCell className="text-right font-medium">
-                                            ${(product.total_used * product.price_per_unit).toLocaleString()}
-                                          </TableCell>
-
+                                  {
+                                    task.supplies.length === 0 && <p className="text-sm text-muted-foreground">No hay suministros utilizados en este trabajo</p>
+                                  }
+                                  {
+                                    task.supplies.length > 0 && <Table>
+                                      <TableHeader>
+                                        <TableRow>
+                                          <TableHead>Suministro</TableHead>
+                                          <TableHead>Tipo</TableHead>
+                                          <TableHead>Dosis/h</TableHead>
+                                          <TableHead>Cant/h</TableHead>
+                                          <TableHead>Costo/Unidad</TableHead>
+                                          <TableHead className="text-right">Costo Total</TableHead>
                                         </TableRow>
-                                      ))
+                                      </TableHeader>
 
-                                      }
-                                    </TableBody>
-                                  </Table>
+                                      <TableBody>
+                                        {task.supplies.map((product) => (
+
+                                          <TableRow key={product.supply_id ?? product.stock_id}>
+                                            <TableCell className="font-medium">
+                                              {product.supply_name}
+                                            </TableCell>
+                                            <TableCell>
+                                              <Badge variant="outline">{product.category_name}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                              {product.dose_per_ha} {product.unit}
+                                            </TableCell>
+                                            <TableCell>
+                                              {product.hectares}
+                                            </TableCell>
+                                            <TableCell>
+                                              ${product.price_per_unit.toLocaleString()}
+                                            </TableCell>
+                                            <TableCell className="text-right font-medium">
+                                              ${(product.total_used * product.price_per_unit).toLocaleString()}
+                                            </TableCell>
+
+                                          </TableRow>
+                                        ))
+
+                                        }
+                                      </TableBody>
+                                    </Table>
+                                  }
+
+
                                 </div>
                               </TableCell>
                             </TableRow>

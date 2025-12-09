@@ -5,7 +5,6 @@ export const createTaskAction = async (payload: any) => {
   const { task_id } = payload;
   const isCreating = task_id === null;
 
-  console.log({ payloadTask: payload });
   const { data } = await agroApi<any>({
     url: isCreating ? "/tasks/new" : `/tasks/${task_id}`,
     method: isCreating ? "POST" : "PATCH",

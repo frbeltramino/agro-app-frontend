@@ -1,5 +1,6 @@
 
 import { createTaskAction } from "../actions/tasks/create-task.action";
+import { deleteTaskByCropIdAction } from "../actions/tasks/delete-task-by-crop-id.action";
 import { getTasksByCropIdAction } from "../actions/tasks/get-tasks-by-crop-id.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -32,6 +33,21 @@ export const useTasks = ({ cropId, page, limit, type, search }: UseTasksOptions)
     mutationFn: createTaskAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["supply"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const deleteTask = useMutation({
+    mutationFn: async (payload: any) => {
+      const response = await deleteTaskByCropIdAction(payload);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["supply"] });
     },
     onError: (error) => {
       console.log(error);
@@ -42,6 +58,7 @@ export const useTasks = ({ cropId, page, limit, type, search }: UseTasksOptions)
     ...query,
     createTaskMutation: createUpdateTask.mutateAsync,
     isCreatingTask: createUpdateTask.isPending,
+    deleteTask
   };
 };
 

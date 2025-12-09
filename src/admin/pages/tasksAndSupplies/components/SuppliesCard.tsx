@@ -16,19 +16,27 @@ import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
 import { SupplyForm } from "./FormSupply"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
+import { SupplyInUseDialog } from "../../../components/SupplyInUseDialog"
+import { DeleteDialog } from "@/admin/components/DeleteDialog";
+import { useStock } from "@/admin/hooks/useStock"
 
 
 export const SuppliesCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openSupplyForm, setOpenSupplyForm] = useState(false);
+  const [openProductInUseDialog, setOpenProductInUseDialog] = useState(false);
+  const [openDeleteSupplyDialog, setOpenDeleteSupplyDialog] = useState(false);
+  const [usedInTasksData, setUsedInTasksData] = useState<any[]>([]);
+  const [deletingItem, setDeletingItem] = useState<any | null>(null);
   const [, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const { selectedCrop } = useCropStore();
-  const { data: suppliesData, isLoading } = useSupply({
+  const { data: suppliesData, isLoading, checkSupplyUsage, deleteSupply } = useSupply({
     cropId: selectedCrop?.id || 0,
     page,
     q: searchTerm,
   });
+  const { adjustStock } = useStock();
 
   const suppliesPagination = {
     page: suppliesData?.page || 1,
@@ -55,6 +63,77 @@ export const SuppliesCard = () => {
     setCurrentPage(1);
   };
 
+  const handleCheckUsageSupply = async (supply: any) => {
+
+    setDeletingItem(supply);
+
+    // Caso crop_stock: no está en tareas
+    if (supply.crop_stock_id) {
+      setOpenDeleteSupplyDialog(true);
+      return;
+    }
+
+    const { can_delete, used_in_tasks } = await checkSupplyUsage.mutateAsync({
+      supply_id: supply.supply_id || null,
+      crop_id: selectedCrop?.id || 0,
+      stock_id: supply.stock_id || null
+    });
+
+    if (!can_delete) {
+      setUsedInTasksData(used_in_tasks);
+      setOpenProductInUseDialog(true);
+      return;
+    }
+    setOpenDeleteSupplyDialog(true);
+  };
+
+  const showDeleteSupplyDialog = (supply: any) => {
+    setOpenDeleteSupplyDialog(true);
+    setDeletingItem(supply)
+  }
+
+  const handleDeleteSupply = async (supply: any) => {
+    if (supply.from_stock) {
+      // 1️⃣ Ajustar stock si corresponde
+      await adjustStock.mutateAsync({
+        stockId: supply.stock_id,
+        quantity: supply.total_used
+      });
+
+      // 2️⃣ Si es un registro de crop_stock
+      if (supply.crop_stock_id) {
+        await deleteSupply.mutateAsync({
+          crop_stock_id: supply.crop_stock_id,
+          from_stock: true,
+        });
+        setDeletingItem(null);
+        setOpenDeleteSupplyDialog(false);
+        return;
+      }
+
+      // 3️⃣ Si es stock usado en tareas
+      if (supply.stock_id) {
+        await deleteSupply.mutateAsync({
+          stock_id: supply.stock_id,
+          from_stock: true,
+          crop_supply_id: supply.crop_supply_id,
+        });
+        setDeletingItem(null);
+        setOpenDeleteSupplyDialog(false);
+        return;
+      }
+    } else {
+      // 🔵 Insumo normal
+      await deleteSupply.mutateAsync({
+        supply_id: supply.supply_id,
+        crop_supply_id: supply.crop_supply_id,
+        from_stock: false,
+      });
+      setDeletingItem(null);
+      setOpenDeleteSupplyDialog(false);
+    }
+  };
+
 
 
   return (
@@ -63,20 +142,20 @@ export const SuppliesCard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitleSummary title="Productos Utilizados" count={suppliesPagination.total || 0} label="productos" />
+              <CardTitleSummary title="Suministros Utilizados" count={suppliesPagination.total || 0} label="productos" />
             </div>
             <Button
               onClick={() => setOpenSupplyForm(true)}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Nuevo Producto
+              Nuevo Suministro
             </Button>
           </div>
           <div className="flex items-center gap-2 mt-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar productos por nombre..."
+                placeholder="Buscar suministros por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
@@ -102,7 +181,7 @@ export const SuppliesCard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Producto</TableHead>
+                      <TableHead>Suministro</TableHead>
                       <TableHead>Categoría</TableHead>
                       <TableHead>Dosis/ha</TableHead>
                       <TableHead>Cant/h</TableHead>
@@ -141,7 +220,7 @@ export const SuppliesCard = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => toast.info("Función de eliminar próximamente")}
+                              onClick={() => handleCheckUsageSupply(supply)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -173,6 +252,26 @@ export const SuppliesCard = () => {
         cropId={selectedCrop?.id || 0}
         categories={categoriesData?.categories || []}
       />
+      <SupplyInUseDialog
+        isOpen={openProductInUseDialog}
+        onCancel={() => setOpenProductInUseDialog(false)}
+        onContinue={() => showDeleteSupplyDialog(deletingItem)}
+        productName={deletingItem?.supply_name}
+        usedInTasks={usedInTasksData}
+      />
+      <DeleteDialog
+        title="Eliminar Suministro"
+        description="Esta acción no se puede deshacer."
+        itemData={[
+          { label: "Nombre", value: deletingItem?.supply_name || "" },
+          { label: "Categoría", value: deletingItem?.category_name || "" }
+        ]}
+        isOpen={openDeleteSupplyDialog}
+        onConfirm={handleDeleteSupply}
+        onCancel={() => setOpenDeleteSupplyDialog(false)}
+        item={deletingItem}
+      />
+
     </>
   )
 }

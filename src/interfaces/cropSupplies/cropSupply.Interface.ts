@@ -1,6 +1,7 @@
 
 
 export interface CropSupply {
+  crop_stock_id: number | null;
   crop_supply_id: number | null;
   supply_id: number | null;
   stock_id: number | null;
@@ -12,4 +13,5 @@ export interface CropSupply {
   dose_per_ha: number;
   hectares: number;
   from_stock: number;
+  used_at: string;
 }

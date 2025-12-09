@@ -61,7 +61,6 @@ export const Crops = () => {
   };
 
   const handleCreateCrop = (data: any) => {
-    console.log("Crear cultivo:", data);
     createCrop.mutateAsync(data, {
       onSuccess: () => toast.success("Cultivo creado exitosamente"),
       onError: (error) => {

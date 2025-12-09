@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import { Crop } from "@/interfaces/crops/crop.interface";
 import { useCropNames } from "@/admin/hooks/useCropNames";
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useLotStore } from "@/admin/store/lot.store";
+import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 
 interface FormValues {
   id: number | string;
@@ -40,11 +41,11 @@ interface CropFormProps {
 export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, cropToEdit, mode = 'create' }: CropFormProps) {
 
 
-  const { data } = useCropNames();
+  const { data, createCropName } = useCropNames();
   const cropNames = data?.cropNames ?? [];
 
 
-  const [isCreatingNewCrop, setIsCreatingNewCrop] = useState(false);
+
   const { selectedCampaign } = useCampaignStore();
   const { selectedLot } = useLotStore();
 
@@ -92,10 +93,9 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
 
 
   const onFormSubmit = (data: FormValues) => {
-    console.log('onFormSubmit', data);
     onSubmit(data);
     reset();
-    setIsCreatingNewCrop(false);
+
     onOpenChange(false);
   };
 
@@ -129,66 +129,20 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium">
-                {isCreatingNewCrop ? "Crear Nombre de Cultivo Nuevo" : "Seleccionar Cultivo"}
-              </label>
-              {mode === "create" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsCreatingNewCrop(!isCreatingNewCrop)}
-                >
-                  {isCreatingNewCrop ? "Seleccionar existente" : "Crear nuevo"}
-                </Button>
-              )}
-            </div>
-
-            {/* Selección existente */}
-            {!isCreatingNewCrop ? (
-              <div>
-                <select
-                  {...register("crop_name_id", {
-                    required: !isCreatingNewCrop ? "Selecciona un cultivo" : false,
-                  })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  defaultValue={cropToEdit?.crop_name_id ?? ""}
-                  onChange={(e) => {
-                    const selectedId = Number(e.target.value);
-                    const selectedCrop = cropNames.find(c => c.id === selectedId);
-                    setValue("crop_name_id", selectedId);
-                    setValue("crop_name", selectedCrop?.name ?? "");
-                  }}
-                >
-                  <option value="">Selecciona un cultivo...</option>
-                  {cropNames.map((crop) => (
-                    <option key={crop.id} value={crop.id}>
-                      {crop.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.crop_name_id && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.crop_name_id.message}
-                  </p>
-                )}
-              </div>
-            ) : (
-              /* Crear nuevo nombre de cultivo */
-              <div>
-                <input
-                  {...register("crop_name", { required: "El nombre del cultivo es requerido" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Ej: Maíz"
-                />
-                {errors.crop_name && (
-                  <p className="text-sm text-destructive mt-1">{errors.crop_name.message}</p>
-                )}
-              </div>
-            )}
-          </div>
+          <CustomSelectWithCreate
+            label="Cultivo"
+            name="crop_name_id"
+            options={cropNames.map(c => ({ id: Number(c.id), name: c.name }))}
+            register={register}
+            errors={errors.crop_name_id?.message}
+            selectHeight="h-10"
+            mb="0"
+            onCreate={async (name: string) => {
+              const newCrop = await createCropName(name);
+              setValue("crop_name_id", newCrop.id);
+              setValue("crop_name", newCrop.name);
+            }}
+          />
 
           <div>
             <label className="block text-sm font-medium mb-2">
