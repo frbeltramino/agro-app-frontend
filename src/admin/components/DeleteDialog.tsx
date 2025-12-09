@@ -15,6 +15,7 @@ interface DeleteDialogProps {
   onConfirm: (item: any) => void
   onCancel: () => void
   itemId?: number | string | null
+  item?: any;
   title?: string
   description?: string
   isLoading?: boolean
@@ -29,6 +30,7 @@ export function DeleteDialog({
   onConfirm,
   onCancel,
   itemId,
+  item,
   title = "Eliminar elemento",
   description = "Esta acción no se puede deshacer.",
   isLoading = false,
@@ -56,7 +58,7 @@ export function DeleteDialog({
         <div className="flex justify-end gap-3">
           <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => onConfirm(itemId)}
+            onClick={() => onConfirm(item ?? itemId)}
             disabled={isLoading}
             className="bg-destructive hover:bg-destructive/90 text-white"
           >

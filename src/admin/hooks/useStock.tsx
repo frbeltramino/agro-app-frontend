@@ -4,6 +4,7 @@ import { getStockAction } from "../actions/stock/get-stock.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createOrUpdateStockAction } from "../actions/stock/create-update-stock.action";
 import { useSearchParams } from "react-router-dom";
+import { createCropStockAction } from "../actions/stock/create-crop-stock.action";
 
 
 
@@ -64,10 +65,27 @@ export const useStock = () => {
     }
   });
 
+  const createCropStock = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await createCropStockAction(data);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["stockStats"] });
+      queryClient.invalidateQueries({ queryKey: ["supply"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
   return {
     ...query,
     adjustStock,
     deleteStock,
     mutation,
+    createCropStock
   }
 };

@@ -11,6 +11,7 @@ interface SelectWithCreateProps {
   onCreate?: (newValue: string) => Promise<void>;
   mb?: string
   selectHeight?: string
+  placeholder?: string
 }
 
 export const CustomSelectWithCreate = ({
@@ -21,7 +22,8 @@ export const CustomSelectWithCreate = ({
   errors,
   onCreate,
   mb,
-  selectHeight
+  selectHeight,
+  placeholder
 }: SelectWithCreateProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState("");
@@ -71,7 +73,7 @@ export const CustomSelectWithCreate = ({
               e.key === "Enter" && (e.preventDefault(), handleAdd())
             }
             className="flex-1 px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder={`Nuevo ${label.toLowerCase()}`}
+            placeholder={placeholder || `Nuevo ${label.toLowerCase()}`}
           />
           <Button
             type="button"
@@ -96,8 +98,8 @@ export const CustomSelectWithCreate = ({
         ))}
       </select>
 
-      {errors[name] && (
-        <p className="text-destructive text-sm mt-1">{errors[name].message}</p>
+      {errors?.[name]?.message && (
+        <p className="text-destructive text-sm mt-1">{errors?.[name]?.message}</p>
       )}
     </div>
   );

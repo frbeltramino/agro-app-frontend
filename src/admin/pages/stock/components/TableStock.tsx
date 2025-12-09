@@ -125,7 +125,7 @@ export const StockTable = () => {
         <div>
           <PageHeader
             title="Control de Stock"
-            subtitle="Gestiona tus suministros y productos"
+            subtitle="Gestiona tus suministros y suministros"
           />
         </div>
         <Button onClick={handleAdd}>
@@ -139,7 +139,7 @@ export const StockTable = () => {
           <StockCard
             title="Total Suministros"
             value={statsData?.active_count ? statsData.active_count : 0}
-            description="Productos registrados"
+            description="Suministros registrados"
             isLoading={isStatsLoading}
             isStatsError={isStatsError}
           />
@@ -170,7 +170,7 @@ export const StockTable = () => {
 
         <CardHeader>
           <CardTitle>Suministros</CardTitle>
-          <CardDescription>Lista completa de productos en stock</CardDescription>
+          <CardDescription>Lista completa de suministros en stock</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 items-center mb-4">

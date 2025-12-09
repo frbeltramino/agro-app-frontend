@@ -5,8 +5,6 @@ export const createUpdateCampaignAction = async (campaignData: any): Promise<Cam
 
   const { id, name, start_date, end_date, category_id, notes } = campaignData;
 
-  console.log('Campaña:', campaignData);
-
   const isCreating = id === 'new';
 
   const { data } = await agroApi<Campaign>({

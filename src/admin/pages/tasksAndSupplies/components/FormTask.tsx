@@ -116,8 +116,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       const stockSupplies = data.supplies.filter((s) => s.supplyType === "stock");
       const purchaseSupplies = data.supplies.filter((s) => s.supplyType === "purchase");
       // me creo los array donde voy a poner los ids de las suministros creadas y editados en caso de stock
-      const createdSupplies: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number }[] = [];
-      const usedStocks: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number }[] = [];
+      const createdSupplies: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
+      const usedStocks: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
 
       // Primero los supplies comprados
       for (const s of purchaseSupplies) {
@@ -138,6 +138,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           stock_id: null,
           dose_per_ha: Number(s.dosagePerHectare),
           hectares: Number(s.hectareQuantity),
+          price_per_unit: parseAmount(s.pricePerUnit),
         });
       }
 
@@ -150,12 +151,16 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           quantity: quantityToSubtract,
         });
 
+        //Busco el stock seleccionado
+        const selectedStock = stock ? stock.find((itemStock) => itemStock.id === Number(s.stockId)) : null;
+
         // Guardamos el stock usado
         usedStocks.push({
           supply_id: null,
           stock_id: Number(resultStock.id),
           dose_per_ha: Number(s.dosagePerHectare),
           hectares: Number(s.hectareQuantity),
+          price_per_unit: parseAmount(selectedStock?.price_per_unit),
         });
       }
 
@@ -184,7 +189,6 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           supplies: taskSupplies.length > 0 ? taskSupplies : [],
         };
 
-        console.log("Datos para la tarea:", dataForTask);
 
         // 3. Crear la task esperando a que termine
         await createTaskMutation(dataForTask);

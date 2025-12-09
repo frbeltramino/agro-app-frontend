@@ -59,13 +59,13 @@ export const TasksAndSupplies = () => {
           { label: selectedCampaign?.name || "Campañas", href: "/admin/campaigns" },
           { label: selectedLot?.name || "Lotes", href: `/admin/campaigns/${selectedCampaign?.id}/lots` },
           { label: selectedCrop?.crop_name || "Cultivos", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops` },
-          { label: "Trabajos y Productos", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops/${selectedCrop?.id}/TasksAndSupplies` },
+          { label: "Trabajos y Suministros", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops/${selectedCrop?.id}/TasksAndSupplies` },
         ]}
       />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <PageHeader title="Trabajos y Productos" subtitle="Gestiona los trabajos realizados y productos utilizados" />
+        <PageHeader title="Trabajos y Suministros" subtitle="Gestiona los trabajos realizados y Suministros utilizados" />
       </div>
 
       {/* Stats Cards */}
@@ -81,7 +81,7 @@ export const TasksAndSupplies = () => {
           icon={<CheckCircle className="h-4 w-4 text-green-600" />}
         />
         <StatCard
-          title="Productos"
+          title="Suministros"
           value={suppliesData?.supplies.length || 0}
           icon={<Boxes className="h-4 w-4 text-muted-foreground" />}
         />
@@ -97,7 +97,7 @@ export const TasksAndSupplies = () => {
       <Tabs defaultValue="works" className="space-y-4">
         <TabsList>
           <TabsTrigger value="works">Trabajos Realizados</TabsTrigger>
-          <TabsTrigger value="products">Productos Utilizados</TabsTrigger>
+          <TabsTrigger value="products">Suministros Utilizados</TabsTrigger>
         </TabsList>
 
         <TabsContent value="works" className="space-y-4">

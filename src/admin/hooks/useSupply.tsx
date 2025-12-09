@@ -1,4 +1,6 @@
+import { checkSupplyUsageAction } from "../actions/supplies/check-supply-usage.action";
 import { createSupplyAction } from "../actions/supplies/create-suply.action";
+import { deleteSupplyAction } from "../actions/supplies/delete-supply.action";
 import { getSupplyByCropIdAction } from "../actions/supplies/get-supply-by-crop-id.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -29,6 +31,29 @@ export const useSupply = ({ cropId, page, limit, q }: UseSupplyOptions) => {
     mutationFn: createSupplyAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supply"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const checkSupplyUsage = useMutation({
+    mutationFn: checkSupplyUsageAction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supply"] });
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const deleteSupply = useMutation({
+    mutationFn: deleteSupplyAction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["supply"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
     },
     onError: (error) => {
       console.log(error);
@@ -37,17 +62,12 @@ export const useSupply = ({ cropId, page, limit, q }: UseSupplyOptions) => {
 
   return {
     ...query,
-    createSupply
+    createSupply,
+    checkSupplyUsage,
+    deleteSupply
   }
 
 
 };
 
 
-
-//TODO: ejemplos de filtros
-
-// GET /crops/1/supplies?name=glifo
-//GET /crops/1/supplies?category=Fertilizante
-//GET /crops/1/supplies?page=2&limit=10
-//GET /crops/1/supplies?name=urea&category=Ferti&page=1&limit=5
