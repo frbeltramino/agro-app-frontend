@@ -1,7 +1,7 @@
 "use client"
 
 import { forwardRef, useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +18,7 @@ import { UNITS } from "@/constants/units";
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 import { toast } from "sonner";
 import { currencyFormatter } from "@/lib/currency-formatter";
+import { formatNumber } from "@/lib/format-number";
 
 
 interface FormValues {
@@ -44,6 +45,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
     const { data: categoriesData, createCategory } = useSupplyCategories();
     const categories = categoriesData?.categories || [];
     const [formatAmount, setFormatAmount] = useState("0,00");
+    const [, setQuantityDisplay] = useState("");
 
     const formatPrice = (price: number) => {
       setFormatAmount(
@@ -56,7 +58,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
       handleSubmit,
       formState: { errors },
       reset,
-      watch
+      watch,
+      control
     } = useForm<FormValues>({
       defaultValues: {
         name: initialData?.name || "",
@@ -79,7 +82,9 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
           price_per_unit: initialData.price_per_unit,
           expiration_date: initialData.expiration_date,
           status: initialData.status,
+
         });
+        setQuantityDisplay(formatNumber(initialData.quantity_available.toString()));
       } else {
         reset({
           name: "",
@@ -90,6 +95,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
           expiration_date: "",
           status: "active",
         });
+        setQuantityDisplay("");
       }
     }, [initialData, reset]);
 
@@ -180,17 +186,36 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Cantidad Disponible ({unitValue})*</label>
-                <input
-                  type="number"
-                  step="1"
-                  {...register("quantity_available", {
+                <Controller
+                  control={control}
+                  name="quantity_available"
+                  defaultValue={initialData?.quantity_available ?? 0}
+                  rules={{
                     required: "La cantidad es requerida",
                     min: { value: 0, message: "La cantidad debe ser positiva" },
-                  })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0"
+                  }}
+                  render={({ field }) => {
+                    const displayValue =
+                      field.value !== null && field.value !== undefined
+                        ? formatNumber(String(field.value))
+                        : "";
 
+                    return (
+                      <input
+                        type="text"
+                        value={displayValue}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const digits = raw.replace(/\D/g, ""); // solo dígitos
 
+                          field.onChange(digits === "" ? 0 : Number(digits));
+                        }}
+                        onBlur={field.onBlur}
+                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="0"
+                      />
+                    );
+                  }}
                 />
                 {errors.quantity_available && (
                   <p className="text-destructive text-sm mt-1">{errors.quantity_available.message}</p>

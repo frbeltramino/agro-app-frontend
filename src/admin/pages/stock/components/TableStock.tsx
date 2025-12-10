@@ -27,6 +27,7 @@ import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { useStockStats } from "@/admin/hooks/useStockStats";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
+import { formatKg } from "@/lib/format-kg";
 
 
 export const StockTable = () => {
@@ -233,7 +234,7 @@ export const StockTable = () => {
                         <TableRow key={item.id}>
                           <TableCell className="font-medium">{item.name}</TableCell>
                           <TableCell>{item.category_name}</TableCell>
-                          <TableCell>{item.quantity_available}</TableCell>
+                          <TableCell>{formatKg(item.quantity_available || 0)}</TableCell>
                           <TableCell>{item.unit}</TableCell>
                           <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
                           <TableCell className="font-bold">${item.price_per_unit.toFixed(2)}</TableCell>
