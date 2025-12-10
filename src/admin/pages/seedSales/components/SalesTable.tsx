@@ -17,6 +17,7 @@ import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CustomPagination } from "@/components/custom/CustomPagination"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
+import { formatKg } from "@/lib/format-kg"
 
 
 
@@ -209,8 +210,8 @@ export const SeedSalesTable = () => {
                         <TableCell className="font-medium">{item.waybill_number}</TableCell>
                         <TableCell>{item.destination}</TableCell>
                         <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right font-semibold">{item.kg_delivered.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-semibold">{item.kg_sold.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatKg(item.kg_delivered || 0)}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatKg(item.kg_sold || 0)}</TableCell>
                         <TableCell className="text-center">
                           {calculatePercentage(item.kg_sold, item.kg_delivered)}%
                         </TableCell>

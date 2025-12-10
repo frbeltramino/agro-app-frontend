@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
+import { formatNumber } from "@/lib/format-number"
 
 
 
@@ -41,13 +42,16 @@ const statuses = [
 
 export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
   ({ isOpen, onClose, onSave, initialData }, ref) => {
-    const [isSaving, setIsSaving] = useState(false)
+    const [isSaving, setIsSaving] = useState(false);
+    const [kgDeliveredDisplay, setKgDeliveredDisplay] = useState("");
+    const [kgSoldDisplay, setKgSoldDisplay] = useState("");
 
     const {
       register,
       handleSubmit,
       formState: { errors },
       reset,
+      setValue,
     } = useForm<FormValues>({
       defaultValues: {
         waybill_number: initialData?.waybill_number || "",
@@ -176,14 +180,17 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
               <div>
                 <label className="block text-sm font-medium mb-2">KG Entregados *</label>
                 <input
-                  type="number"
-                  step="0.01"
-                  {...register("kg_delivered", {
-                    required: "Los kg entregados son requeridos",
-                    min: { value: 0, message: "Debe ser positivo" },
-                  })}
+                  type="text"
+                  value={kgDeliveredDisplay}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const formatted = formatNumber(raw);
+
+                    setKgDeliveredDisplay(formatted);
+                    setValue("kg_delivered", Number(raw.replace(/\./g, ""))); // valor real numérico
+                  }}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0"
                 />
                 {errors.kg_delivered && <p className="text-destructive text-sm mt-1">{errors.kg_delivered.message}</p>}
               </div>
@@ -191,14 +198,17 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
               <div>
                 <label className="block text-sm font-medium mb-2">KG Vendidos *</label>
                 <input
-                  type="number"
-                  step="0.01"
-                  {...register("kg_sold", {
-                    required: "Los kg vendidos son requeridos",
-                    min: { value: 0, message: "Debe ser positivo" },
-                  })}
+                  type="text"
+                  value={kgSoldDisplay}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const formatted = formatNumber(raw);
+
+                    setKgSoldDisplay(formatted);
+                    setValue("kg_sold", Number(raw.replace(/\./g, ""))); // valor real numérico
+                  }}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0.00"
+                  placeholder="0"
                 />
                 {errors.kg_sold && <p className="text-destructive text-sm mt-1">{errors.kg_sold.message}</p>}
               </div>
