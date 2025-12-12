@@ -31,6 +31,7 @@ import { StatCard } from "../../../components/StatCard";
 import { PageHeader } from "../../../components/PageHeader";
 import { CropForm } from "../components/CropForm";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -52,7 +53,7 @@ export const Crops = () => {
   const crops = data?.crops ?? [];
 
   const filteredCrops = crops.filter((crop: Crop) =>
-    crop.seed_type.toLowerCase().includes(searchTerm.toLowerCase())
+    crop.crop_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSelectCrop = (crop: Crop) => {
@@ -152,6 +153,7 @@ export const Crops = () => {
               <CardDescription>
                 {filteredCrops.length} cultivos encontradas
               </CardDescription>
+
               <div className="flex items-center gap-2 mt-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -163,80 +165,91 @@ export const Crops = () => {
                   />
                 </div>
               </div>
+
             </CardHeader>
 
             <CardContent>
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Cultivo</TableHead>
-                      <TableHead className="hidden sm:table-cell">Variedad</TableHead>
-                      <TableHead>Fecha Siembra</TableHead>
-                      <TableHead className="hidden md:table-cell">Fecha estimada de cosecha</TableHead>
-                      <TableHead>Rendimiento final (qq)</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCrops.map((crop: Crop) => (
-                      <TableRow
-                        key={crop.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectCrop(crop)
-                        }
-                        }
-                      >
-                        <TableCell className="font-medium">{crop.crop_name}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{crop.seed_type}</TableCell>
-                        <TableCell>
-                          {new Date(crop.start_date).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
-                        </TableCell>
-                        <TableCell>{crop.real_yield ? crop.real_yield : "No hay valor real"}</TableCell>
-                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openEditForm(crop);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedCrop(crop);
-                                setIsDeleteOpen(true);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectCrop(crop);
-                              }}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {
+                  filteredCrops.length === 0 && <CustomNoResultsCard
+                    title="No se encontraron cultivos"
+                    message="Prueba cambiando la búsqueda o los filtros."
+                  />
+                }
+                {
+                  filteredCrops.length > 0 && (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Cultivo</TableHead>
+                          <TableHead className="hidden sm:table-cell">Variedad</TableHead>
+                          <TableHead>Fecha Siembra</TableHead>
+                          <TableHead className="hidden md:table-cell">Fecha estimada de cosecha</TableHead>
+                          <TableHead>Rendimiento final (kg)</TableHead>
+                          <TableHead className="text-right">Acciones</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredCrops.map((crop: Crop) => (
+                          <TableRow
+                            key={crop.id}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectCrop(crop)
+                            }
+                            }
+                          >
+                            <TableCell className="font-medium">{crop.crop_name}</TableCell>
+                            <TableCell className="hidden sm:table-cell">{crop.seed_type}</TableCell>
+                            <TableCell>
+                              {new Date(crop.start_date).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
+                            </TableCell>
+                            <TableCell>{crop.real_yield ? crop.real_yield : "No hay valor real"}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditForm(crop);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedCrop(crop);
+                                    setIsDeleteOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectCrop(crop);
+                                  }}
+                                >
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+
               </div>
             </CardContent>
           </Card>
