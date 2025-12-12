@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -21,14 +21,16 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit, Trash2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useCampaigns } from "../../../hooks/useCampaigns"; // Hook que trae la data de campañas
-import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
+
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CustomPagination } from "@/components/custom/CustomPagination";
 import { PageHeader } from "../../../components/PageHeader";
 import { useCampaignStore } from "../../../store/campaign.store";
 import { Campaign } from "@/interfaces/campaigns/campaign.interface";
 import { CampaignForm } from "@/admin/pages/campaigns/components/CampaignForm";
-import { DeleteCampaignDialog } from "../components/DeleteCampaignDialog";
+import { DeleteDialog } from "@/admin/components/DeleteDialog"
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 
 export const Campaigns = () => {
 
@@ -37,14 +39,14 @@ export const Campaigns = () => {
   const { setSelectedCampaign } = useCampaignStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<any | null>(null);
 
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const query = searchParams.get('query') || '';
 
-  const handleSearch = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleSearch = () => {
     //si escribe algo en el input de busqueda quiere decir que resetea todos los filtros antes aplicados
-    if (event.key !== 'Enter') return
     const query = inputRef.current?.value;
     const newSearchParams = new URLSearchParams();
 
@@ -72,8 +74,6 @@ export const Campaigns = () => {
 
     );
   };
-
-  if (isLoading) return <CustomFullScreenLoading />;
 
   const filteredCampaigns = data?.campaigns ?? [];
   const campaignsPagination = data?.pagination || {
@@ -125,8 +125,6 @@ export const Campaigns = () => {
     setIsDeleteDialogOpen(false)
   };
 
-
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -161,7 +159,7 @@ export const Campaigns = () => {
               <input
                 ref={inputRef}
                 placeholder="Buscar por nombre..."
-                onKeyDown={handleSearch}
+                onChange={handleSearch}
                 defaultValue={query}
                 className="pl-10 w-full border rounded-md h-10"
               />
@@ -170,78 +168,90 @@ export const Campaigns = () => {
         </CardHeader>
 
         <CardContent>
+          {
+            isLoading && <CustomLoadingCard />
+          }
+
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Campaña</TableHead>
-                  <TableHead>Fecha Inicio</TableHead>
-                  <TableHead>Fecha Fin</TableHead>
-                  <TableHead className="hidden md:table-cell">Notas</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCampaigns?.map((campaign) => (
-                  <TableRow
-                    key={campaign.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={
-                      (e) => {
-                        e.stopPropagation();
-                        handleSelectCampaign(campaign);
-                      }
-                    }
-                  >
-                    <TableCell className="font-medium">{campaign.name}</TableCell>
-                    <TableCell>{new Date(campaign.start_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "No hay fecha de fin"}</TableCell>
-                    <TableCell className="hidden md:table-cell">{campaign.notes}</TableCell>
-                    <TableCell>{getStatusBadge(campaign.status as CampaignStatus)}</TableCell>
-                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditCampaign(campaign);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCampaign(campaign);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
+            {
+              filteredCampaigns.length === 0 && <CustomNoResultsCard
+                title="No se encontraron campañas"
+                message="Prueba cambiando la búsqueda o los filtros."
+              />
+            }
+            {filteredCampaigns.length > 0 && (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Campaña</TableHead>
+                      <TableHead>Fecha Inicio</TableHead>
+                      <TableHead>Fecha Fin</TableHead>
+                      <TableHead className="hidden md:table-cell">Notas</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCampaigns?.map((campaign) => (
+                      <TableRow
+                        key={campaign.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={
+                          (e) => {
                             e.stopPropagation();
                             handleSelectCampaign(campaign);
-                          }}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {
-              campaignsPagination.totalPages > 1 && <CustomPagination totalPages={Number(campaignsPagination.totalPages) || 0} />
-            }
+                          }
+                        }
+                      >
+                        <TableCell className="font-medium">{campaign.name}</TableCell>
+                        <TableCell>{new Date(campaign.start_date).toLocaleDateString()}</TableCell>
+                        <TableCell>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "No hay fecha de fin"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{campaign.notes || "No hay notas"}</TableCell>
+                        <TableCell>{getStatusBadge(campaign.status as CampaignStatus)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditCampaign(campaign);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setDeletingItem(campaign);
+                              setIsDeleteDialogOpen(true)
+                            }
+                            }>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectCampaign(campaign);
+                              }}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {
+                  campaignsPagination.totalPages > 1 && <CustomPagination totalPages={Number(campaignsPagination.totalPages) || 0} />
+                }
+              </>
+            )}
+
           </div>
+
         </CardContent>
       </Card>
       <CampaignForm
@@ -249,10 +259,19 @@ export const Campaigns = () => {
         onOpenChange={setIsFormOpen}
         onSubmit={handleSubmitForm}
       />
-      <DeleteCampaignDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onDelete={handleDeleteCampaign}
+
+      <DeleteDialog
+        title="Eliminar Campaña"
+        description="Esta acción no se puede deshacer."
+        itemId={deletingItem?.id}
+        itemData={[
+          { label: "Nombre", value: deletingItem?.name || "" },
+          { label: "Fecha de inicio", value: deletingItem?.start_date ? new Date(deletingItem?.start_date).toLocaleDateString() : "No hay fecha de inicio" },
+        ]}
+        isOpen={isDeleteDialogOpen}
+        onConfirm={handleDeleteCampaign}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+
       />
     </div>
   );

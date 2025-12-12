@@ -181,7 +181,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           task_id: null,
           crop_id: selectedCrop?.id,
           task_type_id: data.task_type_id ? Number(data.task_type_id) : undefined,
-          description: data.description ?? undefined,
+          description: data.description?.trim() !== "" ? data.description : null,
           provider: data.provider ?? undefined,
           performed_at: data.date ?? null,
           note: data.note ?? null,
@@ -250,14 +250,14 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
             {/* Descripción */}
             <div>
-              <label className="block text-sm font-medium mb-2">Descripción *</label>
+              <label className="block text-sm font-medium mb-2">Descripción</label>
               <textarea
-                {...register("description", { required: "La descripción es requerida" })}
+                {...register("description")}
+                required={false}
                 rows={2}
                 className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                 placeholder="Describe los detalles de la tarea..."
               />
-              {errors.description && <p className="text-destructive text-sm mt-1">{errors.description.message}</p>}
             </div>
 
             {/* Proveedor y Fecha */}

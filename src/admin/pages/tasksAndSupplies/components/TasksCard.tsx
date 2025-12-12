@@ -20,11 +20,14 @@ import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
 import { toast } from "sonner"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
+import { DeleteDialog } from "@/admin/components/DeleteDialog"
 
 
 
 export const TasksCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [deletingItem, setDeletingItem] = useState<any | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const [openTaskForm, setOpenTaskForm] = useState(false)
@@ -164,7 +167,7 @@ export const TasksCard = () => {
                             </TableCell>
 
                             <TableCell className="font-medium">{task.type}</TableCell>
-                            <TableCell>{task.description}</TableCell>
+                            <TableCell>{task.description || "No hay descripción"}</TableCell>
                             <TableCell>{new Date(task.date).toLocaleDateString()}</TableCell>
                             <TableCell>{task.provider}</TableCell>
                             <TableCell>{currencyFormatter(Number(task.laborCost))}</TableCell>
@@ -177,7 +180,10 @@ export const TasksCard = () => {
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="icon"
-                                  onClick={() => { handleDeleteTask(task) }}
+                                  onClick={() => {
+                                    setDeletingItem(task);
+                                    setIsDeleteDialogOpen(true)
+                                  }}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -270,6 +276,20 @@ export const TasksCard = () => {
         open={openTaskForm}
         onOpenChange={setOpenTaskForm}
         stock={dataStock?.stock}
+      />
+      <DeleteDialog
+        title="Eliminar Tarea"
+        description="Esta acción no se puede deshacer."
+        item={deletingItem}
+        itemData={[
+          { label: "Descripción", value: deletingItem?.description || "No hay descripción" },
+          { label: "Proveedor", value: deletingItem?.provider || "" },
+          { label: "Fecha", value: deletingItem?.date ? new Date(deletingItem?.date).toLocaleDateString() : "No hay fecha de vencimiento" },
+        ]}
+        isOpen={isDeleteDialogOpen}
+        onConfirm={handleDeleteTask}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+
       />
     </>
 
