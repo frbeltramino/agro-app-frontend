@@ -39,15 +39,22 @@ export const TasksAndSupplies = () => {
       const n = Number(val);
       return isNaN(n) ? 0 : n;
     };
+
     const totalCostTasks = tasksData?.tasks.reduce(
       (acc, work) => acc + safeNum(work.laborCost),
       0
     );
-    const totalCostSupplies = suppliesData?.supplies.reduce(
-      (acc, supply) =>
-        acc + safeNum(supply.unit_price) * safeNum(supply.total_used),
+
+    const totalCostSupplies = tasksData?.tasks.reduce(
+      (acc, task) =>
+        acc +
+        (task.supplies?.reduce(
+          (sum, supply) => sum + safeNum(supply.price_per_unit) * safeNum(supply.total_used),
+          0
+        ) || 0),
       0
     );
+
     const total = (totalCostTasks || 0) + (totalCostSupplies || 0);
     return currencyFormatter(total);
   };

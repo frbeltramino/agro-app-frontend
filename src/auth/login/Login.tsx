@@ -75,8 +75,15 @@ export const Login = () => {
                 className="border rounded px-3 py-2 w-full"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isPosting}>
-              Iniciar Sesión
+            <Button type="submit" className="w-full flex items-center justify-center gap-2" disabled={isPosting}>
+              {isPosting ? (
+                <>
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                "Iniciar Sesión"
+              )}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

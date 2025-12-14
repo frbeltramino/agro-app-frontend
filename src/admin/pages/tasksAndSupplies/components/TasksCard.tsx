@@ -17,7 +17,6 @@ import { TaskForm } from "./FormTask"
 import { useStock } from "@/admin/hooks/useStock"
 import React from "react";
 import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
-import { toast } from "sonner"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
@@ -28,6 +27,8 @@ export const TasksCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingItem, setDeletingItem] = useState<any | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const [openTaskForm, setOpenTaskForm] = useState(false)
@@ -73,6 +74,13 @@ export const TasksCard = () => {
     setCurrentPage(1);
   };
 
+  const openEditForm = (task: CropTask) => {
+    setFormMode('edit');
+    setSelectedTask(task);
+    setOpenTaskForm(true);
+    console.log(task);
+  };
+
   return (
     <>
       <Card>
@@ -82,7 +90,11 @@ export const TasksCard = () => {
               <CardTitleSummary title="Lista de Trabajos" count={tasksPagination.total || 0} label="trabajos registrados" />
             </div>
             <Button
-              onClick={() => setOpenTaskForm(true)}
+              onClick={() => {
+                setFormMode('create');
+                setSelectedTask(null);
+                setOpenTaskForm(true);
+              }}
             >
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Trabajo
@@ -176,7 +188,11 @@ export const TasksCard = () => {
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button variant="ghost" size="icon"
-                                  onClick={() => { toast.success("Función de editar próximamente") }}>
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditForm(task);
+                                  }}
+                                >
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="icon"
@@ -276,6 +292,7 @@ export const TasksCard = () => {
         open={openTaskForm}
         onOpenChange={setOpenTaskForm}
         stock={dataStock?.stock}
+        taskToEdit={formMode === 'edit' ? selectedTask : undefined}
       />
       <DeleteDialog
         title="Eliminar Tarea"

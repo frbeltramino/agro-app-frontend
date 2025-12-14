@@ -1,7 +1,7 @@
 "use client"
 
-import { forwardRef, useState } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
+import { forwardRef, useEffect, useState } from "react"
+import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,40 +20,74 @@ import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCrea
 import { useCropStore } from "@/admin/store/crop.store"
 import { useSupply } from "@/admin/hooks/useSupply"
 import { useStock } from "@/admin/hooks/useStock"
-import { currencyFormatter } from "@/lib/currency-formatter"
 import { useTasks } from "@/admin/hooks/useTasks"
 import { parseAmount } from "@/lib/parse-amount"
 import { toast } from "sonner"
+import { AmountInput } from "@/components/custom/CustomAmountInput"
+import { useLotStore } from "@/admin/store/lot.store";
 
-interface TaskSupply {
-  supplyType: "stock" | "purchase"
-  stockId?: string // Para suministros de stock
-  productName?: string // Para suministros comprados
-  categoryId?: string
-  unit?: "lt" | "kg"
-  pricePerUnit?: number | string | undefined | null
-  dosagePerHectare: number
-  hectareQuantity: number
+interface TaskSupplyForm {
+  supplyType: "stock" | "purchase";
+  supply_id?: number | string | null;
+  stockId?: string;
+  productName?: string;
+  categoryId?: string;
+  unit?: string;
+  pricePerUnit?: number | string | null;
+  dosagePerHectare: number;
+  hectareQuantity: number;
+}
+
+interface TaskSupplyEdit {
+  supply_id: number | null;
+  stock_id: number | null;
+  supply_name: string;
+  category_id?: number;
+  category_name: string;
+  unit: string;
+  price_per_unit: number | null | undefined | string;
+  dose_per_ha: number;
+  hectares: number;
+  total_used: number;
+  from_stock: boolean;
 }
 
 interface FormValues {
-  id?: number | string | null
-  task_type_id: string; // <- aquí va el id del tipo de tarea
-  description: string
-  provider: string
-  date: string
-  note?: string
-  laborCost?: number
-  supplies: TaskSupply[]
+  id?: number | string | null;
+  task_type_id: string;
+  description: string;
+  provider: string;
+  date: string;
+  note?: string;
+  laborCost?: number | undefined;
+  supplies: TaskSupplyForm[];
 }
 
 interface TaskFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 
-  stock: Stock[] | undefined// Lista de suministros disponibles
-  // supplies?: Supply[] // Lista de suministros disponibles
-  taskTypes?: string[] // Tipos de tarea disponibles
+  stock: Stock[] | undefined
+
+  taskTypes?: string[]
+
+  taskToEdit?: {
+    id: number
+    crop_id: number
+    task_type_id: number
+    description?: string
+    provider: string
+    total_price: number
+    date: string
+    note?: string
+    laborCost?: number
+    status: string
+    created_at: string
+    updated_at: string
+    performed_at: string
+    type: string
+    supplies: TaskSupplyEdit[]
+  }
 }
 
 export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
@@ -61,7 +95,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     {
       open,
       onOpenChange,
-      stock
+      stock,
+      taskToEdit
     },
     ref,
   ) => {
@@ -74,10 +109,10 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     const { createTaskMutation } = useTasks({ cropId: selectedCrop?.id || 0 });
     const { adjustStock } = useStock();
     const categories = categoriesData?.categories || [];
-    const [formatedAmount, setFormatedAmount] = useState("0,00");
-    const [formatedLaborCost, setFormatedLaborCost] = useState("0,00");
+    const [, setFormatedAmount] = useState("0,00");
+    const [, setFormatedLaborCost] = useState("0,00");
     const [isSaving, setIsSaving] = useState(false);
-
+    const { selectedLot } = useLotStore();
 
     const {
       register,
@@ -108,20 +143,24 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       append({
         supplyType: "stock",
         dosagePerHectare: 0,
-        hectareQuantity: 0,
+        hectareQuantity: selectedLot?.hectares ?? 0,
       })
     }
 
-    const createArrayOfSupplies = async (data: FormValues) => {
+    const createArrayOfSupplies = async (data: FormValues, taskToEdit?: any) => {
       const stockSupplies = data.supplies.filter((s) => s.supplyType === "stock");
       const purchaseSupplies = data.supplies.filter((s) => s.supplyType === "purchase");
-      // me creo los array donde voy a poner los ids de las suministros creadas y editados en caso de stock
-      const createdSupplies: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
-      const usedStocks: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
 
-      // Primero los supplies comprados
+      const suppliesResult: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
+
+      // 1️⃣ Manejo de suministros de compra (igual que antes)
       for (const s of purchaseSupplies) {
-        const result = await createSupply.mutateAsync({
+        const existingSupply = taskToEdit?.supplies.find(
+          (supply: TaskSupplyEdit) => supply.supply_id === s.supply_id
+        );
+
+        const payload = {
+          id: existingSupply?.supply_id ?? null,
           crop_id: selectedCrop!.id,
           name: s.productName ?? "",
           category_id: Number(s.categoryId),
@@ -130,10 +169,11 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           hectares: Number(s.hectareQuantity),
           price_per_unit: parseAmount(s.pricePerUnit),
           status: "active",
-        });
+        };
 
-        // Guardamos el id del supply creado
-        createdSupplies.push({
+        const result = await createSupply.mutateAsync(payload);
+
+        suppliesResult.push({
           supply_id: result.supply.id,
           stock_id: null,
           dose_per_ha: Number(s.dosagePerHectare),
@@ -142,43 +182,92 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         });
       }
 
-      // Luego los supplies de stock
-      for (const s of stockSupplies) {
-        const quantityToSubtract = -1 * Number(s.dosagePerHectare) * Number(s.hectareQuantity);
+      // 2️⃣ Manejo de stock (optimizado)
+      const oldStockSupplies = taskToEdit?.supplies.filter((s: TaskSupplyEdit) => s.from_stock) || [];
 
-        const resultStock = await adjustStock.mutateAsync({
-          stockId: s.stockId ? Number(s.stockId) : 0,
-          quantity: quantityToSubtract,
-        });
+      // Map para búsqueda rápida de stock actual
+      const newStockMap = new Map<number, typeof stockSupplies[0]>();
+      stockSupplies.forEach((s) => newStockMap.set(Number(s.stockId), s));
 
-        //Busco el stock seleccionado
-        const selectedStock = stock ? stock.find((itemStock) => itemStock.id === Number(s.stockId)) : null;
+      for (const oldS of oldStockSupplies) {
+        const oldUsedQuantity = oldS.dose_per_ha * oldS.hectares;
+        const newS = newStockMap.get(oldS.stock_id!);
 
-        // Guardamos el stock usado
-        usedStocks.push({
-          supply_id: null,
-          stock_id: Number(resultStock.id),
-          dose_per_ha: Number(s.dosagePerHectare),
-          hectares: Number(s.hectareQuantity),
-          price_per_unit: parseAmount(selectedStock?.price_per_unit),
-        });
+        let quantityToAdjust = 0;
+
+        if (newS) {
+          // Suministro actualizado → calcular diferencia
+          const newUsedQuantity = Number(newS.dosagePerHectare) * Number(newS.hectareQuantity);
+          quantityToAdjust = oldUsedQuantity - newUsedQuantity;
+
+          // Ya procesado → lo eliminamos del map para detectar nuevos al final
+          newStockMap.delete(oldS.stock_id!);
+        } else {
+          // Suministro eliminado → devolver stock completo
+          quantityToAdjust = oldUsedQuantity;
+        }
+
+        try {
+          const resultStock = await adjustStock.mutateAsync({
+            stockId: oldS.stock_id!,
+            quantity: quantityToAdjust,
+          });
+
+          // Solo agregamos al array si aún existe en la edición
+          if (newS) {
+            const selectedStock = stock?.find((itemStock) => itemStock.id === Number(newS.stockId)) ?? null;
+            suppliesResult.push({
+              supply_id: null,
+              stock_id: Number(resultStock.id),
+              dose_per_ha: Number(newS.dosagePerHectare),
+              hectares: Number(newS.hectareQuantity),
+              price_per_unit: parseAmount(selectedStock?.price_per_unit),
+            });
+          }
+        } catch (error: any) {
+          const message =
+            error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
+          throw new Error(message);
+        }
       }
 
-      // Juntamos ambos arrays para enviar al servicio de creación de task
-      return [...createdSupplies, ...usedStocks];
+      // 🔹 Manejo de nuevos suministros de stock que no existían antes
+      for (const s of newStockMap.values()) {
+        const newUsedQuantity = Number(s.dosagePerHectare) * Number(s.hectareQuantity);
 
-    }
+        try {
+          const resultStock = await adjustStock.mutateAsync({
+            stockId: Number(s.stockId!),
+            quantity: -newUsedQuantity, // negativo → restar del stock
+          });
+
+          const selectedStock = stock?.find((itemStock) => itemStock.id === Number(s.stockId)) ?? null;
+          suppliesResult.push({
+            supply_id: null,
+            stock_id: Number(resultStock.id),
+            dose_per_ha: Number(s.dosagePerHectare),
+            hectares: Number(s.hectareQuantity),
+            price_per_unit: parseAmount(selectedStock?.price_per_unit),
+          });
+        } catch (error: any) {
+          const message =
+            error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
+          throw new Error(message);
+        }
+      }
+
+      return suppliesResult;
+    };
 
     const onFormSubmit = async (data: FormValues) => {
-      setIsSaving(true); // loading ON
+      setIsSaving(true);
 
       try {
-        // 1. Esperar al procesamiento de supplies y stock
-        const taskSupplies = await createArrayOfSupplies(data);
 
-        // 2. Armar el payload de la task
+        const taskSupplies = await createArrayOfSupplies(data, taskToEdit);
+
         const dataForTask = {
-          task_id: null,
+          task_id: taskToEdit?.id || null,
           crop_id: selectedCrop?.id,
           task_type_id: data.task_type_id ? Number(data.task_type_id) : undefined,
           description: data.description?.trim() !== "" ? data.description : null,
@@ -189,19 +278,17 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           supplies: taskSupplies.length > 0 ? taskSupplies : [],
         };
 
+        const response = await createTaskMutation(dataForTask);
 
-        // 3. Crear la task esperando a que termine
-        await createTaskMutation(dataForTask);
-
-        // 4. Reset y cierre
         reset();
         onOpenChange(false);
         setFormatedAmount("0,00");
         setFormatedLaborCost("0,00");
-        toast.success("La tarea ha sido creada exitosamente");
+        toast.success(response.message || "La tarea ha sido creada exitosamente");
 
-      } catch (err) {
-        console.error("Error al crear la tarea:", err);
+      } catch (err: any) {
+        const errorMessage = err?.message || "Error al crear la tarea";
+        toast.error(errorMessage);
       } finally {
         setIsSaving(false); // loading OFF SIEMPRE
       }
@@ -211,17 +298,49 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       typeof t === "string" ? { id: t, name: t } : t
     );
 
-    const formatAmount = (amount: number) => {
-      setFormatedAmount(
-        currencyFormatter(amount)
-      );
+
+    const findCategoryId = (name: string) => {
+      const category = categoriesData?.categories.find((c) => c.name === name);
+      return category?.id || 0;
     };
 
-    const formatLaborCost = (laborCost: number) => {
-      setFormatedLaborCost(
-        currencyFormatter(laborCost)
-      );
-    };
+    const mapTaskSupplyToForm = (s: TaskSupplyEdit): TaskSupplyForm => (
+      {
+        supplyType: s.from_stock ? "stock" : "purchase",
+        supply_id: s.supply_id || "",
+        stockId: s.stock_id?.toString() || "",
+        productName: s.supply_name || "",
+        categoryId: s.category_name ? findCategoryId(s.category_name).toString() : "0",
+        unit: s.unit || "",
+        pricePerUnit: s.price_per_unit ?? 0,
+        dosagePerHectare: s.dose_per_ha,
+        hectareQuantity: s.hectares,
+      });
+
+    useEffect(() => {
+      if (taskToEdit) {
+        reset({
+          id: taskToEdit.id,
+          task_type_id: taskToEdit.task_type_id?.toString() || "",
+          description: taskToEdit.description || "",
+          provider: taskToEdit.provider || "",
+          date: taskToEdit.date || taskToEdit.performed_at || "",
+          note: taskToEdit.note || "",
+          laborCost: taskToEdit?.laborCost ?? undefined,
+          supplies: taskToEdit.supplies?.map(mapTaskSupplyToForm) || [],
+        });
+      } else {
+        reset({
+          task_type_id: "",
+          description: "",
+          provider: "",
+          date: "",
+          note: "",
+          laborCost: undefined,
+          supplies: [],
+        });
+      }
+    }, [taskToEdit, reset]);
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -296,22 +415,26 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
             {/* Costo de Mano de Obra */}
             <div>
-              <label className="block text-sm font-medium mb-2">Costo de Mano de Obra (opcional)</label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("laborCost", {
+              <Controller
+                name="laborCost"
+                control={control}
+
+                rules={{
                   min: { value: 0, message: "El costo debe ser positivo" },
-                })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="0.00"
-                onChange={(e) => { formatLaborCost(Number(e.target.value)) }}
+                }}
+                render={({ field, fieldState }) => (
+                  <AmountInput
+                    label="Costo de Mano de Obra (opcional)"
+                    value={field.value}           // RHF controla el valor numérico
+                    onChange={field.onChange}     // RHF actualiza su estado
+                    error={fieldState.error?.message}
+                    currency="ARS"
+                    locale="es-AR"
+                    placeholder="0,00"
+                  />
+                )}
               />
-              <p className="text-muted-foreground text-xs">{formatedLaborCost}</p>
-              {errors.laborCost && <p className="text-destructive text-sm mt-1">{errors.laborCost.message}</p>}
             </div>
-
-
 
             {/* Suministros */}
             <div className="border-t pt-4">
@@ -336,7 +459,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
               )}
 
               <div className="space-y-4">
-                {fields.map((field, index) => {
+                {fields.map((field: any, index) => {
                   const supplyType = watchSupplies[index]?.supplyType
                   const selectedStockId = watch(`supplies.${index}.stockId`);
                   const selectedStock = stock?.find((s) => s.id === Number(selectedStockId));
@@ -448,26 +571,25 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                               )}
                             </div>
 
-                            <div>
-                              <label className="block text-sm font-medium mb-2">Precio por Unidad *</label>
-                              <input
-                                type="number"
-                                step="0.01"
-                                {...register(`supplies.${index}.pricePerUnit`, {
-                                  required: "El precio es requerido",
-                                  min: { value: 0, message: "El precio debe ser positivo" },
-                                })}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                                placeholder="0.00"
-                                onChange={(e) => { formatAmount(Number(e.target.value)) }}
-                              />
-                              {errors.supplies?.[index]?.pricePerUnit && (
-                                <p className="text-destructive text-sm mt-1">
-                                  {errors.supplies[index]?.pricePerUnit?.message}
-                                </p>
+                            <Controller
+                              control={control}
+                              name={`supplies.${index}.pricePerUnit`}
+                              rules={{
+                                required: "El precio es requerido",
+                                min: { value: 0, message: "El precio debe ser positivo" },
+                              }}
+                              render={({ field, fieldState }) => (
+                                <AmountInput
+                                  label="Precio por Unidad *"
+                                  value={field.value != null && field.value !== "" ? Number(field.value) : undefined}
+                                  onChange={field.onChange}
+                                  currency="ARS"
+                                  locale="es-AR"
+                                  placeholder="0,00"
+                                  error={fieldState.error?.message}
+                                />
                               )}
-                              <p className="text-muted-foreground text-xs">{formatedAmount}</p>
-                            </div>
+                            />
                           </div>
                         </>
                       )}

@@ -2,23 +2,24 @@ import { agroApi } from "@/api/agroApi";
 import { SupplyCreateResponse } from "@/interfaces/cropSupplies/supplyCreateResponse";
 
 interface SupplyPayload {
-  id?: number;
+  id?: number | string | null;
   crop_id: number;
   name: string;
-  category_id: number;
-  unit: "lt" | "kg" | "g" | "ml";
+  category_id: number | null;
+  unit: string;
   dose_per_ha?: number | null;
   hectares?: number | null;
-  price_per_unit?: number | null;
-  status?: "active" | "inactive";
+  price_per_unit?: number | null | undefined | string;
+  status?: string;
 }
 
 
 export const createSupplyAction = async (payload: SupplyPayload) => {
-  console.log({ payloadSupply: payload });
+  const { id } = payload;
+  const isCreating = !!id;
   const { data } = await agroApi<SupplyCreateResponse>({
-    url: "/supplies/new",
-    method: "POST",
+    url: isCreating ? "/supplies/new" : `/supplies/${id}`,
+    method: isCreating ? "POST" : "PATCH",
     data: payload,
   });
 

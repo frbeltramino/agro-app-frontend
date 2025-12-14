@@ -55,6 +55,7 @@ export const SeedSalesTable = () => {
   }
 
   const handleEdit = (item: SeedSale) => {
+    console.log({ item })
     setEditingItem(item)
     setIsModalOpen(true)
   }
