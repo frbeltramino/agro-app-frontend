@@ -16,8 +16,6 @@ import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
 import { formatNumber } from "@/lib/format-number"
 
 
-
-
 interface FormValues {
   waybill_number: string
   destination: string
@@ -91,6 +89,8 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
 
     useEffect(() => {
       if (initialData) {
+        setKgDeliveredDisplay(formatNumber(initialData.kg_delivered.toString()));
+        setKgSoldDisplay(formatNumber(initialData.kg_sold.toString()));
         reset({
           waybill_number: initialData.waybill_number,
           destination: initialData.destination,

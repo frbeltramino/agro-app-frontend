@@ -2,10 +2,9 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { currencyFormatter } from "@/lib/currency-formatter"
-import { Plus, Search, Edit, Trash2 } from "lucide-react"
+import { Search, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge";
 import { CardTitleSummary } from "./CardTitleSummary"
 import { CustomTasksSuppliesPagination } from "@/components/custom/CustomTasksSuppliesPagination"
@@ -13,8 +12,7 @@ import { CustomTasksSuppliesPagination } from "@/components/custom/CustomTasksSu
 import { useSupply } from "@/admin/hooks/useSupply"
 import { useCropStore } from "@/admin/store/crop.store"
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
-import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
-import { SupplyForm } from "./FormSupply"
+
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { SupplyInUseDialog } from "../../../components/SupplyInUseDialog"
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
@@ -23,7 +21,6 @@ import { useStock } from "@/admin/hooks/useStock"
 
 export const SuppliesCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [openSupplyForm, setOpenSupplyForm] = useState(false);
   const [openProductInUseDialog, setOpenProductInUseDialog] = useState(false);
   const [openDeleteSupplyDialog, setOpenDeleteSupplyDialog] = useState(false);
   const [usedInTasksData, setUsedInTasksData] = useState<any[]>([]);
@@ -44,7 +41,6 @@ export const SuppliesCard = () => {
     total: suppliesData?.total || 0,
     totalPages: suppliesData?.totalPages || 1,
   };
-  const { data: categoriesData } = useSupplyCategories();
   const normalized = searchTerm.toLowerCase();
 
   const filteredSupplies =
@@ -144,12 +140,12 @@ export const SuppliesCard = () => {
             <div>
               <CardTitleSummary title="Suministros Utilizados" count={suppliesPagination.total || 0} label="productos" />
             </div>
-            <Button
+            {/* <Button
               onClick={() => setOpenSupplyForm(true)}
             >
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Suministro
-            </Button>
+            </Button> */}
           </div>
           <div className="flex items-center gap-2 mt-4">
             <div className="relative flex-1">
@@ -213,13 +209,6 @@ export const SuppliesCard = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => toast.info("Función de editar próximamente")}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => handleCheckUsageSupply(supply)}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -246,12 +235,7 @@ export const SuppliesCard = () => {
 
         </CardContent>
       </Card>
-      <SupplyForm
-        open={openSupplyForm}
-        onOpenChange={setOpenSupplyForm}
-        cropId={selectedCrop?.id || 0}
-        categories={categoriesData?.categories || []}
-      />
+
       <SupplyInUseDialog
         isOpen={openProductInUseDialog}
         onCancel={() => setOpenProductInUseDialog(false)}
