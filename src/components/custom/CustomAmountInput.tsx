@@ -18,7 +18,7 @@ interface AmountInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
 export function AmountInput({
   value,
   onChange,
-  currency = "ARS",
+  currency,
   locale = "es-AR", // Changed default to Argentine locale
   label,
   error,
@@ -43,6 +43,7 @@ export function AmountInput({
 
   // Get currency symbol
   const getCurrencySymbol = (): string => {
+    if (!currency) return "" // Si no hay currency, no mostrar símbolo
     return (
       new Intl.NumberFormat(locale, {
         style: "currency",
@@ -52,7 +53,6 @@ export function AmountInput({
         .find((part) => part.type === "currency")?.value || "$"
     )
   }
-
   // Update display when value changes externally
   React.useEffect(() => {
     if (!isFocused && value !== undefined) {
@@ -126,9 +126,11 @@ export function AmountInput({
         </label>
       )}
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-          {getCurrencySymbol()}
-        </span>
+        {currency && (
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+            {getCurrencySymbol()}
+          </span>
+        )}
         <Input
           type="text"
           inputMode="decimal"
@@ -138,7 +140,11 @@ export function AmountInput({
           onBlur={handleBlur}
           disabled={disabled}
           placeholder={placeholder}
-          className={cn("pl-8 h-10", error && "border-destructive focus-visible:ring-destructive", className)}
+          className={cn(
+            currency ? "pl-8 h-10" : "h-10", // si no hay currency no dejar padding extra
+            error && "border-destructive focus-visible:ring-destructive",
+            className
+          )}
           {...props}
         />
       </div>

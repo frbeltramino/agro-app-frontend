@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import { useCropNames } from "@/admin/hooks/useCropNames";
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useLotStore } from "@/admin/store/lot.store";
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
+import { AmountInput } from "@/components/custom/CustomAmountInput";
 
 interface FormValues {
   id: number | string;
@@ -23,7 +24,7 @@ interface FormValues {
   campaign_id: number | null;
   lot_id: number | null;
   seed_type: string;
-  real_yield: number;
+  real_yield: number | undefined;
 }
 
 interface CropFormProps {
@@ -49,7 +50,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
   const { selectedCampaign } = useCampaignStore();
   const { selectedLot } = useLotStore();
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, reset, setValue, control } = useForm<FormValues>({
     defaultValues: {
       id: cropToEdit?.id || 'new',
       crop_name_id: Number(cropToEdit?.crop_name_id) || null,
@@ -59,7 +60,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
       campaign_id: selectedCampaign?.id || null,
       lot_id: selectedLot?.id || null,
       seed_type: cropToEdit?.seed_type || "",
-      real_yield: 0,
+      real_yield: cropToEdit?.real_yield || undefined,
     },
   });
 
@@ -74,7 +75,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
         campaign_id: selectedCampaign?.id || null,
         lot_id: selectedLot?.id || null,
         seed_type: cropToEdit?.seed_type || "",
-        real_yield: 0,
+        real_yield: cropToEdit?.real_yield || undefined,
       });
     } else {
       reset({
@@ -86,7 +87,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
         campaign_id: selectedCampaign?.id || null,
         lot_id: selectedLot?.id || null,
         seed_type: "",
-        real_yield: 0,
+        real_yield: undefined,
       });
     }
   }, [cropToEdit, reset, selectedCampaign, selectedLot]);
@@ -191,14 +192,24 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Rendimiento Real
-            </label>
-            <input
-              type="number"
-              {...register("real_yield")}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Ej: 55"
+            <Controller
+              name="real_yield"
+              control={control}
+              rules={{
+                required: "El rendimiento real es obligatorio",
+                min: { value: 0.01, message: "Debe ser mayor a 0" },
+              }}
+              render={({ field, fieldState }) => (
+                <AmountInput
+                  label="Rendimiento Real"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error?.message}
+                  locale="es-AR"
+                  placeholder="0,00"
+                  currency={undefined}
+                />
+              )}
             />
           </div>
 

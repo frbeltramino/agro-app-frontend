@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/auth/store/auth.store";
+import { PasswordInput } from "@/components/custom/CustomPasswordInput";
 
 export const NewUserCard = () => {
   const [isPosting, setIsPosting] = useState(false);
@@ -81,11 +82,11 @@ export const NewUserCard = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input
+
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
+              label="Contraseña"
               placeholder="••••••••"
               required
             />
