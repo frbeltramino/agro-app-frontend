@@ -1,10 +1,9 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuthStore } from "@/auth/store/auth.store";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/custom/CustomPasswordInput";
 
 interface SecurityCardProps {
   title: string;
@@ -14,6 +13,7 @@ interface SecurityCardProps {
 export const SecurityCard = ({ title, description }: SecurityCardProps) => {
   const { user, changePassword } = useAuthStore();
   const [isPosting, setIsPosting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,6 +39,7 @@ export const SecurityCard = ({ title, description }: SecurityCardProps) => {
     if (isPasswordChanged) {
       toast.success("Contraseña actualizada correctamente");
       setIsPosting(false);
+      setFormKey(k => k + 1);
       return;
     }
 
@@ -55,21 +56,34 @@ export const SecurityCard = ({ title, description }: SecurityCardProps) => {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form key={formKey} onSubmit={handleSubmit} className="space-y-4">
 
           <div className="space-y-2">
-            <Label htmlFor="current-password">Contraseña Actual</Label>
-            <Input id="current-password" name="current-password" type="password" required />
+            <PasswordInput
+              id="current-password"
+              name="current-password"
+              label="Contraseña Actual"
+              required
+            />
+
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="new-password">Nueva Contraseña</Label>
-            <Input id="new-password" name="new-password" type="password" required />
+            <PasswordInput
+              id="new-password"
+              name="new-password"
+              label="Nueva Contraseña"
+              required
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmar Nueva Contraseña</Label>
-            <Input id="confirm-password" name="confirm-password" type="password" required />
+            <PasswordInput
+              id="confirm-password"
+              name="confirm-password"
+              label="Confirmar Nueva Contraseña"
+              required
+            />
           </div>
 
           <Button type="submit" disabled={isPosting}>

@@ -43,6 +43,7 @@ export const useSeedSales = ({
     mutationFn: createUpdateSaleAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
+      queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
     },
     onError: (error) => {
       console.log(error);
@@ -53,6 +54,7 @@ export const useSeedSales = ({
     mutationFn: deleteSeedSaleAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
+      queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
     },
     onError: (error) => {
       console.log(error);

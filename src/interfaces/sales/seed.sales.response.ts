@@ -2,6 +2,7 @@
 
 import { SeedSale } from "./seed.sale.interface";
 
+
 export interface SeedSalesResponse {
   seed_sales: SeedSale[];
   pagination: Pagination;
@@ -13,5 +14,7 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
+
+
 
 

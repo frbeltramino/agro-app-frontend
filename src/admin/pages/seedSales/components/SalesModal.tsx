@@ -70,8 +70,9 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         return;
       }
 
-      const item: SeedSale = {
-        id: initialData?.id || null,
+      const item: any = {
+        id: initialData?.id || 0,
+        crop_id: initialData?.crop_id || 0,
         waybill_number: data.waybill_number,
         sale_date: data.date,
         destination: data.destination,

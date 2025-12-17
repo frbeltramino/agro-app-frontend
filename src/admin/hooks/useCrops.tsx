@@ -34,6 +34,7 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
     mutationFn: createCropAction,
     onSuccess: () => {
       QueryClient.invalidateQueries({ queryKey: ["crops"] });
+      QueryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
     },
     onError: (error) => {
       console.log(error);
@@ -53,6 +54,7 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
   return {
     ...query,
     createCrop,
-    deleteCrop
+    deleteCrop,
+
   }
 };

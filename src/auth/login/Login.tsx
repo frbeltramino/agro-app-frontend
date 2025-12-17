@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CustomLogo } from "@/components/custom/CustomLogo";
 
 import { useAuthStore } from "../store/auth.store";
+import { PasswordInput } from "@/components/custom/CustomPasswordInput";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -65,14 +66,12 @@ export const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 name="password"
+                label="Contraseña"
                 placeholder="••••••••"
                 required
-                className="border rounded px-3 py-2 w-full"
               />
             </div>
             <Button type="submit" className="w-full flex items-center justify-center gap-2" disabled={isPosting}>
