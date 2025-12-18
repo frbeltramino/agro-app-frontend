@@ -34,7 +34,7 @@ interface TaskSupplyForm {
   categoryId?: string;
   unit?: string;
   pricePerUnit?: number | string | null;
-  dosagePerHectare: number;
+  dosagePerHectare: number | undefined;
   hectareQuantity: number;
 }
 
@@ -142,7 +142,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     const handleAddSupply = () => {
       append({
         supplyType: "stock",
-        dosagePerHectare: 0,
+        dosagePerHectare: undefined,
         hectareQuantity: selectedLot?.hectares ?? 0,
       })
     }
@@ -597,30 +597,27 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       {/* Dosis por Hectárea y Cantidad de Hectáreas */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          {/*TODO mostrar la unidad del stock seleccionado si es stock*/}
-                          <label className="block text-sm font-medium mb-2">
-                            Dosis por Hectárea (
-                            {supplyType === "stock"
-                              ? selectedStock?.unit ?? "unidad"
-                              : watchSupplies[index]?.unit ?? "unidad"
-                            }
-                            ) *
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            {...register(`supplies.${index}.dosagePerHectare`, {
+                          <Controller
+                            control={control}
+                            name={`supplies.${index}.dosagePerHectare`}
+                            rules={{
                               required: "La dosis es requerida",
-                              min: { value: 0, message: "La dosis debe ser positiva" },
-                            })}
-                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                            placeholder="0.00"
+                              min: { value: 0.01, message: "La dosis debe ser positiva" },
+                            }}
+                            render={({ field, fieldState }) => (
+                              <AmountInput
+                                label={`Dosis por Hectárea (${supplyType === "stock"
+                                  ? selectedStock?.unit ?? "unidad"
+                                  : watchSupplies[index]?.unit ?? "unidad"
+                                  }) *`}
+                                value={field.value}
+                                onChange={field.onChange}
+                                error={fieldState.error?.message}
+                                locale="es-AR"
+                                placeholder="0,00"
+                              />
+                            )}
                           />
-                          {errors.supplies?.[index]?.dosagePerHectare && (
-                            <p className="text-destructive text-sm mt-1">
-                              {errors.supplies[index]?.dosagePerHectare?.message}
-                            </p>
-                          )}
                         </div>
 
                         <div>

@@ -17,16 +17,16 @@ import { Stock } from "@/interfaces/stock/stock.interface";
 import { UNITS } from "@/constants/units";
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 import { toast } from "sonner";
-import { currencyFormatter } from "@/lib/currency-formatter";
 import { formatNumber } from "@/lib/format-number";
+import { AmountInput } from "@/components/custom/CustomAmountInput";
 
 
 interface FormValues {
   name: string
   category_id: number
   unit: string
-  quantity_available: number
-  price_per_unit: number
+  quantity_available: number | undefined
+  price_per_unit: number | undefined
   expiration_date: string
   status: string
 }
@@ -44,14 +44,9 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
     const [isSaving, setIsSaving] = useState(false)
     const { data: categoriesData, createCategory } = useSupplyCategories();
     const categories = categoriesData?.categories || [];
-    const [formatAmount, setFormatAmount] = useState("0,00");
     const [, setQuantityDisplay] = useState("");
 
-    const formatPrice = (price: number) => {
-      setFormatAmount(
-        currencyFormatter(price)
-      );
-    };
+
 
     const {
       register,
@@ -65,8 +60,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
         name: initialData?.name || "",
         category_id: initialData?.category_id || 0,
         unit: initialData?.unit || "lt",
-        quantity_available: initialData?.quantity_available || 0,
-        price_per_unit: initialData?.price_per_unit || 0,
+        quantity_available: initialData?.quantity_available || undefined,
+        price_per_unit: initialData?.price_per_unit || undefined,
         expiration_date: initialData?.expiration_date || "",
         status: "active",
       },
@@ -78,8 +73,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
           name: initialData.name,
           category_id: initialData.category_id,
           unit: initialData.unit,
-          quantity_available: initialData.quantity_available,
-          price_per_unit: initialData.price_per_unit,
+          quantity_available: initialData.quantity_available ?? undefined,
+          price_per_unit: initialData.price_per_unit ?? undefined,
           expiration_date: initialData.expiration_date,
           status: initialData.status,
 
@@ -90,8 +85,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
           name: "",
           category_id: 0,
           unit: "lt",
-          quantity_available: 0,
-          price_per_unit: 0,
+          quantity_available: undefined,
+          price_per_unit: undefined,
           expiration_date: "",
           status: "active",
         });
@@ -185,61 +180,49 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Cantidad Disponible ({unitValue})*</label>
                 <Controller
                   control={control}
                   name="quantity_available"
-                  defaultValue={initialData?.quantity_available ?? 0}
+                  defaultValue={initialData?.quantity_available ?? undefined}
                   rules={{
                     required: "La cantidad es requerida",
                     min: { value: 0, message: "La cantidad debe ser positiva" },
                   }}
-                  render={({ field }) => {
-                    const displayValue =
-                      field.value !== null && field.value !== undefined
-                        ? formatNumber(String(field.value))
-                        : "";
-
-                    return (
-                      <input
-                        type="text"
-                        value={displayValue}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          const digits = raw.replace(/\D/g, ""); // solo dígitos
-
-                          field.onChange(digits === "" ? 0 : Number(digits));
-                        }}
-                        onBlur={field.onBlur}
-                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="0"
-                      />
-                    );
-                  }}
+                  render={({ field, fieldState }) => (
+                    <AmountInput
+                      label={`Cantidad Disponible (${unitValue}) *`}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={fieldState.error?.message}
+                      locale="es-AR"
+                      placeholder="0"
+                    />
+                  )}
                 />
-                {errors.quantity_available && (
-                  <p className="text-destructive text-sm mt-1">{errors.quantity_available.message}</p>
-                )}
               </div>
 
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium mb-2">Precio por Unidad *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  {...register("price_per_unit", {
+                <Controller
+                  name="price_per_unit"
+                  control={control}
+                  defaultValue={undefined}
+                  rules={{
                     required: "El precio es requerido",
                     min: { value: 0, message: "El precio debe ser positivo" },
-                  })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0.00"
-                  onChange={(e) => { formatPrice(Number(e.target.value)) }}
+                  }}
+                  render={({ field, fieldState }) => (
+                    <AmountInput
+                      label="Precio por Unidad *"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={fieldState.error?.message}
+                      currency="ARS"
+                      locale="es-AR"
+                      placeholder="0,00"
+                    />
+                  )}
                 />
-                <p className="text-muted-foreground text-xs">{formatAmount}</p>
-                {errors.price_per_unit && (
-                  <p className="text-destructive text-sm mt-1">{errors.price_per_unit.message}</p>
-                )}
               </div>
             </div>
 

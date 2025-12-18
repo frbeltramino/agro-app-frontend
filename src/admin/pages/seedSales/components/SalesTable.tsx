@@ -262,12 +262,13 @@ export const SeedSalesTable = () => {
           <div className="overflow-x-auto">
             {isLoading && <CustomLoadingCard />}
 
-            {seedSalesData.length === 0 ? (
+            {!isLoading && seedSalesData.length === 0 &&
               <CustomNoResultsCard
                 title="No se encontraron suministros"
                 message="Prueba cambiando la búsqueda o los filtros."
               />
-            ) : (
+            }
+            {!isLoading && seedSalesData.length > 0 &&
               <>
                 <Table>
                   <TableHeader>
@@ -390,7 +391,7 @@ export const SeedSalesTable = () => {
                   <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
                 )}
               </>
-            )}
+            }
           </div>
         </CardContent>
       </Card>

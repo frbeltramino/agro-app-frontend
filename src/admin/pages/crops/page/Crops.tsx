@@ -32,6 +32,8 @@ import { PageHeader } from "../../../components/PageHeader";
 import { CropForm } from "../components/CropForm";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
+import { formatKg } from "@/lib/format-kg";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -49,7 +51,7 @@ export const Crops = () => {
 
   if (isError) return <CustomNoResultsScreen message="Error al cargar cultivos" />;
 
-  if (isLoading) return <CustomFullScreenLoading />;
+
   const crops = data?.crops ?? [];
 
   const filteredCrops = crops.filter((crop: Crop) =>
@@ -171,13 +173,16 @@ export const Crops = () => {
             <CardContent>
               <div className="overflow-x-auto">
                 {
-                  filteredCrops.length === 0 && <CustomNoResultsCard
+                  isLoading && <CustomLoadingCard />
+                }
+                {
+                  !isLoading && filteredCrops.length === 0 && <CustomNoResultsCard
                     title="No se encontraron cultivos"
                     message="Prueba cambiando la búsqueda o los filtros."
                   />
                 }
                 {
-                  filteredCrops.length > 0 && (
+                  !isLoading && filteredCrops.length > 0 && (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -208,7 +213,7 @@ export const Crops = () => {
                             <TableCell className="hidden md:table-cell">
                               {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
                             </TableCell>
-                            <TableCell>{crop.real_yield ? crop.real_yield : "No hay valor real"}</TableCell>
+                            <TableCell>{crop.real_yield ? formatKg(crop.real_yield) : "No hay valor real"}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button

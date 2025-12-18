@@ -237,7 +237,7 @@ export const StockTable = () => {
                           <TableCell>{formatKg(item.quantity_available || 0)}</TableCell>
                           <TableCell>{item.unit}</TableCell>
                           <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
-                          <TableCell className="font-bold">${item.price_per_unit.toFixed(2)}</TableCell>
+                          <TableCell className="font-bold">{currencyFormatter(item.price_per_unit)}</TableCell>
                           <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
                           <TableCell>{getStatusBadge(item.status)}</TableCell>
                           <TableCell>
