@@ -196,7 +196,6 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
               name="real_yield"
               control={control}
               rules={{
-                required: "El rendimiento real es obligatorio",
                 min: { value: 0.01, message: "Debe ser mayor a 0" },
               }}
               render={({ field, fieldState }) => (
