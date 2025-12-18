@@ -267,7 +267,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                   ))}
                 </select>
                 {crops.length === 0 && (
-                  <p className="text-sm text-muted-foreground mt-1">No hay cultivos disponibles</p>
+                  <p className="text-sm text-muted-foreground mt-1">No hay cultivos cocechados</p>
                 )}
                 {errors.crop_id && <p className="text-destructive text-sm mt-1">{errors.crop_id.message}</p>}
               </div>
