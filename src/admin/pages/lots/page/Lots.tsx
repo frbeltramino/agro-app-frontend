@@ -35,6 +35,7 @@ import { StatCard } from "@/admin/components/StatCard";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 
 
 
@@ -71,8 +72,6 @@ export const Lots = () => {
   });
 
   if (isError) return <CustomNoResultsScreen message="Error al cargar lotes" />;
-
-  if (isLoading) return <CustomFullScreenLoading />;
 
   const lots = data?.lots ?? [];
 
@@ -174,13 +173,17 @@ export const Lots = () => {
 
         </CardHeader>
         {
-          filteredLots.length === 0 && <CustomNoResultsCard
+          isLoading && <CustomLoadingCard />
+        }
+
+        {
+          !isLoading && filteredLots.length === 0 && <CustomNoResultsCard
             title="No se encontraron lotes"
             message="Prueba cambiando la búsqueda o los filtros."
           />
         }
         {
-          filteredLots.length > 0 && (
+          !isLoading && filteredLots.length > 0 && (
             <CardContent>
               <div className="overflow-x-auto">
                 <Table>
