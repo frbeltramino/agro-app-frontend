@@ -20,6 +20,7 @@ import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
+import { formatKg } from "@/lib/format-kg"
 
 
 
@@ -243,16 +244,16 @@ export const TasksCard = () => {
                                               <Badge variant="outline">{product.category_name}</Badge>
                                             </TableCell>
                                             <TableCell>
-                                              {product.dose_per_ha} {product.unit}
+                                              {formatKg(product.dose_per_ha)} {product.unit}
                                             </TableCell>
                                             <TableCell>
-                                              {product.hectares}
+                                              {formatKg(product.hectares)}
                                             </TableCell>
                                             <TableCell>
-                                              ${product.price_per_unit.toLocaleString()}
+                                              {currencyFormatter(product.price_per_unit)}
                                             </TableCell>
                                             <TableCell className="text-right font-medium">
-                                              ${(product.total_used * product.price_per_unit).toLocaleString()}
+                                              {currencyFormatter(product.total_used * product.price_per_unit)}
                                             </TableCell>
 
                                           </TableRow>
