@@ -14,7 +14,6 @@ import {
 import { Trash2, Plus } from "lucide-react"
 import { Stock } from "@/interfaces/stock/stock.interface"
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
-import { UNITS } from "@/constants/units";
 import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate"
 import { useCropStore } from "@/admin/store/crop.store"
@@ -25,10 +24,12 @@ import { parseAmount } from "@/lib/parse-amount"
 import { toast } from "sonner"
 import { AmountInput } from "@/components/custom/CustomAmountInput"
 import { useLotStore } from "@/admin/store/lot.store";
+import { MasterSupplySelect } from "./MasterSupplySelect"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
   supply_id?: number | string | null;
+  master_supply_id?: number | null;
   stockId?: string;
   productName?: string;
   categoryId?: string;
@@ -41,6 +42,7 @@ interface TaskSupplyForm {
 interface TaskSupplyEdit {
   supply_id: number | null;
   stock_id: number | null;
+  master_supply_id?: number | null;
   supply_name: string;
   category_id?: number;
   category_name: string;
@@ -55,6 +57,7 @@ interface TaskSupplyEdit {
 interface FormValues {
   id?: number | string | null;
   task_type_id: string;
+  master_supply_id: number | null;
   description: string;
   provider: string;
   date: string;
@@ -101,7 +104,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     ref,
   ) => {
 
-    const { data: categoriesData, createCategory } = useSupplyCategories();
+    const { data: categoriesData } = useSupplyCategories();
     const { data: taskTypesData, createTaskTypeMutation } = useTaskTypes();
 
     const { selectedCrop } = useCropStore();
@@ -121,6 +124,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       reset,
       control,
       watch,
+      setValue
     } = useForm<FormValues>({
       defaultValues: {
         task_type_id: "",
@@ -151,7 +155,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       const stockSupplies = data.supplies.filter((s) => s.supplyType === "stock");
       const purchaseSupplies = data.supplies.filter((s) => s.supplyType === "purchase");
 
-      const suppliesResult: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number }[] = [];
+      const suppliesResult: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number; }[] = [];
 
       // 1️⃣ Manejo de suministros de compra (igual que antes)
       for (const s of purchaseSupplies) {
@@ -162,6 +166,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         const payload = {
           id: existingSupply?.supply_id ?? null,
           crop_id: selectedCrop!.id,
+          master_supply_id: s.master_supply_id ? Number(s.master_supply_id) : null,
           name: s.productName ?? "",
           category_id: Number(s.categoryId),
           unit: s.unit ?? "kg",
@@ -308,6 +313,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       {
         supplyType: s.from_stock ? "stock" : "purchase",
         supply_id: s.supply_id || "",
+        master_supply_id: s.master_supply_id || null,
         stockId: s.stock_id?.toString() || "",
         productName: s.supply_name || "",
         categoryId: s.category_name ? findCategoryId(s.category_name).toString() : "0",
@@ -344,7 +350,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent ref={ref} className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent key={taskToEdit?.id ?? "new"} ref={ref} className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nueva Tarea de Cultivo</DialogTitle>
             <DialogDescription>
@@ -444,7 +450,10 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleAddSupply}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAddSupply();
+                  }}
                   className="gap-2 bg-transparent"
                 >
                   <Plus className="w-4 h-4" />
@@ -517,59 +526,60 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       ) : (
                         <>
                           <div>
-                            <label className="block text-sm font-medium mb-2">Nombre del Producto *</label>
-                            <input
-                              type="text"
-                              {...register(`supplies.${index}.productName`, {
-                                required: "El nombre del producto es requerido",
-                              })}
-                              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                              placeholder="Ej: Fertilizante NPK 10-20-20"
+                            <MasterSupplySelect
+                              control={control}
+                              setValue={setValue}
+                              index={index}
+                              name={`supplies.${index}.supply_id`}
+                              errors={errors}
+                              editingSupply={taskToEdit?.supplies[index]}
                             />
-                            {errors.supplies?.[index]?.productName && (
-                              <p className="text-destructive text-sm mt-1">
-                                {errors.supplies[index]?.productName?.message}
-                              </p>
-                            )}
                           </div>
 
                           <div>
-                            <CustomSelectWithCreate
-                              label="Categoría"
-                              name={`supplies.${index}.categoryId`}
-                              options={categories || []}
-                              register={register}
-                              errors={errors}
-                              onCreate={async (name: string) => {
-                                await createCategory(name);
-                                // opcional: actualizar estado local si lo necesitas
-                              }}
+                            <label className="block text-sm font-medium mb-2">Nombre del Producto *</label>
+                            <input
+                              type="text"
+                              {...register(`supplies.${index}.productName`)}
+                              value={watch(`supplies.${index}.productName`) || ""}
+                              readOnly
+                              className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
+                            />
+                          </div>
 
-
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Categoría *</label>
+                            <input
+                              type="text"
+                              {...register(`supplies.${index}.categoryId`)}
+                              value={
+                                categories.find(c => c.id.toString() === watch(`supplies.${index}.categoryId`))?.name || ""
+                              }
+                              readOnly
+                              className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
                             />
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <label className="block text-sm font-medium mb-2">Unidad *</label>
-                              <select
-                                {...register(`supplies.${index}.unit`, {
-                                  required: "La unidad es requerida",
-                                })}
-                                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                              >
-                                <option value="">Selecciona una unidad</option>
-
-                                {UNITS.map((u) => (
-                                  <option key={u.value} value={u.value}>
-                                    {u.label}
-                                  </option>
-                                ))}
-                              </select>
+                              <input
+                                type="text"
+                                {...register(`supplies.${index}.unit`)}
+                                value={watch(`supplies.${index}.unit`) || ""}
+                                readOnly
+                                className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
+                              />
                               {errors.supplies?.[index]?.unit && (
                                 <p className="text-destructive text-sm mt-1">{errors.supplies[index]?.unit?.message}</p>
                               )}
                             </div>
+
+                            <input
+                              type="hidden"
+                              {...register(`supplies.${index}.master_supply_id`)}
+                              value={watch(`supplies.${index}.master_supply_id`) || ""}
+                            />
 
                             <Controller
                               control={control}

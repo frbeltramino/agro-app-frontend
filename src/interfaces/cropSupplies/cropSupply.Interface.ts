@@ -1,17 +1,21 @@
 
-
 export interface CropSupply {
-  crop_stock_id: number | null;
-  crop_supply_id: number | null;
-  supply_id: number | null;
-  stock_id: number | null;
-  supply_name: string;
-  category_name: string;
-  supply_unit: string;
-  unit_price: number;
-  total_used: number;
+  task_id: number;
+  task_supply_id: number;
   dose_per_ha: number;
   hectares: number;
-  from_stock: number;
+  total_used: number;
+  unit_price: number;
   used_at: string;
+  supply_id: number;
+  master_supply_id: number;
+  supply_name: string;
+  supply_unit: string;
+  stock_id: null;
+  stock_name: null;
+  stock_unit: null;
+  category_id: number;
+  category_name: string;
+  from_stock: number;
 }
+
