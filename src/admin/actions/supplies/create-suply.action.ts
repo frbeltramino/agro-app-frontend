@@ -11,6 +11,7 @@ interface SupplyPayload {
   hectares?: number | null;
   price_per_unit?: number | null | undefined | string;
   status?: string;
+  master_supply_id?: number | null;
 }
 
 
