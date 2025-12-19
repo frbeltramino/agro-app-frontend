@@ -4,4 +4,5 @@ export const UNITS = [
   { value: "g", label: "Gramos (g)" },
   { value: "ml", label: "Mililitros (ml)" },
   { value: "bl", label: "Bolsas (bl)" },
+  { value: "tn", label: "Toneladas (tn)" },
 ];
