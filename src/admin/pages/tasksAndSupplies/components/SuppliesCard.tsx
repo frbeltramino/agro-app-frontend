@@ -17,6 +17,7 @@ import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { SupplyInUseDialog } from "../../../components/SupplyInUseDialog"
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { useStock } from "@/admin/hooks/useStock"
+import { formatKg } from "@/lib/format-kg"
 
 
 export const SuppliesCard = () => {
@@ -195,12 +196,12 @@ export const SuppliesCard = () => {
                           <Badge variant="outline">{supply.category_name}</Badge>
                         </TableCell>
 
-                        <TableCell>{supply.dose_per_ha} {supply.supply_unit}</TableCell>
-                        <TableCell>{supply.hectares}</TableCell>
+                        <TableCell>{formatKg(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
+                        <TableCell>{formatKg(supply.hectares)}</TableCell>
                         <TableCell>
-                          {(supply.dose_per_ha * supply.hectares).toFixed(2)} {supply.supply_unit}
+                          {formatKg(supply.dose_per_ha * supply.hectares)} {supply.supply_unit}
                         </TableCell>
-                        <TableCell>${supply.unit_price.toLocaleString()}</TableCell>
+                        <TableCell>{currencyFormatter(supply.unit_price)}</TableCell>
                         <TableCell className="font-medium">
                           {calculateTotalCostBySupply(supply.unit_price, (supply.dose_per_ha * supply.hectares))}
                         </TableCell>
