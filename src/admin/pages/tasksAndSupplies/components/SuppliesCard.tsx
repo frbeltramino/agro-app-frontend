@@ -189,7 +189,7 @@ export const SuppliesCard = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredSupplies?.map((supply, index) => (
-                      <TableRow key={supply.crop_supply_id ?? `supply-${index}`}>
+                      <TableRow key={supply.supply_id ?? `supply-${index}`}>
                         <TableCell className="font-medium">{supply.supply_name}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{supply.category_name}</Badge>
