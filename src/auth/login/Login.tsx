@@ -40,15 +40,15 @@ export const Login = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-[#171318] text-white border border-white/10">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <CustomLogo />
           </div>
-          <CardTitle className="text-2xl text-center">
+          <CardTitle className="text-2xl text-center text-white">
             Iniciar Sesión
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-white/70">
             Ingresa tus credenciales para acceder
           </CardDescription>
         </CardHeader>
@@ -62,7 +62,12 @@ export const Login = () => {
                 name="email"
                 placeholder="tu@email.com"
                 required
-                className="border rounded px-3 py-2 w-full"
+                className="
+                  w-full rounded px-3 py-2
+                  bg-white text-black
+                  placeholder:text-gray-400
+                  border border-gray-300
+                  focus:outline-none focus:ring-2 focus:#333333"
               />
             </div>
             <div className="space-y-2">
@@ -72,12 +77,21 @@ export const Login = () => {
                 label="Contraseña"
                 placeholder="••••••••"
                 required
+                className="w-full rounded px-3 py-2
+                  bg-white text-black
+                  placeholder:text-gray-400
+                  border border-gray-300
+                  focus:outline-none focus:ring-2 focus:#333333"
               />
             </div>
-            <Button type="submit" className="w-full flex items-center justify-center gap-2" disabled={isPosting}>
+            <Button
+              type="submit"
+              disabled={isPosting}
+              className="w-full bg-[#d92727] hover:bg-[#d92727]/90 text-[#d92727]-foreground font-semibold py-5 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25"
+            >
               {isPosting ? (
                 <>
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="btn-loading-spinner mr-2" />
                   Iniciando sesión...
                 </>
               ) : (
@@ -88,8 +102,7 @@ export const Login = () => {
           <div className="mt-4 text-center text-sm">
             <button
               type="button"
-              onClick={() => { }}
-              className="text-accent-foreground hover:underline"
+              className="text-white/70 hover:text-white hover:underline"
             >
               ¿Olvidaste tu contraseña? Recupera tu cuenta
             </button>

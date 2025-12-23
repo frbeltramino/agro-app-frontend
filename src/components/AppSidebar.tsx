@@ -15,8 +15,8 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CustomLogo } from "./custom/CustomLogo";
-import { CustomlogoMobile } from "./custom/CustomlogoMobile";
+import { CustomLogoSidebar } from "./custom/LogoSidebar";
+import { CustomLogoMobile } from "./custom/CustomlogoMobile";
 import { useAuthStore } from "@/auth/store/auth.store";
 
 const menuItems = [
@@ -45,15 +45,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="h-20 border-b border-border p-4 flex justify-center">
-        <div className="flex items-center gap-2">
-
-          {open ? (
-            <CustomLogo />
-          ) :
-            (
-              <CustomlogoMobile />
-            )}
+      <SidebarHeader
+        className={`h-20 border-b border-border flex items-center justify-center ${open ? "px-4" : "px-0"
+          }`}
+      >
+        <div className="flex items-center justify-center w-full">
+          {open ? <CustomLogoSidebar /> : <CustomLogoMobile />}
         </div>
       </SidebarHeader>
 

@@ -99,8 +99,8 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
               <input
                 type="text"
                 {...register("name", { required: "El nombre es requerido" })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Ej: Campaña Soja Primavera"
+                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               {errors.name && (
                 <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
@@ -115,7 +115,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
                 <input
                   type="date"
                   {...register("start_date", { required: "La fecha de inicio es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent  dark:[color-scheme:dark]"
                 />
                 {errors.start_date && (
                   <p className="text-destructive text-sm mt-1">{errors.start_date.message}</p>
@@ -129,7 +129,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
                 <input
                   type="date"
                   {...register("end_date")}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent  dark:[color-scheme:dark]"
                 />
               </div>
             </div>

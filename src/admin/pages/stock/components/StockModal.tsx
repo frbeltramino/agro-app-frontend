@@ -166,11 +166,37 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                 <label className="block text-sm font-medium mb-1 mt-1">Unidad *</label>
                 <select
                   {...register("unit", { required: "La unidad es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="
+                      w-full
+                      px-3
+                      py-2
+                      border
+                      rounded-md
+                      bg-background
+                      text-foreground
+                      border-input
+                      shadow-sm
+                      transition-colors
+
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-ring
+                      focus:border-ring
+
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+  "
                 >
+                  <option value="" className="bg-background text-foreground">
+                    Selecciona una unidad
+                  </option>
                   {UNITS.map((unit) => (
-                    <option key={unit.value} value={unit.value}>
-                      {unit.value}
+                    <option
+                      key={unit.value}
+                      value={unit.value}
+                      className="bg-background text-foreground"
+                    >
+                      {unit.label}
                     </option>
                   ))}
                 </select>
@@ -232,7 +258,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                 <input
                   type="date"
                   {...register("expiration_date", { required: "La fecha de vencimiento es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
                 />
                 {errors.expiration_date && (
                   <p className="text-destructive text-sm mt-1">{errors.expiration_date.message}</p>

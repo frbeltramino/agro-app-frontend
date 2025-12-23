@@ -175,16 +175,46 @@ export const MasterSupplySelect = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)} // timeout permite click en la lista
                 onKeyDown={(e) => { handleKeyDown(e, field) }}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="
+                  w-full px-3 py-2 rounded-md
+                  border border-border
+                  bg-background
+                  text-foreground
+                  placeholder:text-muted-foreground
+
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-ring
+                  focus:border-ring
+                "
               />
 
               {isFocused && filteredSupplies.length > 0 && (
-                <ul ref={listRef} className="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                <ul
+                  ref={listRef}
+                  className="
+                  absolute z-10 w-full mt-1
+                  max-h-40 overflow-y-auto
+                  rounded-md
+                  border border-border
+                  bg-popover
+                  text-popover-foreground
+                  shadow-lg
+                "
+                >
                   {filteredSupplies.map((s, idx) => (
                     <li
                       key={s.id}
-                      className={`px-3 py-2 cursor-pointer hover:bg-primary/10 ${idx === highlightedIndex ? "bg-primary/20" : ""
-                        }`}
+                      className={`
+                        px-3 py-2 cursor-pointer
+                        text-foreground
+                        transition-colors
+
+                        hover:bg-accent
+                        hover:text-accent-foreground
+
+                        ${idx === highlightedIndex ? "bg-accent text-accent-foreground" : ""}
+                      `}
                       onMouseDown={() => selectSupply(s, field)}
                     >
                       {s.name} ({s.category_name})

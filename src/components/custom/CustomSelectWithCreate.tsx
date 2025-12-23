@@ -72,7 +72,24 @@ export const CustomSelectWithCreate = ({
             onKeyDown={(e) =>
               e.key === "Enter" && (e.preventDefault(), handleAdd())
             }
-            className="flex-1 px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="
+                        flex-1
+                        rounded-md
+                        border
+                        border-input
+                        bg-background
+                        px-3
+                        py-2
+                        text-sm
+                        text-foreground
+                        placeholder:text-muted-foreground
+                        shadow-sm
+
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-ring
+                        focus:border-ring
+                        "
             placeholder={placeholder || `Nuevo ${label.toLowerCase()}`}
           />
           <Button
@@ -88,11 +105,39 @@ export const CustomSelectWithCreate = ({
 
       <select
         {...register(name, { required: `${label} es requerida` })}
-        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent ${selectHeight ? selectHeight : ""}`}
+        className={`
+            w-full
+            rounded-md
+            border
+            border-input
+            bg-background
+            px-3
+            py-2
+            text-sm
+            text-foreground
+            shadow-sm
+            transition-colors
+
+            focus:outline-none
+            focus:ring-2
+            focus:ring-ring
+            focus:border-ring
+
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+
+            ${selectHeight ?? ""}
+        `}
       >
-        <option value="">Selecciona {label.toLowerCase()}</option>
+        <option value="" className="text-muted-foreground">
+          Selecciona {label.toLowerCase()}
+        </option>
         {options.map((opt) => (
-          <option key={opt.id} value={opt.id}>
+          <option
+            key={opt.id}
+            value={opt.id}
+            className="bg-background text-foreground"
+          >
             {opt.name}
           </option>
         ))}

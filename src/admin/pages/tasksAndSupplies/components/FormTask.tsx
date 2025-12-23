@@ -496,11 +496,16 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                           {...register(`supplies.${index}.supplyType`, {
                             required: "Selecciona el tipo de suministro",
                           })}
-                          className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                          className=" w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50 "
                         >
-                          <option value="stock">De Stock</option>
-                          <option value="purchase">Comprar para esta tarea</option>
+                          <option value="stock" className="bg-background text-foreground">
+                            De Stock
+                          </option>
+                          <option value="purchase" className="bg-background text-foreground">
+                            Comprar para esta tarea
+                          </option>
                         </select>
+
                       </div>
 
                       {supplyType === "stock" ? (
@@ -543,7 +548,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                               {...register(`supplies.${index}.productName`)}
                               value={watch(`supplies.${index}.productName`) || ""}
                               readOnly
-                              className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
+                              className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
                             />
                           </div>
 
@@ -556,7 +561,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                                 categories.find(c => c.id.toString() === watch(`supplies.${index}.categoryId`))?.name || ""
                               }
                               readOnly
-                              className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
+                              className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
                             />
                           </div>
 
@@ -568,7 +573,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                                 {...register(`supplies.${index}.unit`)}
                                 value={watch(`supplies.${index}.unit`) || ""}
                                 readOnly
-                                className="w-full px-3 py-2 border rounded-md bg-gray-100 text-sm rounded-md"
+                                className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
                               />
                               {errors.supplies?.[index]?.unit && (
                                 <p className="text-destructive text-sm mt-1">{errors.supplies[index]?.unit?.message}</p>
