@@ -56,6 +56,19 @@ export const Dashboard = () => {
     },
   ];
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+
+    return (
+      <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm text-muted-foreground">
+          {payload[0].name}: {payload[0].value}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader
@@ -87,7 +100,7 @@ export const Dashboard = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="ventas" fill="hsl(var(--accent))" />
               </BarChart>
             </ResponsiveContainer>
@@ -107,7 +120,7 @@ export const Dashboard = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="productos"
