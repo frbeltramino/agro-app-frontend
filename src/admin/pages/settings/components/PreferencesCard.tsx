@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTheme } from "@/context/theme-context";
 
 export const PreferencesCard = () => {
 
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, setTheme } = useTheme(); // consume el contexto
+  const darkMode = theme === "dark";
 
   const handleSavePreferences = () => {
     toast.success("Preferencias guardadas correctamente");
   };
+
   return (
     <Card>
       <CardHeader>
@@ -37,7 +40,10 @@ export const PreferencesCard = () => {
               Cambia entre tema claro y oscuro
             </p>
           </div>
-          <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+          <Switch
+            checked={darkMode}
+            onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+          />
         </div>
 
         <Button onClick={handleSavePreferences}>

@@ -145,16 +145,37 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
               {!isCreatingNew && (
                 <div>
                   <select
-                    {...register("lot_master_id", { required: !isCreatingNew ? "Selecciona un lote" : false })}
+                    {...register("lot_master_id", {
+                      required: !isCreatingNew ? "Selecciona un lote" : false,
+                    })}
                     onChange={(e) => {
                       register("lot_master_id").onChange(e);
                       handleLotMasterChange(e);
                     }}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="
+                    w-full
+                    px-3
+                    py-2
+                    border
+                    rounded-md
+                    bg-background
+                    text-foreground
+                    border-input
+                    shadow-sm
+                    transition-colors
+
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-ring
+                    focus:border-ring
+
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
                   >
                     <option value="">Seleccionar lote...</option>
                     {lotMasters.map((lot) => (
-                      <option key={lot.id} value={lot.id}>
+                      <option key={lot.id} value={lot.id} className="bg-background text-foreground">
                         {lot.name}
                       </option>
                     ))}
