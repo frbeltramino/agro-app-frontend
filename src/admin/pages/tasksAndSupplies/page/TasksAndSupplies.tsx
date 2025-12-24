@@ -79,7 +79,7 @@ export const TasksAndSupplies = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard
           title="Total Trabajos"
-          value={tasksData?.tasks.length || 0}
+          value={tasksData?.total || 0}
           icon={<Wrench className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
@@ -89,7 +89,7 @@ export const TasksAndSupplies = () => {
         />
         <StatCard
           title="Suministros"
-          value={suppliesData?.supplies.length || 0}
+          value={suppliesData?.total || 0}
           icon={<Boxes className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard

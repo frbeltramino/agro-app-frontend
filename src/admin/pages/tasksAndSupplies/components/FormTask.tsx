@@ -402,7 +402,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                 <input
                   type="date"
                   {...register("date", { required: "La fecha es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
                 />
                 {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
               </div>
