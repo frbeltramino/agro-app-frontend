@@ -262,7 +262,26 @@ export const MasterSupplySelect = ({
             <label className="block text-sm font-medium mb-2">Unidad</label>
             <select
               {...register("unit", { required: "La unidad es requerida" })}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="
+                      w-full
+                      px-3
+                      py-2
+                      border
+                      rounded-md
+                      bg-background
+                      text-foreground
+                      border-input
+                      shadow-sm
+                      transition-colors
+
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-ring
+                      focus:border-ring
+
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+  "
             >
               <option value="">Selecciona una unidad</option>
               {UNITS.map((u) => (
