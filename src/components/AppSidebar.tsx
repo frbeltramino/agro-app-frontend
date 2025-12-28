@@ -29,7 +29,7 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, isMobile, setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logout } = useAuthStore();
@@ -40,6 +40,7 @@ export function AppSidebar() {
       title: "Sesión cerrada",
       description: "Has cerrado sesión exitosamente",
     });
+    if (isMobile) setOpenMobile(false)
     navigate("/");
   };
 
@@ -64,6 +65,9 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
+                      onClick={() => {
+                        if (isMobile) setOpenMobile(false)
+                      }}
                       className="flex items-center gap-3 hover:bg-accent-foreground/10"
                       activeClassName="bg-accent-foreground/20 text-accent-foreground font-medium"
                     >
