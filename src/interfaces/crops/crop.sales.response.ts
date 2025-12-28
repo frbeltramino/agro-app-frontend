@@ -1,23 +1,11 @@
 export interface CropsSalesResponse {
-  crops: Crop[];
+  crops: CropSale[];
 }
 
-export interface Crop {
-  id: number;
+export interface CropSale {
   crop_name_id: number;
-  start_date: string;
-  end_date: string;
-  campaign_id: number;
-  lot_id: number;
-  seed_type: string;
-  expected_yield: null;
-  total_estimated: null;
-  real_yield: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
   crop_name: string;
-  campaign_name: string;
-  lot_name: string;
-  hectares: number;
+  total_harvested_kg: number;
+  total_sold_kg: number;
+  available_kg: number;
 }

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Edit2, ChevronDown, ChevronRight } from "lucide-react"
+import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, X, Search } from "lucide-react"
 import { toast } from "sonner"
 import { SeedSalesModal } from "./SeedSalesModal"
 import { useSeedSales } from "@/admin/hooks/useSeedSales"
@@ -22,6 +22,8 @@ import { currencyFormatter } from "@/lib/currency-formatter"
 import { useCropsToSale } from "@/admin/hooks/useCropsToSale"
 import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
 import { Delivery } from "@/interfaces/sales/seed.sale.delivery.interface"
+import { CropSale } from "@/interfaces/crops/crop.sales.response"
+import { SeedSaleMobileCard } from "./SeedSaleMobileCard"
 
 export const SeedSalesTable = () => {
   const [deletingItem, setDeletingItem] = useState<SeedSale | null>(null)
@@ -34,8 +36,9 @@ export const SeedSalesTable = () => {
   const [endDate, setEndDate] = useState("")
   const { data: cropsToSale } = useCropsToSale();
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const crops = cropsToSale?.crops || [];
+  const crops: CropSale[] = cropsToSale?.crops || [];
   const { mutation: mutationDelivery, deleteSaleDelivery } = useSeedSaleDelivery();
+  const [showFilters, setShowFilters] = useState(false)
 
   const {
     data: seedSales,
@@ -112,19 +115,17 @@ export const SeedSalesTable = () => {
           );
         }
 
-        if (incomingIds.length > 0) {
-          // 6️⃣ Guardar/actualizar los deliveries que vinieron del frontend
-          for (const delivery of item.deliveries) {
-            await mutationDelivery.mutateAsync({
-              id: delivery.id ?? null,
-              seed_sale_id: existingSale.id,
-              crop_id: item.crop_id,
-              delivery_date: delivery.delivery_date,
-              destination: delivery.destination,
-              kg_delivered: delivery.kg_delivered,
-              price_per_kg: delivery.price_per_kg,
-            });
-          }
+        for (const delivery of item.deliveries) {
+          await mutationDelivery.mutateAsync({
+            id: delivery.id ?? null,
+            waybill_number: existingSale.waybill_number,
+            seed_sale_id: existingSale.id,
+            crop_name_id: item.crop_name_id,
+            delivery_date: delivery.delivery_date,
+            destination: delivery.destination,
+            kg_delivered: delivery.kg_delivered,
+            price_per_kg: delivery.price_per_kg,
+          });
         }
 
         //Actualizo la data de la venta 
@@ -139,8 +140,9 @@ export const SeedSalesTable = () => {
         for (const delivery of item.deliveries) {
           await mutationDelivery.mutateAsync({
             id: delivery.id ?? null,
+            waybill_number: delivery.waybill_number,
             seed_sale_id: seedSaleId,
-            crop_id: item.crop_id,
+            crop_name_id: item.crop_name_id,
             delivery_date: delivery.delivery_date,
             destination: delivery.destination,
             kg_delivered: delivery.kg_delivered,
@@ -179,17 +181,17 @@ export const SeedSalesTable = () => {
   const totalSold = seedSalesData.reduce((sum, item) => sum + item.kg_sold, 0)
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto  p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <PageHeader title="Venta de Semillas" subtitle="Gestiona tus ventas y entregas" />
-        <Button onClick={handleAdd}>
+        <Button onClick={handleAdd} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nueva Venta
         </Button>
       </div>
 
       {/* Resumen de métricas */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <StockCard
             title="Total Entregas"
@@ -223,39 +225,55 @@ export const SeedSalesTable = () => {
 
       {/* Filtros */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+        <CardHeader className="pb-3 flex flex-row items-center justify-between">
+          <CardTitle className="text-base md:text-lg">Filtros</CardTitle>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowFilters((prev) => !prev)}
+          >
+            {showFilters ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Search className="w-5 h-5" />
+            )}
+          </Button>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Carta de Porte</label>
-              <Input placeholder="Buscar..." value={searchWaybill} onChange={(e) => setSearchWaybill(e.target.value)} />
+        {showFilters && (
+          <CardContent>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Carta de Porte</label>
+                <Input placeholder="Buscar..." value={searchWaybill} onChange={(e) => setSearchWaybill(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Destino</label>
+                <Input
+                  placeholder="Buscar..."
+                  value={searchDestination}
+                  onChange={(e) => setSearchDestination(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Desde</label>
+                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+                  className="dark:[color-scheme:dark]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Hasta</label>
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+                  className="dark:[color-scheme:dark]" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Destino</label>
-              <Input
-                placeholder="Buscar..."
-                value={searchDestination}
-                onChange={(e) => setSearchDestination(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Desde</label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Hasta</label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            </div>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
       {/* Tabla */}
       <Card>
         <CardHeader>
-          <CardTitle>Entregas Registradas</CardTitle>
+          <CardTitle className="text-base md:text-lg">Entregas Registradas</CardTitle>
           <CardDescription>Total de {seedSalesPagination.total} registros</CardDescription>
         </CardHeader>
         <CardContent>
@@ -270,126 +288,147 @@ export const SeedSalesTable = () => {
             }
             {!isLoading && seedSalesData.length > 0 &&
               <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                      <TableHead>Carta de Porte</TableHead>
-                      <TableHead>Destino</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead className="text-right">KG Entregados</TableHead>
-                      <TableHead className="text-right">KG Vendidos</TableHead>
-                      <TableHead className="text-center">% Venta</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {seedSalesData.map((item) => (
-                      <>
-                        <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50">
-                          <TableCell onClick={() => toggleRow(item.id!)}>
-                            {expandedRows.has(item.id!) ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">{item.waybill_number}</TableCell>
-                          <TableCell>{item.destination}</TableCell>
-                          <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right font-semibold">{formatKg(item.kg_delivered || 0)}</TableCell>
-                          <TableCell className="text-right font-semibold">{formatKg(item.kg_sold || 0)}</TableCell>
-                          <TableCell className="text-center">
-                            {calculatePercentage(item.kg_sold, item.kg_delivered)}%
-                          </TableCell>
-                          <TableCell>{getStatusBadge(item.status)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex gap-2 justify-end">
-                              <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                  setDeletingItem(item)
-                                  setIsDeleteDialogOpen(true)
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        {expandedRows.has(item.id!) && (
-                          <TableRow>
-                            <TableCell colSpan={9} className="bg-muted/30 p-0">
-                              <div className="p-4">
-                                <h4 className="font-semibold mb-3 text-sm">Ventas Realizadas</h4>
-                                {item.deliveries && item.deliveries.length > 0 ? (
-                                  <div className="rounded-lg border">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow>
-                                          <TableHead>Fecha de Entrega</TableHead>
-                                          <TableHead>Destino</TableHead>
-                                          <TableHead className="text-right">KG Vendidos</TableHead>
-                                          <TableHead className="text-right">Precio/KG</TableHead>
-                                          <TableHead className="text-right">Total</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        {item.deliveries.map((delivery) => (
-                                          <TableRow key={delivery.id}>
-                                            <TableCell>
-                                              {new Date(delivery.delivery_date).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell>{delivery.destination}</TableCell>
-                                            <TableCell className="text-right">
-                                              {formatKg(delivery.kg_delivered)}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                              {currencyFormatter(delivery.price_per_kg)}
-                                            </TableCell>
-                                            <TableCell className="text-right font-semibold">
-                                              {currencyFormatter(delivery.kg_delivered * delivery.price_per_kg)}
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}
-                                        <TableRow className="font-semibold bg-muted/50">
-                                          <TableCell colSpan={2}>Total</TableCell>
-                                          <TableCell className="text-right">
-                                            {formatKg(item.deliveries.reduce((sum, d) => sum + d.kg_delivered, 0))}
-                                          </TableCell>
-                                          <TableCell></TableCell>
-                                          <TableCell className="text-right">
+                {/* Mobile Cards */}
 
-                                            {currencyFormatter(
-                                              item.deliveries.reduce(
-                                                (sum, d) => sum + d.kg_delivered * d.price_per_kg,
-                                                0,
-                                              ),
-                                            )}
-                                          </TableCell>
-                                        </TableRow>
-                                      </TableBody>
-                                    </Table>
-                                  </div>
-                                ) : (
-                                  <p className="text-sm text-muted-foreground">No hay entregas registradas</p>
-                                )}
+                <div className="md:hidden space-y-3">
+                  {seedSalesData.map((item) => (
+                    <SeedSaleMobileCard
+                      key={item.id}
+                      item={item}
+                      isExpanded={expandedRows.has(item.id!)}
+                      onToggle={() => toggleRow(item.id!)}
+                      onEdit={() => handleEdit(item)}
+                      onDelete={() => handleDelete(item.id)}
+                      getStatusBadge={getStatusBadge}
+                      formatKg={formatKg}
+                      currencyFormatter={currencyFormatter}
+                      calculatePercentage={calculatePercentage}
+                    />
+                  ))}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12"></TableHead>
+                        <TableHead>Carta de Porte</TableHead>
+                        <TableHead>Destino</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead className="text-right">KG Entregados</TableHead>
+                        <TableHead className="text-right">KG Vendidos</TableHead>
+                        <TableHead className="text-center">% Venta</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {seedSalesData.map((item) => (
+                        <>
+                          <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50">
+                            <TableCell onClick={() => toggleRow(item.id!)}>
+                              {expandedRows.has(item.id!) ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">{item.waybill_number}</TableCell>
+                            <TableCell>{item.destination}</TableCell>
+                            <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatKg(item.kg_delivered || 0)}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatKg(item.kg_sold || 0)}</TableCell>
+                            <TableCell className="text-center">
+                              {calculatePercentage(item.kg_sold, item.kg_delivered)}%
+                            </TableCell>
+                            <TableCell>{getStatusBadge(item.status)}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex gap-2 justify-end">
+                                <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => {
+                                    setDeletingItem(item)
+                                    setIsDeleteDialogOpen(true)
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
-                        )}
-                      </>
-                    ))}
-                  </TableBody>
-                </Table>
-                {seedSalesPagination.totalPages > 1 && (
-                  <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
-                )}
+                          {expandedRows.has(item.id!) && (
+                            <TableRow>
+                              <TableCell colSpan={9} className="bg-muted/30 p-0">
+                                <div className="p-4">
+                                  <h4 className="font-semibold mb-3 text-sm">Ventas Realizadas</h4>
+                                  {item.deliveries && item.deliveries.length > 0 ? (
+                                    <div className="rounded-lg border">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead>Fecha de Entrega</TableHead>
+                                            <TableHead>Destino</TableHead>
+                                            <TableHead className="text-right">KG Vendidos</TableHead>
+                                            <TableHead className="text-right">Precio/KG</TableHead>
+                                            <TableHead className="text-right">Total</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {item.deliveries.map((delivery) => (
+                                            <TableRow key={delivery.id}>
+                                              <TableCell>
+                                                {new Date(delivery.delivery_date).toLocaleDateString()}
+                                              </TableCell>
+                                              <TableCell>{delivery.destination}</TableCell>
+                                              <TableCell className="text-right">
+                                                {formatKg(delivery.kg_delivered)}
+                                              </TableCell>
+                                              <TableCell className="text-right">
+                                                {currencyFormatter(delivery.price_per_kg)}
+                                              </TableCell>
+                                              <TableCell className="text-right font-semibold">
+                                                {currencyFormatter(delivery.kg_delivered * delivery.price_per_kg)}
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                          <TableRow className="font-semibold bg-muted/50">
+                                            <TableCell colSpan={2}>Total</TableCell>
+                                            <TableCell className="text-right">
+                                              {formatKg(item.deliveries.reduce((sum, d) => sum + d.kg_delivered, 0))}
+                                            </TableCell>
+                                            <TableCell></TableCell>
+                                            <TableCell className="text-right">
+
+                                              {currencyFormatter(
+                                                item.deliveries.reduce(
+                                                  (sum, d) => sum + d.kg_delivered * d.price_per_kg,
+                                                  0,
+                                                ),
+                                              )}
+                                            </TableCell>
+                                          </TableRow>
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">No hay entregas registradas</p>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {seedSalesPagination.totalPages > 1 && (
+                    <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
+                  )}
+                </div>
               </>
             }
           </div>

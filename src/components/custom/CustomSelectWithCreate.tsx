@@ -72,24 +72,7 @@ export const CustomSelectWithCreate = ({
             onKeyDown={(e) =>
               e.key === "Enter" && (e.preventDefault(), handleAdd())
             }
-            className="
-                        flex-1
-                        rounded-md
-                        border
-                        border-input
-                        bg-background
-                        px-3
-                        py-2
-                        text-sm
-                        text-foreground
-                        placeholder:text-muted-foreground
-                        shadow-sm
-
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-ring
-                        focus:border-ring
-                        "
+            className="input-standard"
             placeholder={placeholder || `Nuevo ${label.toLowerCase()}`}
           />
           <Button
@@ -105,29 +88,7 @@ export const CustomSelectWithCreate = ({
 
       <select
         {...register(name, { required: `${label} es requerida` })}
-        className={`
-            w-full
-            rounded-md
-            border
-            border-input
-            bg-background
-            px-3
-            py-2
-            text-sm
-            text-foreground
-            shadow-sm
-            transition-colors
-
-            focus:outline-none
-            focus:ring-2
-            focus:ring-ring
-            focus:border-ring
-
-            disabled:cursor-not-allowed
-            disabled:opacity-50
-
-            ${selectHeight ?? ""}
-        `}
+        className={`input-standard ${selectHeight ?? ""}`}
       >
         <option value="" className="text-muted-foreground">
           Selecciona {label.toLowerCase()}
