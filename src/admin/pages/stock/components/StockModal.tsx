@@ -166,26 +166,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                 <label className="block text-sm font-medium mb-1 mt-1">Unidad *</label>
                 <select
                   {...register("unit", { required: "La unidad es requerida" })}
-                  className="
-                      w-full
-                      px-3
-                      py-2
-                      border
-                      rounded-md
-                      bg-background
-                      text-foreground
-                      border-input
-                      shadow-sm
-                      transition-colors
-
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-ring
-                      focus:border-ring
-
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-  "
+                  className="input-standard"
                 >
                   <option value="" className="bg-background text-foreground">
                     Selecciona una unidad

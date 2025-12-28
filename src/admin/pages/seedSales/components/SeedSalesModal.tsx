@@ -13,17 +13,19 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { formatNumber } from "@/lib/format-number"
-import { PlusCircle, Trash2, Edit2 } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { PlusCircle } from "lucide-react"
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
-import { Crop } from "@/interfaces/crops/crop.sales.response";
+import { CropSale } from "@/interfaces/crops/crop.sales.response";
 import { AmountInput } from "@/components/custom/CustomAmountInput"
-import { currencyFormatter } from "@/lib/currency-formatter"
 import { formatKg } from "@/lib/format-kg"
-import { useSeedSale } from "../hooks/useSeedSale"
+import { useSeedSaleForm } from "../hooks/useSeedSaleForm"
+import { SeedSaleDeliveryForm } from "./SeedSaleDeliveryForm"
+import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
+import { Label } from "@/components/ui/label"
+
 
 interface FormValues {
-  crop_id: number
+  crop_name_id: number
   waybill_number: string
   destination: string
   date: string
@@ -32,6 +34,7 @@ interface FormValues {
 }
 
 interface DeliveryFormValues {
+  waybill_delivery_number: string | undefined | null
   delivery_date: string
   destination: string
   kg_delivered: number | undefined
@@ -43,7 +46,7 @@ interface SeedSalesModalProps {
   onClose: () => void
   onSave: (item: SeedSale) => void
   initialData: SeedSale | null
-  crops?: Crop[]
+  crops?: CropSale[]
 }
 
 const statuses = [
@@ -53,13 +56,13 @@ const statuses = [
 ]
 
 export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
-  ({ isOpen, onClose, onSave, initialData, crops = [] }, ref) => {
+  ({ isOpen, onClose, onSave, initialData, crops }, ref) => {
     const [isSaving, setIsSaving] = useState(false)
     const [, setKgDeliveredDisplay] = useState("")
 
-    const [isAddingDelivery, setIsAddingDelivery] = useState(false)
+    const [isAddingDelivery, setIsAddingDelivery] = useState(false);
 
-
+    const cropsData: CropSale[] = crops || [];
 
     const {
       register,
@@ -71,7 +74,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       watch
     } = useForm<FormValues>({
       defaultValues: {
-        crop_id: initialData?.crop_id || (crops.length > 0 ? crops[0].id : 0),
+        crop_name_id: initialData?.crop_name_id || (cropsData.length > 0 ? cropsData[0].crop_name_id : 0),
         waybill_number: initialData?.waybill_number || "",
         destination: initialData?.destination || "",
         date: initialData?.sale_date || new Date().toISOString().split("T")[0],
@@ -88,6 +91,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       control: controlDelivery,
     } = useForm<DeliveryFormValues>({
       defaultValues: {
+        waybill_delivery_number: "",
         delivery_date: new Date().toISOString().split("T")[0],
         destination: "",
         kg_delivered: undefined,
@@ -99,10 +103,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
     const [, setDeliveryPriceDisplay] = useState("")
 
     const totalKgDelivered = watch("kg_delivered") || 0;
-    const selectedCropId = watch("crop_id");
-
-
-
+    const selectedCropNameId = watch("crop_name_id");
 
     const {
       createOrUpdateDeliveries,
@@ -110,11 +111,10 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       editingDeliveryIndex,
       setDeliveries,
       setEditingDeliveryIndex
-    } = useSeedSale();
+    } = useSeedSaleForm();
 
-    const totalKgSold = deliveries.reduce((sum, d) => sum + d.kg_delivered, 0);
-
-
+    const selectedCrop = crops?.find(c => c.crop_name_id === selectedCropNameId);
+    const totalKgSold = selectedCrop?.total_sold_kg || 0;
 
     const onDeliverySubmit = (data: DeliveryFormValues) => {
 
@@ -124,12 +124,13 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         editingDeliveryIndex,
         initialData,
         totalKgDelivered,
-        selectedCropId,
+        selectedCropNameId,
         totalKgSold
       });
 
       setIsAddingDelivery(false)
       resetDelivery({
+        waybill_delivery_number: "",
         delivery_date: "",
         destination: "",
         kg_delivered: undefined,
@@ -151,6 +152,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       setDeliveryKgDisplay(formatNumber(delivery.kg_delivered.toString()))
       setDeliveryPriceDisplay(formatNumber(delivery.price_per_kg.toString()))
       resetDelivery({
+        waybill_delivery_number: delivery.waybill_number,
         delivery_date: delivery.delivery_date,
         destination: delivery.destination,
         kg_delivered: delivery.kg_delivered,
@@ -169,7 +171,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
 
       const item: SeedSale = {
         id: initialData?.id || null,
-        crop_id: Number(data.crop_id),
+        crop_name_id: Number(data.crop_name_id),
         waybill_number: data.waybill_number,
         sale_date: data.date,
         destination: data.destination,
@@ -178,6 +180,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         status: data.status,
         deliveries: deliveries,
         deleted_at: null,
+        crop_name: cropsData.find(c => c.crop_name_id === Number(data.crop_name_id))?.crop_name || "",
       }
       console.log(item);
       onSave(item)
@@ -186,95 +189,94 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       onClose()
       setIsSaving(false)
     }
-
     useEffect(() => {
+      if (!isOpen) return;
+
       if (initialData) {
         setKgDeliveredDisplay(formatNumber(initialData.kg_delivered.toString()))
-        setDeliveries(initialData.deliveries || [])
+        setDeliveries(initialData.deliveries || []) // ✅ acá seteamos el hook
         reset({
-          crop_id: initialData.crop_id || (crops.length > 0 ? crops[0].id : 0),
+          crop_name_id: initialData.crop_name_id || (cropsData.length > 0 ? cropsData[0].crop_name_id : 0),
           waybill_number: initialData.waybill_number,
           destination: initialData.destination,
           date: initialData.sale_date,
           kg_delivered: initialData.kg_delivered,
           status: initialData.status,
         })
-      } else {
-        // si hay se leccionado un cultivo deben figurar los kg dispobibles para entregar de ese cultivo
-        const selectedCropDefault = crops.find(c => c.id === Number(crops[0].id));
-        const formatted = selectedCropDefault?.real_yield.toString() || "";
+      } else if (cropsData.length > 0) {
+        const selectedCropDefault = cropsData.find(c => c.crop_name_id === Number(cropsData[0].crop_name_id));
+        const formatted = selectedCropDefault?.total_harvested_kg.toString() || "";
         setKgDeliveredDisplay(formatted);
         reset({
-          crop_id: crops.length > 0 ? crops[0].id : 0,
+          crop_name_id: cropsData[0].crop_name_id,
           waybill_number: "",
           destination: "",
           date: new Date().toISOString().split("T")[0],
           kg_delivered: Number(formatted),
           status: "pending",
         })
-        setDeliveries([])
-
+        setDeliveries([]) // solo al crear nueva venta
       }
-    }, [initialData, reset, crops, isOpen])
+    }, [initialData, reset, cropsData, isOpen, setDeliveries])
 
     useEffect(() => {
-      if (!selectedCropId || !crops.length) return;
+      if (!selectedCropNameId || !cropsData.length) return;
 
-      const crop = crops.find(c => c.id === Number(selectedCropId));
-      if (!crop || crop.real_yield == null) return;
+      const crop = cropsData.find(c => c.crop_name_id === Number(selectedCropNameId));
+      if (!crop || crop.total_harvested_kg == null) return;
 
-      const formatted = formatNumber(crop.real_yield.toString());
-
+      const formatted = formatNumber(crop.total_harvested_kg.toString());
       setKgDeliveredDisplay(formatted);
-      setValue("kg_delivered", Number(crop.real_yield), {
+      setValue("kg_delivered", Number(crop.total_harvested_kg), {
         shouldValidate: true,
         shouldDirty: true,
       });
 
-      setDeliveries([]);
-    }, [selectedCropId, crops, reset]);
+      // 🔹 Solo limpiar deliveries si estamos creando nueva venta
+      if (!initialData) setDeliveries([]);
+    }, [selectedCropNameId, cropsData, setValue, initialData, setDeliveries])
 
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent ref={ref} className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogContent ref={ref} className="w-[95vw] max-w-[95vw] md:max-w-[800px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 md:p-6">
           <DialogHeader>
-            <DialogTitle>{initialData ? "Editar Venta" : "Nueva Venta de Semillas"}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg md:text-xl">{initialData ? "Editar Venta" : "Nueva Venta de Semillas"}</DialogTitle>
+            <DialogDescription className="text-sm">
               {initialData
                 ? "Actualiza los datos de la entrega y sus ventas"
                 : "Registra una nueva entrega de semillas y sus ventas"}
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 md:space-y-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Datos Generales</h3>
+              <h3 className="text-base md:text-lg font-semibold">Datos Generales</h3>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Cultivo *</label>
+                <Label className="text-sm">Cultivo *</Label>
                 <select
-                  {...register("crop_id", {
+                  {...register("crop_name_id", {
                     required: "El cultivo es requerido",
                     valueAsNumber: true,
                   })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  disabled={crops.length === 0}
+                  className="mt-1.5 w-full px-3 py-2 border rounded-md bg-background text-sm"
+                  disabled={cropsData.length === 0}
                 >
-                  {crops.map((crop) => (
-                    <option key={crop.id} value={crop.id}>
-                      {crop.crop_name} - {crop.campaign_name}
+                  {cropsData.map((crop) => (
+                    <option key={crop.crop_name_id} value={crop.crop_name_id}>
+                      {crop.crop_name}
                     </option>
                   ))}
                 </select>
-                {crops.length === 0 && (
+                {cropsData.length === 0 && (
                   <p className="text-sm text-muted-foreground mt-1">No hay cultivos cocechados</p>
                 )}
-                {errors.crop_id && <p className="text-destructive text-sm mt-1">{errors.crop_id.message}</p>}
+                {errors.crop_name_id && <p className="text-destructive text-xs mt-1">{errors.crop_name_id.message}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Carta de Porte *</label>
+                  <Label className="text-sm mb-1.5">Carta de Porte *</Label>
                   <input
                     type="text"
                     {...register("waybill_number", { required: "La carta de porte es requerida" })}
@@ -282,58 +284,38 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                     placeholder="Ej: CP-2024-001"
                   />
                   {errors.waybill_number && (
-                    <p className="text-destructive text-sm mt-1">{errors.waybill_number.message}</p>
+                    <p className="text-destructive text-xs mt-1">{errors.waybill_number.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Destino Principal *</label>
+                  <Label className="text-sm mb-1.5">Destino Principal *</Label>
                   <input
                     type="text"
                     {...register("destination", { required: "El destino es requerido" })}
                     className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Ej: Buenos Aires"
                   />
-                  {errors.destination && <p className="text-destructive text-sm mt-1">{errors.destination.message}</p>}
+                  {errors.destination && <p className="text-destructive text-xs mt-1">{errors.destination.message}</p>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Fecha *</label>
+                  <Label className="text-sm mb-1.5">Fecha *</Label>
                   <input
                     type="date"
                     {...register("date", { required: "La fecha es requerida" })}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
                   />
                   {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Estado *</label>
+                  <Label className="text-sm mb-1.5">Estado *</Label>
                   <select
                     {...register("status", { required: "El estado es requerido" })}
-                    className="
-                      w-full
-                      px-3
-                      py-2
-                      border
-                      rounded-md
-                      bg-background
-                      text-foreground
-                      border-input
-                      shadow-sm
-                      transition-colors
-
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-ring
-                      focus:border-ring
-
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-  "
-
+                    className="w-full px-3 py-2 border rounded-md bg-background text-md"
                   >
                     {statuses.map((s) => (
                       <option key={s.value} value={s.value}>
@@ -354,7 +336,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                     }}
                     render={({ field, fieldState }) => (
                       <AmountInput
-                        label="KG Totales Entregados *"
+                        label="KG Entregados *"
                         value={field.value}
                         onChange={field.onChange}
                         error={fieldState.error?.message}
@@ -366,19 +348,19 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                 </div>
               </div>
 
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-muted p-3 md:p-4 rounded-lg">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-muted-foreground">KG Totales</p>
-                    <p className="text-2xl font-bold">{formatKg(totalKgDelivered)}</p>
+                    <p className="text-xs text-muted-foreground">KG Totales</p>
+                    <p className="text-lg md:text-2xl font-bold">{formatKg(totalKgDelivered)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">KG Vendidos</p>
-                    <p className="text-2xl font-bold text-green-600">{formatKg(totalKgSold)}</p>
+                    <p className="text-xs text-muted-foreground">KG Vendidos</p>
+                    <p className="text-lg md:text-2xl font-bold text-green-600">{formatKg(totalKgSold)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">KG Disponibles</p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-xs text-muted-foreground">KG Disponibles</p>
+                    <p className="text-lg md:text-2xl font-bold text-blue-600">
                       {formatKg((totalKgDelivered - totalKgSold))}
                     </p>
                   </div>
@@ -386,9 +368,9 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Ventas</h3>
+                <h3 className="text-base md:text-lg font-semibold">Ventas</h3>
                 <Button
                   type="button"
                   variant="outline"
@@ -400,196 +382,52 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                   }}
                   disabled={isAddingDelivery || totalKgDelivered === 0}
                 >
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Agregar Venta
+                  <PlusCircle className="w-4 h-4 mr-1.5" />
+                  <span className="hidden sm:inline">Agregar Venta</span>
+                  <span className="sm:hidden">Agregar</span>
                 </Button>
               </div>
 
               {isAddingDelivery && (
 
-                <div className="border rounded-lg p-4 bg-muted/50">
-                  <h4 className="font-medium mb-3">
-                    {editingDeliveryIndex !== null ? "Editar Venta" : "Nueva Venta"}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Fecha de Venta *</label>
-                      <input
-                        type="date"
-                        {...registerDelivery("delivery_date", { required: "La fecha es requerida" })}
-                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                      />
-                      {deliveryErrors.delivery_date && (
-                        <p className="text-destructive text-sm mt-1">{deliveryErrors.delivery_date.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Destino *</label>
-                      <input
-                        type="text"
-                        {...registerDelivery("destination", { required: "El destino es requerido" })}
-                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="Cliente o destino"
-                      />
-                      {deliveryErrors.destination && (
-                        <p className="text-destructive text-sm mt-1">{deliveryErrors.destination.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-
-
-                      <Controller
-                        name="kg_delivered"
-                        control={controlDelivery}
-                        rules={{
-                          required: "KG vendidos es obligatorio",
-                          min: { value: 0.01, message: "Debe ser mayor a 0" },
-                        }}
-                        render={({ field, fieldState }) => (
-                          <AmountInput
-                            label="KG Vendidos *"
-                            value={field.value != null ? Number(field.value) : undefined}
-                            onChange={field.onChange}
-                            error={fieldState.error?.message}
-                            locale="es-AR"
-                            placeholder="0,00"
-                          />
-                        )}
-                      />
-
-                    </div>
-
-                    <div>
-
-                      <Controller
-                        name="price_per_kg"
-                        control={controlDelivery}
-                        rules={{ required: "Precio por KG es obligatorio" }}
-                        render={({ field, fieldState }) => (
-                          <AmountInput
-                            label="Precio por KG *"
-                            value={field.value != null ? Number(field.value) : undefined}
-                            onChange={field.onChange}
-                            error={fieldState.error?.message}
-                            currency="ARS"
-                            locale="es-AR"
-                            placeholder="0,00"
-                          />
-                        )}
-                      />
-
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsAddingDelivery(false)
-                        resetDelivery({
-                          delivery_date: "",
-                          destination: "",
-                          kg_delivered: undefined,
-                          price_per_kg: undefined,
-                        })
-                        setDeliveryKgDisplay("")
-                        setDeliveryPriceDisplay("")
-                        setEditingDeliveryIndex(null)
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="button" size="sm" onClick={handleSubmitDelivery(onDeliverySubmit)}>
-                      {editingDeliveryIndex !== null ? "Actualizar" : "Agregar"}
-                    </Button>
-                  </div>
-                </div>
-
+                <SeedSaleDeliveryForm
+                  registerDelivery={registerDelivery}
+                  controlDelivery={controlDelivery}
+                  deliveryErrors={deliveryErrors}
+                  isEditing={editingDeliveryIndex !== null}
+                  onSubmit={handleSubmitDelivery(onDeliverySubmit)}
+                  onCancel={() => {
+                    setIsAddingDelivery(false)
+                    resetDelivery()
+                    setEditingDeliveryIndex(null)
+                  }}
+                />
 
               )}
 
               {deliveries.length > 0 && (
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Destino</TableHead>
-                        <TableHead className="text-right">KG</TableHead>
-                        <TableHead className="text-right">Precio/KG</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {deliveries.map((delivery, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{new Date(delivery.delivery_date).toLocaleDateString()}</TableCell>
-                          <TableCell>{delivery.destination}</TableCell>
-                          <TableCell className="text-right">{formatKg(delivery.kg_delivered)}</TableCell>
-                          <TableCell className="text-right">
-                            {currencyFormatter(delivery.price_per_kg)}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {currencyFormatter((delivery.kg_delivered * delivery.price_per_kg))}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex gap-1 justify-end">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditDelivery(index)}
-                                disabled={isAddingDelivery}
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteDelivery(index)}
-                                disabled={isAddingDelivery}
-                              >
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow className="bg-muted/50 font-semibold">
-                        <TableCell colSpan={2}>Total</TableCell>
-                        <TableCell className="text-right">{formatKg(totalKgSold)} kg</TableCell>
-                        <TableCell></TableCell>
-                        <TableCell className="text-right">
-                          {currencyFormatter(
-                            deliveries.reduce((sum, d) => sum + d.kg_delivered * d.price_per_kg, 0)
-                          )}
-                        </TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
+                <SeedSaleDeliveriesTable
+                  deliveries={deliveries}
+                  totalKgSold={totalKgSold}
+                  isAddingDelivery={isAddingDelivery}
+                  onEdit={handleEditDelivery}
+                  onDelete={handleDeleteDelivery}
+                />
               )}
 
               {deliveries.length === 0 && !isAddingDelivery && (
-                <div className="text-center py-8 text-muted-foreground border rounded-lg border-dashed">
-                  <p>No hay ventas registradas</p>
-                  <p className="text-sm">Haz clic en "Agregar Venta" para comenzar</p>
+                <div className="text-center py-6 text-muted-foreground border rounded-lg border-dashed">
+                  <p className="text-sm">No hay ventas registradas</p>
+                  <p className="text-xs">Haz clic en "Agregar Venta" para comenzar</p>
                 </div>
               )}
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSaving} className="flex items-center gap-2">
+              <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
                 {isSaving ? (
                   <>
                     Guardando...

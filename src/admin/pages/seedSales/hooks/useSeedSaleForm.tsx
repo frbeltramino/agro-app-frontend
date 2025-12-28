@@ -4,12 +4,12 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 
-export const useSeedSale = () => {
+export const useSeedSaleForm = () => {
 
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [editingDeliveryIndex, setEditingDeliveryIndex] = useState<number | null>(null);
 
-  const createOrUpdateDeliveries = ({ data, deliveries, editingDeliveryIndex, initialData, totalKgDelivered, selectedCropId, totalKgSold }: any) => {
+  const createOrUpdateDeliveries = ({ data, deliveries, editingDeliveryIndex, initialData, totalKgDelivered, totalKgSold }: any) => {
     const availableKg =
       totalKgDelivered -
       (totalKgSold - (editingDeliveryIndex !== null ? deliveries[editingDeliveryIndex].kg_delivered : 0))
@@ -21,8 +21,9 @@ export const useSeedSale = () => {
 
     const newDelivery: Delivery = {
       id: editingDeliveryIndex !== null ? deliveries[editingDeliveryIndex].id : null,
+      waybill_number: data.waybill_delivery_number,
       seed_sale_id: initialData?.id || null,
-      crop_id: selectedCropId,
+      crop_name_id: initialData?.crop_name_id || null,
       delivery_date: data.delivery_date,
       destination: data.destination,
       kg_delivered: Number(data.kg_delivered || 0),
@@ -38,8 +39,6 @@ export const useSeedSale = () => {
       setDeliveries([...deliveries, newDelivery])
     }
   }
-
-
 
 
   return {
