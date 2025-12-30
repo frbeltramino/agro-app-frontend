@@ -1,26 +1,22 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-
-import { currencyFormatter } from "@/lib/currency-formatter"
-import { Plus, Search, Edit, Trash2, ChevronDown, ChevronRight, Package } from "lucide-react"
+import { Plus, Search } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button";
 import { CardTitleSummary } from "./CardTitleSummary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { CustomTasksSuppliesPagination } from "@/components/custom/CustomTasksSuppliesPagination"
 import { useCropStore } from "@/admin/store/crop.store"
 import { useTasks } from "@/admin/hooks/useTasks"
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { TaskForm } from "./FormTask"
 import { useStock } from "@/admin/hooks/useStock"
-import React from "react";
 import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
-import { formatKg } from "@/lib/format-kg"
+import { TasksCardMobile } from "./TasksCardMobile"
+import { TasksCardDesktop } from "./TasksCardDesktop"
 
 
 
@@ -66,12 +62,12 @@ export const TasksCard = () => {
   };
 
   const handleDeleteTask = async (task: CropTask) => {
-
+    if (!task) return;
     await deleteTask.mutateAsync({
       crop_id: selectedCrop?.id,
       task_id: task.id,
     });
-
+    setIsDeleteDialogOpen(false);
     setCurrentPage(1);
   };
 
@@ -80,6 +76,11 @@ export const TasksCard = () => {
     setSelectedTask(task);
     setOpenTaskForm(true);
     console.log(task);
+  };
+
+  const handleOpenDeleteDialog = (task: CropTask) => {
+    setDeletingItem(task);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -101,31 +102,26 @@ export const TasksCard = () => {
               Nuevo Trabajo
             </Button>
           </div>
-          <div className="flex items-center gap-2 mt-4">
-            <Select
-              value={workTypeFilter}
-              onValueChange={setWorkTypeFilter}
-            >
-              <SelectTrigger className="w-[200px]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-4">
+            <Select value={workTypeFilter} onValueChange={setWorkTypeFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Tipo de trabajo" />
               </SelectTrigger>
-
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
                 {taskTypesData?.taskTypes?.map((t: any) => (
-                  <SelectItem key={t.id} value={String(t.id)}>
-                    {t.name}
-                  </SelectItem>
+                  <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <div className="relative flex-1">
+
+            <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Buscar por descripción"
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
           </div>
@@ -143,137 +139,24 @@ export const TasksCard = () => {
           }
           {
             !isLoading && filteredTasks.length > 0 && (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Suministros usados</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead>Fecha de realización</TableHead>
-                      <TableHead>Proveedor</TableHead>
-                      <TableHead>Costo M/O</TableHead>
-                      <TableHead>Costo total</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTasks?.map((task) => {
-                      const isOpen = expandedWorks.includes(task.id);
+              <>
+                <div className="space-y-3 md:hidden">
+                  <TasksCardMobile
+                    tasks={filteredTasks}
+                    onEdit={openEditForm}
+                    onDelete={handleOpenDeleteDialog}
+                  />
+                </div>
 
-                      return (
-                        <React.Fragment key={task.id}>
-                          {/* FILA PRINCIPAL */}
-                          <TableRow key={task.id}>
-                            <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => toggleWorkExpansion(task.id)}
-                              >
-                                {isOpen ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </TableCell>
-
-                            <TableCell className="font-medium">{task.type}</TableCell>
-                            <TableCell>{task.description || "No hay descripción"}</TableCell>
-                            <TableCell>{new Date(task.date).toLocaleDateString()}</TableCell>
-                            <TableCell>{task.provider}</TableCell>
-                            <TableCell>{currencyFormatter(Number(task.laborCost))}</TableCell>
-                            <TableCell>{currencyFormatter(Number(task.total_price))}</TableCell>
-
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button variant="ghost" size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditForm(task);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon"
-                                  onClick={() => {
-                                    setDeletingItem(task);
-                                    setIsDeleteDialogOpen(true)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-
-                          {/* FILA EXPANDIBLE */}
-                          {isOpen && (
-                            <TableRow>
-                              <TableCell colSpan={7} className="bg-muted/30 p-0">
-                                <div className="p-4">
-                                  <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                                    <Package className="h-4 w-4" />
-                                    Suministros utilizados en este trabajo
-                                  </h4>
-                                  {
-                                    task.supplies.length === 0 && <p className="text-sm text-muted-foreground">No hay suministros utilizados en este trabajo</p>
-                                  }
-                                  {
-                                    task.supplies.length > 0 && <Table>
-                                      <TableHeader>
-                                        <TableRow>
-                                          <TableHead>Suministro</TableHead>
-                                          <TableHead>Tipo</TableHead>
-                                          <TableHead>Dosis/h</TableHead>
-                                          <TableHead>Cant/h</TableHead>
-                                          <TableHead>Costo/Unidad</TableHead>
-                                          <TableHead className="text-right">Costo Total</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-
-                                      <TableBody>
-                                        {task.supplies.map((product) => (
-
-                                          <TableRow key={product.supply_id ?? product.stock_id}>
-                                            <TableCell className="font-medium">
-                                              {product.supply_name}
-                                            </TableCell>
-                                            <TableCell>
-                                              <Badge variant="outline">{product.category_name}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                              {formatKg(product.dose_per_ha)} {product.unit}
-                                            </TableCell>
-                                            <TableCell>
-                                              {formatKg(product.hectares)}
-                                            </TableCell>
-                                            <TableCell>
-                                              {currencyFormatter(product.price_per_unit)}
-                                            </TableCell>
-                                            <TableCell className="text-right font-medium">
-                                              {currencyFormatter(product.total_used * product.price_per_unit)}
-                                            </TableCell>
-
-                                          </TableRow>
-                                        ))
-
-                                        }
-                                      </TableBody>
-                                    </Table>
-                                  }
-
-
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <div className="hidden md:block overflow-x-auto">
+                  <TasksCardDesktop
+                    tasks={filteredTasks}
+                    expandedWorks={expandedWorks}
+                    toggleWorkExpansion={toggleWorkExpansion}
+                    onEdit={openEditForm}
+                    onDelete={handleOpenDeleteDialog}
+                  />
+                </div>
                 <div className="mt-4">
                   {
                     tasksPagination.totalPages > 1 && <CustomTasksSuppliesPagination
@@ -283,8 +166,7 @@ export const TasksCard = () => {
                     />
                   }
                 </div>
-
-              </div>
+              </>
             )}
 
         </CardContent>

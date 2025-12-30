@@ -17,7 +17,7 @@ import { Lot } from "@/interfaces/lots/lot.interface";
 interface FormValues {
   id: number;
   name?: string;
-  hectares?: number;
+  hectares?: number | null;
   location?: string;
   campaign_id?: string;
   lot_master_id: string;
@@ -48,7 +48,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormValues>({
     defaultValues: {
       name: lotToEdit?.name || "",
-      hectares: lotToEdit?.hectares || 0,
+      hectares: lotToEdit?.hectares || null,
       lot_master_id: "",
       campaign_id: "",
     },
@@ -62,7 +62,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
       // Limpiar campos cuando cambia a modo "crear nuevo"
       setValue("lot_master_id", "");
       setValue("name", "");
-      setValue("hectares", 0);
+      setValue("hectares", null);
     }
   };
 
@@ -78,30 +78,34 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
   };
 
   useEffect(() => {
+    if (!open) return
+
     if (selectedLot) {
-      setFormMode("edit");
-      setLotToEdit(selectedLot);
+      setFormMode("edit")
+      setLotToEdit(selectedLot)
 
       reset({
         id: selectedLot.id,
         name: selectedLot.name,
         hectares: selectedLot.hectares,
         campaign_id: selectedCampaign?.id?.toString() || "",
-        lot_master_id: ""
-      });
+        lot_master_id: "",
+      })
     } else {
-      setFormMode("create");
-      setLotToEdit(null);
+      setFormMode("create")
+      setLotToEdit(null)
 
       reset({
         id: 0,
         name: "",
-        hectares: 0,
+        hectares: null,
         campaign_id: selectedCampaign?.id?.toString() || "",
-        lot_master_id: ""
-      });
+        lot_master_id: "",
+      })
     }
-  }, [selectedLot, selectedCampaign, reset]);
+
+    setIsCreatingNew(false)
+  }, [open, selectedLot, selectedCampaign, reset])
 
   const onFormSubmit = (data: FormValues) => {
     onSubmit(data);
@@ -152,26 +156,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
                       register("lot_master_id").onChange(e);
                       handleLotMasterChange(e);
                     }}
-                    className="
-                    w-full
-                    px-3
-                    py-2
-                    border
-                    rounded-md
-                    bg-background
-                    text-foreground
-                    border-input
-                    shadow-sm
-                    transition-colors
-
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-ring
-                    focus:border-ring
-
-                    disabled:cursor-not-allowed
-                    disabled:opacity-50
-                  "
+                    className="select-standard"
                   >
                     <option value="">Seleccionar lote...</option>
                     {lotMasters.map((lot) => (
@@ -213,7 +198,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
                 min: { value: 0.01, message: "Debe ser mayor a 0" }
               })}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Ej: 120.5"
+              placeholder="Ej: 120,5"
             />
             {errors.hectares && (
               <p className="text-sm text-destructive mt-1">{errors.hectares.message}</p>
@@ -233,7 +218,10 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false)
+              }
+              }
             >
               Cancelar
             </Button>

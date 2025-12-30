@@ -36,6 +36,7 @@ import { PageHeader } from "@/admin/components/PageHeader";
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
+import { LotMobileCard } from "../components/LotMobileCard";
 
 
 
@@ -185,68 +186,89 @@ export const Lots = () => {
         {
           !isLoading && filteredLots.length > 0 && (
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Lote</TableHead>
-                      <TableHead>Área (ha)</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredLots.map((lot) => (
-                      <TableRow
-                        key={lot.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectLot(lot);
-                        }
-                        }
-                      >
-                        <TableCell className="font-medium">{lot.name}</TableCell>
-                        <TableCell>{lot.hectares}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedLot(lot);
-                                setIsFormOpen(true);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeletingItem(lot);
-                                setIsDeleteDialogOpen(true)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectLot(lot);
-                              }}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+              {/* Mobile */}
+              <div className="block md:hidden space-y-3">
+                {filteredLots.map((lot) => (
+                  <LotMobileCard
+                    key={lot.id}
+                    lot={lot}
+                    onSelect={() => handleSelectLot(lot)}
+                    onEdit={() => {
+                      setSelectedLot(lot)
+                      setIsFormOpen(true)
+                    }}
+                    onDelete={() => {
+                      setDeletingItem(lot)
+                      setIsDeleteDialogOpen(true)
+                    }}
+                  />
+                ))}
+              </div>
+              {/* Desktop */}
+              <div className="hidden md:block">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Lote</TableHead>
+                        <TableHead>Área (ha)</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLots.map((lot) => (
+                        <TableRow
+                          key={lot.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectLot(lot);
+                          }
+                          }
+                        >
+                          <TableCell className="font-medium">{lot.name}</TableCell>
+                          <TableCell>{lot.hectares}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedLot(lot);
+                                  setIsFormOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeletingItem(lot);
+                                  setIsDeleteDialogOpen(true)
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectLot(lot);
+                                }}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </CardContent>
           )

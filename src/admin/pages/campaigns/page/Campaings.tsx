@@ -31,6 +31,7 @@ import { CampaignForm } from "@/admin/pages/campaigns/components/CampaignForm";
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
+import { CampaignMobileCard } from "../components/CampaignMobileCard";
 
 export const Campaigns = () => {
 
@@ -174,76 +175,96 @@ export const Campaigns = () => {
 
           <div className="overflow-x-auto">
             {
-              filteredCampaigns.length === 0 && <CustomNoResultsCard
-                title="No se encontraron campañas"
-                message="Prueba cambiando la búsqueda o los filtros."
-              />
+              !isLoading && filteredCampaigns.length === 0 && (
+                <CustomNoResultsCard
+                  title="No se encontraron campañas"
+                  message="Prueba cambiando la búsqueda o los filtros."
+                />
+              )
+
             }
-            {filteredCampaigns.length > 0 && (
+            {!isLoading && filteredCampaigns.length > 0 && (
               <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Campaña</TableHead>
-                      <TableHead>Fecha Inicio</TableHead>
-                      <TableHead>Fecha Fin</TableHead>
-                      <TableHead className="hidden md:table-cell">Notas</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCampaigns?.map((campaign) => (
-                      <TableRow
-                        key={campaign.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={
-                          (e) => {
-                            e.stopPropagation();
-                            handleSelectCampaign(campaign);
-                          }
-                        }
-                      >
-                        <TableCell className="font-medium">{campaign.name}</TableCell>
-                        <TableCell>{new Date(campaign.start_date).toLocaleDateString()}</TableCell>
-                        <TableCell>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "No hay fecha de fin"}</TableCell>
-                        <TableCell className="hidden md:table-cell">{campaign.notes || "No hay notas"}</TableCell>
-                        <TableCell>{getStatusBadge(campaign.status as CampaignStatus)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditCampaign(campaign);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              setDeletingItem(campaign);
-                              setIsDeleteDialogOpen(true)
-                            }
-                            }>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectCampaign(campaign);
-                              }}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="space-y-3 md:hidden">
+                  {filteredCampaigns.map((campaign) => (
+                    <CampaignMobileCard
+                      key={campaign.id}
+                      campaign={campaign}
+                      getStatusBadge={getStatusBadge}
+                      onEdit={() => handleEditCampaign(campaign)}
+                      onDelete={() => {
+                        setDeletingItem(campaign)
+                        setIsDeleteDialogOpen(true)
+                      }}
+                      onSelect={() => handleSelectCampaign(campaign)}
+                    />
+                  ))}
+                </div>
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Campaña</TableHead>
+                        <TableHead>Fecha Inicio</TableHead>
+                        <TableHead>Fecha Fin</TableHead>
+                        <TableHead className="hidden md:table-cell">Notas</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCampaigns?.map((campaign) => (
+                        <TableRow
+                          key={campaign.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={
+                            (e) => {
+                              e.stopPropagation();
+                              handleSelectCampaign(campaign);
+                            }
+                          }
+                        >
+                          <TableCell className="font-medium">{campaign.name}</TableCell>
+                          <TableCell>{new Date(campaign.start_date).toLocaleDateString()}</TableCell>
+                          <TableCell>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "No hay fecha de fin"}</TableCell>
+                          <TableCell className="hidden md:table-cell">{campaign.notes || "No hay notas"}</TableCell>
+                          <TableCell>{getStatusBadge(campaign.status as CampaignStatus)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditCampaign(campaign);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setDeletingItem(campaign);
+                                setIsDeleteDialogOpen(true)
+                              }
+                              }>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectCampaign(campaign);
+                                }}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {
                   campaignsPagination.totalPages > 1 && <CustomPagination totalPages={Number(campaignsPagination.totalPages) || 0} />
                 }

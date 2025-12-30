@@ -44,26 +44,30 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
     });
 
     useEffect(() => {
-      if (selectedCampaign) {
-        reset({
-          id: selectedCampaign.id,
-          name: selectedCampaign.name,
-          category_id: String(selectedCampaign.category_id),
-          start_date: formatDateInput(selectedCampaign.start_date.toString()),
-          end_date: formatDateInput(selectedCampaign.end_date?.toString()),
-          notes: selectedCampaign.notes ?? "",
-        });
-      } else {
-        reset({
-          id: 'new',
-          name: "",
-          category_id: "",
-          start_date: "",
-          end_date: "",
-          notes: "",
-        });
+      if (open) {
+        // Si hay una campaña seleccionada, setear valores para editar
+        if (selectedCampaign) {
+          reset({
+            id: selectedCampaign.id,
+            name: selectedCampaign.name,
+            category_id: String(selectedCampaign.category_id),
+            start_date: formatDateInput(selectedCampaign.start_date?.toString()),
+            end_date: formatDateInput(selectedCampaign.end_date?.toString()),
+            notes: selectedCampaign.notes ?? "",
+          });
+        } else {
+          // Si no hay campaña seleccionada, setear valores por defecto para crear
+          reset({
+            id: 'new',
+            name: "",
+            category_id: "",
+            start_date: "",
+            end_date: "",
+            notes: "",
+          });
+        }
       }
-    }, [selectedCampaign, reset]);
+    }, [open, selectedCampaign, reset]);
 
     const formatDateInput = (date: string | null | undefined) => {
       if (!date) return "";
@@ -83,7 +87,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent ref={ref} className="sm:max-w-[500px]">
+        <DialogContent ref={ref} className="dialog-content">
           <DialogHeader>
             <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
             <DialogDescription>
@@ -93,70 +97,53 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
 
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Nombre *
-              </label>
+              <label className="block text-sm font-medium mb-2">Nombre *</label>
               <input
                 type="text"
                 {...register("name", { required: "El nombre es requerido" })}
                 placeholder="Ej: Campaña Soja Primavera"
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="input-standard"
               />
-              {errors.name && (
-                <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid-2-cols-mobile">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Fecha de Inicio *
-                </label>
+                <label className="block text-sm font-medium mb-2">Fecha de Inicio *</label>
                 <input
                   type="date"
                   {...register("start_date", { required: "La fecha de inicio es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent  dark:[color-scheme:dark]"
+                  className="date-standard"
                 />
-                {errors.start_date && (
-                  <p className="text-destructive text-sm mt-1">{errors.start_date.message}</p>
-                )}
+                {errors.start_date && <p className="text-destructive text-sm mt-1">{errors.start_date.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Fecha de Fin
-                </label>
+                <label className="block text-sm font-medium mb-2">Fecha de Fin</label>
                 <input
                   type="date"
                   {...register("end_date")}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent  dark:[color-scheme:dark]"
+                  className="date-standard"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Notas (opcional)
-              </label>
+              <label className="block text-sm font-medium mb-2">Notas (opcional)</label>
               <textarea
                 {...register("notes")}
                 rows={3}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                placeholder="Agrega notas adicionales sobre la campaña..."
+                placeholder="Agrega notas adicionales..."
+                className="textarea-standard"
               />
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancelar
-              </Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit">{selectedCampaign ? "Editar" : "Crear"} Campaña</Button>
             </DialogFooter>
           </form>
+
         </DialogContent>
       </Dialog>
     );
