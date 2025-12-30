@@ -17,19 +17,18 @@ import {
 interface MasterSupplySelectProps {
   control: any;
   setValue: any;
-  index: number;
   name: string;
   errors: any;
-  editingSupply?: any;
+  editingSupply?: any
 }
+
 
 export const MasterSupplySelect = ({
   control,
   setValue,
-  index,
   name,
   errors,
-  editingSupply,
+  editingSupply
 }: MasterSupplySelectProps) => {
   const { data, isLoading, mutation } = useMasterSupply();
   const { data: categoriesData, createCategory } = useSupplyCategories();
@@ -86,9 +85,10 @@ export const MasterSupplySelect = ({
     );
     if (selectedSupply) {
       setValue(name, selectedSupply.id);
-      setValue(`supplies.${index}.unit`, selectedSupply.unit);
-      setValue(`supplies.${index}.categoryId`, selectedSupply.category_id.toString());
-      setValue(`supplies.${index}.productName`, selectedSupply.name);
+      setValue("unit", selectedSupply.unit);
+      setValue("categoryId", selectedSupply.category_id.toString());
+      setValue("productName", selectedSupply.name);
+      setValue("master_supply_id", selectedSupply.id);
     }
   }, [editingSupply, supplies]);
 
@@ -129,10 +129,10 @@ export const MasterSupplySelect = ({
   };
 
   const selectSupply = (supply: any, field?: any) => {
-    setValue(`supplies.${index}.unit`, supply.unit);
-    setValue(`supplies.${index}.categoryId`, supply.category_id.toString());
-    setValue(`supplies.${index}.productName`, supply.name);
-    setValue(`supplies.${index}.master_supply_id`, supply.id);
+    setValue("unit", supply.unit);
+    setValue("categoryId", supply.category_id.toString());
+    setValue("productName", supply.name);
+    setValue("master_supply_id", supply.id);
     if (field) field.onChange(supply.id);
     setSearch("");
     setHighlightedIndex(0);
@@ -141,7 +141,7 @@ export const MasterSupplySelect = ({
 
   return (
     <div className="space-y-2 relative">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-0.5">
         <label className="block text-sm font-medium">Suministro *</label>
         <Button
           type="button"
@@ -226,9 +226,9 @@ export const MasterSupplySelect = ({
           );
         }}
       />
-      {errors?.supplies?.[index]?.supply_id && (
+      {errors?.supply_id && (
         <p className="text-destructive text-sm mt-1">
-          {errors.supplies[index].supply_id?.message}
+          {errors.supply_id?.message}
         </p>
       )}
 

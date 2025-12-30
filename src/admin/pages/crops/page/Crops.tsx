@@ -34,6 +34,7 @@ import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { formatKg } from "@/lib/format-kg";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
+import { CropMobileCard } from "../components/CropMobileCard";
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -183,76 +184,96 @@ export const Crops = () => {
                 }
                 {
                   !isLoading && filteredCrops.length > 0 && (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Cultivo</TableHead>
-                          <TableHead className="hidden sm:table-cell">Variedad</TableHead>
-                          <TableHead>Fecha Siembra</TableHead>
-                          <TableHead className="hidden md:table-cell">Fecha estimada de cosecha</TableHead>
-                          <TableHead>Rendimiento final (kg)</TableHead>
-                          <TableHead className="text-right">Acciones</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredCrops.map((crop: Crop) => (
-                          <TableRow
+                    <>
+                      {/* Mobile list */}
+                      <div className="grid gap-4 sm:hidden">
+                        {filteredCrops.map((crop) => (
+                          <CropMobileCard
                             key={crop.id}
-                            className="cursor-pointer hover:bg-muted/50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectCrop(crop)
-                            }
-                            }
-                          >
-                            <TableCell className="font-medium">{crop.crop_name}</TableCell>
-                            <TableCell className="hidden sm:table-cell">{crop.seed_type}</TableCell>
-                            <TableCell>
-                              {new Date(crop.start_date).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
-                            </TableCell>
-                            <TableCell>{crop.real_yield ? formatKg(crop.real_yield) : "No hay valor real"}</TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditForm(crop);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedCrop(crop);
-                                    setIsDeleteOpen(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectCrop(crop);
-                                  }}
-                                >
-                                  <ChevronRight className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
+                            crop={crop}
+                            onSelect={() => handleSelectCrop(crop)}
+                            onEdit={() => openEditForm(crop)}
+                            onDelete={() => {
+                              setSelectedCrop(crop)
+                              setIsDeleteOpen(true)
+                            }}
+                          />
                         ))}
-                      </TableBody>
-                    </Table>
+                      </div>
+                      {/* Desktop list */}
+                      <div className="hidden sm:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Cultivo</TableHead>
+                              <TableHead className="hidden sm:table-cell">Variedad</TableHead>
+                              <TableHead>Fecha Siembra</TableHead>
+                              <TableHead className="hidden md:table-cell">Fecha estimada de cosecha</TableHead>
+                              <TableHead>Rendimiento final (kg)</TableHead>
+                              <TableHead className="text-right">Acciones</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredCrops.map((crop: Crop) => (
+                              <TableRow
+                                key={crop.id}
+                                className="cursor-pointer hover:bg-muted/50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectCrop(crop)
+                                }
+                                }
+                              >
+                                <TableCell className="font-medium">{crop.crop_name}</TableCell>
+                                <TableCell className="hidden sm:table-cell">{crop.seed_type}</TableCell>
+                                <TableCell>
+                                  {new Date(crop.start_date).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
+                                </TableCell>
+                                <TableCell>{crop.real_yield ? formatKg(crop.real_yield) : "No hay valor real"}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditForm(crop);
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedCrop(crop);
+                                        setIsDeleteOpen(true);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSelectCrop(crop);
+                                      }}
+                                    >
+                                      <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   )}
 
               </div>

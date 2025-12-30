@@ -238,7 +238,8 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
 
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent ref={ref} className="w-[95vw] max-w-[95vw] md:max-w-[800px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 md:p-6">
+        <DialogContent ref={ref} className="w-[95vw] max-w-[95vw] md:max-w-[800px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 md:p-6 mt-6  top-6 translate-y-0
+    sm:top-1/2 sm:-translate-y-1/2">
           <DialogHeader>
             <DialogTitle className="text-lg md:text-xl">{initialData ? "Editar Venta" : "Nueva Venta de Semillas"}</DialogTitle>
             <DialogDescription className="text-sm">

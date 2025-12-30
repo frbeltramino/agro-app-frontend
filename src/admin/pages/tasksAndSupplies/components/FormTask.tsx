@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Trash2, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { Stock } from "@/interfaces/stock/stock.interface"
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
 import { useTaskTypes } from "@/admin/hooks/useTaskTypes"
@@ -24,7 +24,9 @@ import { parseAmount } from "@/lib/parse-amount"
 import { toast } from "sonner"
 import { AmountInput } from "@/components/custom/CustomAmountInput"
 import { useLotStore } from "@/admin/store/lot.store";
-import { MasterSupplySelect } from "./MasterSupplySelect"
+import { TaskSuppliesTable } from "./formTaskComponents/TaskSuppliesTable"
+import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
+import { StepIndicator } from "./formTaskComponents/StepIndicator"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
@@ -116,6 +118,9 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     const [, setFormatedLaborCost] = useState("0,00");
     const [isSaving, setIsSaving] = useState(false);
     const { selectedLot } = useLotStore();
+    const [createNewSupply, setCreateNewSupply] = useState(false);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [step, setStep] = useState(1);
 
     const {
       register,
@@ -124,7 +129,6 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       reset,
       control,
       watch,
-      setValue
     } = useForm<FormValues>({
       defaultValues: {
         task_type_id: "",
@@ -137,19 +141,59 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       },
     })
 
-    const { fields, append, remove } = useFieldArray({
+    const { append, remove } = useFieldArray({
       control,
       name: "supplies",
     })
 
-    const watchSupplies = watch("supplies");
-    const handleAddSupply = () => {
-      append({
+    const supplyForm = useForm<TaskSupplyForm>({
+      defaultValues: {
         supplyType: "stock",
-        dosagePerHectare: undefined,
         hectareQuantity: selectedLot?.hectares ?? 0,
-      })
+      },
+    });
+
+    const handleConfirmSupply = () => {
+      const newSupply = supplyForm.getValues();
+
+      if (editingIndex !== null) {
+        // actualizar suministro existente
+        const updatedSupplies = [...watchSupplies];
+        updatedSupplies[editingIndex] = newSupply;
+        reset({ ...supplyForm.getValues(), supplies: updatedSupplies }); // actualizar RHF
+        setEditingIndex(null);
+      } else {
+        // agregar nuevo suministro
+        append(newSupply);
+      }
+
+      supplyForm.reset({
+        supplyType: "stock",
+        hectareQuantity: selectedLot?.hectares ?? 0,
+      });
+      setCreateNewSupply(false);
+    };
+
+    const handleDeleteSupply = (index: number) => {
+      remove(index); // remove de useFieldArray
+    };
+    const watchSupplies = watch("supplies");
+
+    const handleOpenAddSupply = () => {
+      setEditingIndex(null);
+      supplyForm.reset({
+        supplyType: "stock",
+        hectareQuantity: selectedLot?.hectares ?? 0,
+      });
+      setCreateNewSupply(true)
     }
+
+    const handleEditSupply = (index: number) => {
+      const supply = watchSupplies[index];
+      supplyForm.reset(supply); // precarga datos en el formulario
+      setEditingIndex(index);
+      setCreateNewSupply(true); // abre el formulario
+    };
 
     const createArrayOfSupplies = async (data: FormValues, taskToEdit?: any) => {
       const stockSupplies = data.supplies.filter((s) => s.supplyType === "stock");
@@ -324,6 +368,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       });
 
     useEffect(() => {
+      setStep(1)
       if (taskToEdit) {
         reset({
           id: taskToEdit.id,
@@ -352,328 +397,200 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent key={taskToEdit?.id ?? "new"} ref={ref} className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nueva Tarea de Cultivo</DialogTitle>
+            <DialogTitle>
+              {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
+            </DialogTitle>
             <DialogDescription>
-              Completa los datos de la tarea y selecciona los suministros necesarios
+              {step === 1
+                ? "Completa los datos generales de la tarea"
+                : "Selecciona y configura los suministros necesarios para esta tarea"}
             </DialogDescription>
           </DialogHeader>
-
+          <StepIndicator step={step} totalSteps={2} />
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-            {/* Tipo de Tarea */}
-            <CustomSelectWithCreate
-              label="Tipo de tarea"
-              name="task_type_id"
-              options={formattedTaskTypes || []}
-              register={register}
-              errors={errors}
-              onCreate={async (name: string) => {
-                await createTaskTypeMutation.mutateAsync(name);
-                // opcional: actualizar estado local si lo necesitas
-              }}
-            />
+            {
+              step === 1 && (
+                <>
 
-
-            {/* Descripción */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Descripción</label>
-              <textarea
-                {...register("description")}
-                required={false}
-                rows={2}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                placeholder="Describe los detalles de la tarea..."
-              />
-            </div>
-
-            {/* Proveedor y Fecha */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Proveedor</label>
-                <input
-                  type="text"
-                  {...register("provider")}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Nombre del proveedor"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Fecha *</label>
-                <input
-                  type="date"
-                  {...register("date", { required: "La fecha es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
-                />
-                {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
-              </div>
-            </div>
-
-            {/* Nota */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Nota (opcional)</label>
-              <textarea
-                {...register("note")}
-                rows={2}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                placeholder="Agrega notas adicionales..."
-              />
-            </div>
-
-            {/* Costo de Mano de Obra */}
-            <div>
-              <Controller
-                name="laborCost"
-                control={control}
-
-                rules={{
-                  min: { value: 0, message: "El costo debe ser positivo" },
-                }}
-                render={({ field, fieldState }) => (
-                  <AmountInput
-                    label="Costo de Mano de Obra (opcional)"
-                    value={field.value}           // RHF controla el valor numérico
-                    onChange={field.onChange}     // RHF actualiza su estado
-                    error={fieldState.error?.message}
-                    currency="ARS"
-                    locale="es-AR"
-                    placeholder="0,00"
+                  {/* Tipo de Tarea */}
+                  <CustomSelectWithCreate
+                    label="Tipo de tarea"
+                    name="task_type_id"
+                    options={formattedTaskTypes || []}
+                    register={register}
+                    errors={errors}
+                    onCreate={async (name: string) => {
+                      await createTaskTypeMutation.mutateAsync(name);
+                      // opcional: actualizar estado local si lo necesitas
+                    }}
                   />
-                )}
-              />
-            </div>
 
-            {/* Suministros */}
-            <div className="border-t pt-4">
-              <div className="flex justify-between items-center mb-4">
-                <label className="text-sm font-medium">Suministros</label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleAddSupply();
-                  }}
-                  className="gap-2 bg-transparent"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Suministro
-                </Button>
-              </div>
 
-              {fields.length === 0 && (
-                <p className="text-sm text-muted-foreground mb-4">
-                  No hay suministros agregados. Haz clic en "Agregar Suministro" para comenzar.
-                </p>
-              )}
+                  {/* Descripción */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1 sm:mb-2">Descripción</label>
+                    <textarea
+                      {...register("description")}
+                      required={false}
+                      rows={2}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      placeholder="Describe los detalles de la tarea..."
+                    />
+                  </div>
 
-              <div className="space-y-4">
-                {fields.map((field: any, index) => {
-                  const supplyType = watchSupplies[index]?.supplyType
-                  const selectedStockId = watch(`supplies.${index}.stockId`);
-                  const selectedStock = stock?.find((s) => s.id === Number(selectedStockId));
-                  const stockSupplies = stock
-
-                  return (
-                    <div key={field.id} className="border rounded-lg p-4 bg-secondary/5 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-medium text-sm">Suministro {index + 1}</h4>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => remove(index)}
-                          className="text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-
-                      {/* Tipo de Suministro */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Tipo de Suministro *</label>
-                        <select
-                          {...register(`supplies.${index}.supplyType`, {
-                            required: "Selecciona el tipo de suministro",
-                          })}
-                          className=" w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50 "
-                        >
-                          <option value="stock" className="bg-background text-foreground">
-                            De Stock
-                          </option>
-                          <option value="purchase" className="bg-background text-foreground">
-                            Comprar para esta tarea
-                          </option>
-                        </select>
-
-                      </div>
-
-                      {supplyType === "stock" ? (
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Seleccionar Suministro de Stock *</label>
-                          <select
-                            {...register(`supplies.${index}.stockId`, {
-                              required: "Selecciona un suministro de stock",
-                            })}
-                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                          >
-                            <option value="">Selecciona un suministro</option>
-                            {stockSupplies?.map((supply) => (
-                              <option key={supply.id} value={supply.id?.toString()}>
-                                {supply.name} — <span>({supply.quantity_available} {supply.unit} disponibles)</span>
-                              </option>
-                            ))}
-                          </select>
-                          {errors.supplies?.[index]?.stockId && (
-                            <p className="text-destructive text-sm mt-1">{errors.supplies[index]?.stockId?.message}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <>
-                          <div>
-                            <MasterSupplySelect
-                              control={control}
-                              setValue={setValue}
-                              index={index}
-                              name={`supplies.${index}.supply_id`}
-                              errors={errors}
-                              editingSupply={taskToEdit?.supplies[index]}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Nombre del Producto *</label>
-                            <input
-                              type="text"
-                              {...register(`supplies.${index}.productName`)}
-                              value={watch(`supplies.${index}.productName`) || ""}
-                              readOnly
-                              className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Categoría *</label>
-                            <input
-                              type="text"
-                              {...register(`supplies.${index}.categoryId`)}
-                              value={
-                                categories.find(c => c.id.toString() === watch(`supplies.${index}.categoryId`))?.name || ""
-                              }
-                              readOnly
-                              className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-sm font-medium mb-2">Unidad *</label>
-                              <input
-                                type="text"
-                                {...register(`supplies.${index}.unit`)}
-                                value={watch(`supplies.${index}.unit`) || ""}
-                                readOnly
-                                className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-foreground  shadow-sm cursor-default focus:outline-none"
-                              />
-                              {errors.supplies?.[index]?.unit && (
-                                <p className="text-destructive text-sm mt-1">{errors.supplies[index]?.unit?.message}</p>
-                              )}
-                            </div>
-
-                            <input
-                              type="hidden"
-                              {...register(`supplies.${index}.master_supply_id`)}
-                              value={watch(`supplies.${index}.master_supply_id`) || ""}
-                            />
-
-                            <Controller
-                              control={control}
-                              name={`supplies.${index}.pricePerUnit`}
-                              rules={{
-                                required: "El precio es requerido",
-                                min: { value: 0, message: "El precio debe ser positivo" },
-                              }}
-                              render={({ field, fieldState }) => (
-                                <AmountInput
-                                  label="Precio por Unidad *"
-                                  value={field.value != null && field.value !== "" ? Number(field.value) : undefined}
-                                  onChange={field.onChange}
-                                  currency="ARS"
-                                  locale="es-AR"
-                                  placeholder="0,00"
-                                  error={fieldState.error?.message}
-                                />
-                              )}
-                            />
-                          </div>
-                        </>
-                      )}
-
-                      {/* Dosis por Hectárea y Cantidad de Hectáreas */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Controller
-                            control={control}
-                            name={`supplies.${index}.dosagePerHectare`}
-                            rules={{
-                              required: "La dosis es requerida",
-                              min: { value: 0.01, message: "La dosis debe ser positiva" },
-                            }}
-                            render={({ field, fieldState }) => (
-                              <AmountInput
-                                label={`Dosis por Hectárea (${supplyType === "stock"
-                                  ? selectedStock?.unit ?? "unidad"
-                                  : watchSupplies[index]?.unit ?? "unidad"
-                                  }) *`}
-                                value={field.value}
-                                onChange={field.onChange}
-                                error={fieldState.error?.message}
-                                locale="es-AR"
-                                placeholder="0,00"
-                              />
-                            )}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Cantidad de Hectáreas *</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            {...register(`supplies.${index}.hectareQuantity`, {
-                              required: "La cantidad de hectáreas es requerida",
-                              min: { value: 0, message: "Las hectáreas deben ser positivas" },
-                            })}
-                            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                            placeholder="0.00"
-                          />
-                          {errors.supplies?.[index]?.hectareQuantity && (
-                            <p className="text-destructive text-sm mt-1">
-                              {errors.supplies[index]?.hectareQuantity?.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                  {/* Proveedor y Fecha */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 sm:mb-2">Proveedor</label>
+                      <input
+                        type="text"
+                        {...register("provider")}
+                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Nombre del proveedor"
+                      />
                     </div>
-                  )
-                })}
-              </div>
-            </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1 sm:mb-2">Fecha *</label>
+                      <input
+                        type="date"
+                        {...register("date", { required: "La fecha es requerida" })}
+                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                      />
+                      {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
+                    </div>
+                  </div>
+
+                  {/* Nota */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1 sm:mb-2">Nota (opcional)</label>
+                    <textarea
+                      {...register("note")}
+                      rows={2}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      placeholder="Agrega notas adicionales..."
+                    />
+                  </div>
+
+                  {/* Costo de Mano de Obra */}
+                  <div>
+                    <Controller
+                      name="laborCost"
+                      control={control}
+
+                      rules={{
+                        min: { value: 0, message: "El costo debe ser positivo" },
+                      }}
+                      render={({ field, fieldState }) => (
+                        <AmountInput
+                          label="Costo de Mano de Obra (opcional)"
+                          value={field.value}           // RHF controla el valor numérico
+                          onChange={field.onChange}     // RHF actualiza su estado
+                          error={fieldState.error?.message}
+                          currency="ARS"
+                          locale="es-AR"
+                          placeholder="0,00"
+                        />
+                      )}
+                    />
+                  </div>
+                </>
+              )
+            }
+
+            {
+              step === 2 && (
+                <>
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <label className="text-sm font-medium">Suministros</label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleOpenAddSupply();
+                        }}
+                        className="gap-2 bg-transparent"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Crear Suministro
+                      </Button>
+                    </div>
+
+                    {watchSupplies.length === 0 && (
+                      <p className="text-sm text-muted-foreground mb-4">
+                        No hay suministros agregados. Haz clic en "Crear Suministro" para comenzar.
+                      </p>
+                    )}
+
+                    {createNewSupply &&
+                      <TaskSupplyFormComponent
+                        index={0}
+                        register={supplyForm.register}
+                        control={supplyForm.control}
+                        errors={supplyForm.formState.errors}
+                        watch={supplyForm.watch}
+                        setValue={supplyForm.setValue}
+                        stockSupplies={stock}
+                        categories={categories}
+                        onCancel={() => {
+                          supplyForm.reset();
+                          setCreateNewSupply(false);
+                        }}
+                        onSubmit={handleConfirmSupply}
+                        isEditing={false}
+                      />
+                    }
+                    {watchSupplies.length > 0 && (
+                      <div className="mt-2">
+                        <TaskSuppliesTable
+                          supplies={watchSupplies}
+                          isAddingSupply={createNewSupply}
+                          onEdit={handleEditSupply}
+                          onDelete={handleDeleteSupply}
+                        />
+                      </div>
+                    )}
+
+
+
+                  </div>
+                </>
+              )
+            }
+            {/* Suministros */}
+
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSaving} className="flex items-center gap-2">
-                {isSaving ? (
+              {
+                step === 1 && (
+                  <div className="flex justify-end mt-4">
+                    <Button type="button" onClick={() => setStep(2)}>Siguiente</Button>
+                  </div>
+                )
+              }
+              {
+                step === 2 && (
                   <>
-                    Guardando...
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
+                      Volver
+                    </Button>
+                    <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
+                      {isSaving ? (
+                        <>
+                          Guardando...
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        </>
+                      ) : (
+                        "Guardar"
+                      )}
+                    </Button>
                   </>
-                ) : (
-                  "Guardar"
-                )}
-              </Button>
+                )
+              }
+
             </DialogFooter>
           </form>
         </DialogContent>

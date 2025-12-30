@@ -121,6 +121,42 @@
   }
 }
 
-.input-standard {
-  @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+
+@layer components {
+
+  .dialog-content {
+    @apply w-[95vw] max-w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 fixed bottom-0 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 rounded-t-xl sm:rounded-lg;
+  }
+
+  .input-standard {
+    @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .textarea-standard {
+    @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .grid-2-cols-mobile {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+
+  .select-standard {
+    @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .date-standard {
+    @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+
+    /* For native date picker icon */
+    &::-webkit-calendar-picker-indicator {
+      @apply cursor-pointer;
+      filter: invert(0);
+      /* default for light mode */
+    }
+
+    /* Dark mode inversion for the icon */
+    .dark &::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+  }
 }

@@ -1,23 +1,19 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { currencyFormatter } from "@/lib/currency-formatter"
-import { Search, Trash2 } from "lucide-react"
+import { Search } from "lucide-react"
 import { useState } from "react"
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CardTitleSummary } from "./CardTitleSummary"
 import { CustomTasksSuppliesPagination } from "@/components/custom/CustomTasksSuppliesPagination"
-
 import { useSupply } from "@/admin/hooks/useSupply"
 import { useCropStore } from "@/admin/store/crop.store"
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
-
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { SupplyInUseDialog } from "../../../components/SupplyInUseDialog"
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { useStock } from "@/admin/hooks/useStock"
-import { formatKg } from "@/lib/format-kg"
+import { SuppliesCardMobile } from "./SuppliesCardMobile"
+import { SuppliesCardDesktop } from "./SuppliesCardDesktop"
 
 
 export const SuppliesCard = () => {
@@ -141,12 +137,7 @@ export const SuppliesCard = () => {
             <div>
               <CardTitleSummary title="Suministros Utilizados" count={suppliesPagination.total || 0} label="productos" />
             </div>
-            {/* <Button
-              onClick={() => setOpenSupplyForm(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Suministro
-            </Button> */}
+
           </div>
           <div className="flex items-center gap-2 mt-4">
             <div className="relative flex-1">
@@ -174,52 +165,14 @@ export const SuppliesCard = () => {
           }
           {
             !isLoading && filteredSupplies.length > 0 && (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Suministro</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Dosis/ha</TableHead>
-                      <TableHead>Cant/h</TableHead>
-                      <TableHead>Cantidad total</TableHead>
-                      <TableHead>Precio unitario</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSupplies?.map((supply, index) => (
-                      <TableRow key={supply.supply_id ?? `supply-${index}`}>
-                        <TableCell className="font-medium">{supply.supply_name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{supply.category_name}</Badge>
-                        </TableCell>
+              <>
+                <div className="space-y-3 md:hidden">
+                  <SuppliesCardMobile supplies={filteredSupplies} onDelete={handleCheckUsageSupply} />
+                </div>
+                <div className="hidden md:block overflow-x-auto">
 
-                        <TableCell>{formatKg(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
-                        <TableCell>{formatKg(supply.hectares)}</TableCell>
-                        <TableCell>
-                          {formatKg(supply.dose_per_ha * supply.hectares)} {supply.supply_unit}
-                        </TableCell>
-                        <TableCell>{currencyFormatter(supply.unit_price)}</TableCell>
-                        <TableCell className="font-medium">
-                          {calculateTotalCostBySupply(supply.unit_price, (supply.dose_per_ha * supply.hectares))}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCheckUsageSupply(supply)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                  <SuppliesCardDesktop supplies={filteredSupplies} calculateTotalCostBySupply={calculateTotalCostBySupply} handleCheckUsageSupply={handleCheckUsageSupply} onDelete={handleCheckUsageSupply} />
+                </div>
                 <div className="mt-4">
                   {
                     suppliesPagination.totalPages > 1 && <CustomTasksSuppliesPagination
@@ -230,8 +183,7 @@ export const SuppliesCard = () => {
                   }
 
                 </div>
-              </div>
-
+              </>
             )}
 
         </CardContent>

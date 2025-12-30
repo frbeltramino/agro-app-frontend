@@ -65,24 +65,26 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
   });
 
   useEffect(() => {
+    if (!open) return;
+
     if (cropToEdit) {
       reset({
-        id: cropToEdit?.id || 'new',
-        crop_name_id: Number(cropToEdit?.crop_name_id) || null,
-        crop_name: cropToEdit?.crop_name || "",
-        start_date: formatDateForInput(cropToEdit?.start_date),
-        end_date: formatDateForInput(cropToEdit?.end_date),
+        id: cropToEdit.id,
+        crop_name_id: Number(cropToEdit.crop_name_id) || null,
+        crop_name: cropToEdit.crop_name || "",
+        start_date: formatDateForInput(cropToEdit.start_date),
+        end_date: formatDateForInput(cropToEdit.end_date),
         campaign_id: selectedCampaign?.id || null,
         lot_id: selectedLot?.id || null,
-        seed_type: cropToEdit?.seed_type || "",
-        real_yield: cropToEdit?.real_yield || undefined,
+        seed_type: cropToEdit.seed_type || "",
+        real_yield: cropToEdit.real_yield || undefined,
       });
     } else {
       reset({
-        id: 'new',
+        id: "new",
         crop_name_id: null,
         crop_name: "",
-        start_date: new Date(),
+        start_date: formatDateForInput(new Date()),
         end_date: null,
         campaign_id: selectedCampaign?.id || null,
         lot_id: selectedLot?.id || null,
@@ -90,7 +92,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
         real_yield: undefined,
       });
     }
-  }, [cropToEdit, reset, selectedCampaign, selectedLot]);
+  }, [open, cropToEdit, reset, selectedCampaign, selectedLot]);
 
 
   const onFormSubmit = (data: FormValues) => {
@@ -111,7 +113,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}</DialogTitle>
           <DialogDescription>
