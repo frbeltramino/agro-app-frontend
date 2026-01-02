@@ -116,117 +116,121 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
 
   return (
     <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-      <DialogHeader>
-        <DialogTitle>{mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}</DialogTitle>
-        <DialogDescription>
-          {campaignName && (
-            <span className="block font-medium text-foreground mb-1">
-              Campaña: {campaignName}
-            </span>
-          )}
-          {lotName && (
-            <span className="block font-medium text-foreground mb-1">
-              Lote: {lotName}
-            </span>
-          )}
-          {mode === 'edit' ? 'Modifica los datos del cultivo' : 'Completa los datos para crear un nuevo cultivo'}
-        </DialogDescription>
-      </DialogHeader>
-
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-        <CustomSelectWithCreate
-          label="Cultivo"
-          name="crop_name_id"
-          options={cropNames.map(c => ({ id: Number(c.id), name: c.name }))}
-          register={register}
-          errors={errors.crop_name_id?.message}
-          selectHeight="h-10"
-          mb="0"
-          onCreate={async (name: string) => {
-            const newCrop = await createCropName(name);
-            setValue("crop_name_id", newCrop.id);
-            setValue("crop_name", newCrop.name);
-          }}
-        />
-
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Fecha de Inicio *
-          </label>
-
-          <input
-            type="date"
-            {...register("start_date", {
-              required: "La fecha de inicio es requerida",
-            })}
-            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
-          />
-
-          {errors.start_date && (
-            <p className="text-sm text-destructive mt-1">
-              {errors.start_date.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Fecha de Fin
-          </label>
-
-          <input
-            type="date"
-            {...register("end_date")}
-            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Tipo de Semilla
-          </label>
-          <input
-            {...register("seed_type", { required: "El tipo de semilla es requerido" })}
-            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Ej: DK72-10"
-          />
-          {errors.seed_type && (
-            <p className="text-sm text-destructive mt-1">{errors.seed_type.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Controller
-            name="real_yield"
-            control={control}
-            rules={{
-              min: { value: 0.01, message: "Debe ser mayor a 0" },
-            }}
-            render={({ field, fieldState }) => (
-              <AmountInput
-                label="Rendimiento Real"
-                value={field.value}
-                onChange={field.onChange}
-                error={fieldState.error?.message}
-                locale="es-AR"
-                placeholder="0,00"
-                currency={undefined}
-              />
+      <div className="shrink-0">
+        <DialogHeader>
+          <DialogTitle>{mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}</DialogTitle>
+          <DialogDescription>
+            {campaignName && (
+              <span className="block font-medium text-foreground mb-1">
+                Campaña: {campaignName}
+              </span>
             )}
+            {lotName && (
+              <span className="block font-medium text-foreground mb-1">
+                Lote: {lotName}
+              </span>
+            )}
+            {mode === 'edit' ? 'Modifica los datos del cultivo' : 'Completa los datos para crear un nuevo cultivo'}
+          </DialogDescription>
+        </DialogHeader>
+      </div>
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          <CustomSelectWithCreate
+            label="Cultivo"
+            name="crop_name_id"
+            options={cropNames.map(c => ({ id: Number(c.id), name: c.name }))}
+            register={register}
+            errors={errors.crop_name_id?.message}
+            selectHeight="h-10"
+            mb="0"
+            onCreate={async (name: string) => {
+              const newCrop = await createCropName(name);
+              setValue("crop_name_id", newCrop.id);
+              setValue("crop_name", newCrop.name);
+            }}
           />
-        </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button type="submit">
-            {mode === 'edit' ? 'Guardar Cambios' : 'Crear Cultivo'}
-          </Button>
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Fecha de Inicio *
+            </label>
+
+            <input
+              type="date"
+              {...register("start_date", {
+                required: "La fecha de inicio es requerida",
+              })}
+              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+            />
+
+            {errors.start_date && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.start_date.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Fecha de Fin
+            </label>
+
+            <input
+              type="date"
+              {...register("end_date")}
+              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Tipo de Semilla
+            </label>
+            <input
+              {...register("seed_type", { required: "El tipo de semilla es requerido" })}
+              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Ej: DK72-10"
+            />
+            {errors.seed_type && (
+              <p className="text-sm text-destructive mt-1">{errors.seed_type.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Controller
+              name="real_yield"
+              control={control}
+              rules={{
+                min: { value: 0.01, message: "Debe ser mayor a 0" },
+              }}
+              render={({ field, fieldState }) => (
+                <AmountInput
+                  label="Rendimiento Real"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error?.message}
+                  locale="es-AR"
+                  placeholder="0,00"
+                  currency={undefined}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit">
+              {mode === 'edit' ? 'Guardar Cambios' : 'Crear Cultivo'}
+            </Button>
+          </div>
         </div>
       </form>
     </BaseModal>

@@ -22,7 +22,7 @@ export function Stepper({ step, steps }: StepperProps) {
                     : "border-gray-400 bg-gray-100 text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
                 }`}
             >
-              {isCompleted ? "✓" : index + 1}
+              {index + 1}
             </div>
 
             {/* Texto */}

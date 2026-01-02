@@ -68,7 +68,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
           <TableBody>
             {supplies.map((s, index) => (
               <TableRow key={index}>
-                <TableCell>{s.productName || s.stockName || "Suministro"}</TableCell>
+                <TableCell className="max-w-[250px] truncate">{s.productName || s.stockName || "Suministro"}</TableCell>
                 <TableCell>{s.supplyType === "stock" ? "De Stock" : "Compra"}</TableCell>
                 <TableCell className="text-right">{s.unit}</TableCell>
                 <TableCell className="text-right">{s.dosagePerHectare}</TableCell>
