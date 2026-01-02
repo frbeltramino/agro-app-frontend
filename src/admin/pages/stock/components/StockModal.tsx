@@ -122,153 +122,155 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
 
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent ref={ref} className="sm:max-w-[600px]">
+        <DialogContent ref={ref} className="w-[95vw] max-w-[95vw] md:max-w-[800px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 md:p-6 mt-6  top-6 translate-y-0
+    sm:top-1/2 sm:-translate-y-1/2">
           <DialogHeader>
             <DialogTitle>{initialData ? "Editar Suministro" : "Nuevo Suministro"}</DialogTitle>
             <DialogDescription>
               {initialData ? "Actualiza los datos del suministro" : "Agrega un nuevo suministro a tu inventario"}
             </DialogDescription>
           </DialogHeader>
-
-          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Nombre del Suministro *</label>
-              <input
-                type="text"
-                {...register("name", { required: "El nombre del suministro es requerido" })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Ej: Funguicida Tebuconazole"
-              />
-              {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
-            </div>
-
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-
-                <CustomSelectWithCreate
-                  label="Categoría"
-                  name="category_id"
-                  options={categories || []}
-                  register={register}
-                  errors={"error en categoria"}
-                  onCreate={async (name: string) => {
-                    await createCategory(name);
-                  }}
-                  mb="0"
-                  selectHeight="h-10"
-                  placeholder="Nueva categoría"
-                />
-              </div>
-
-
+          <div className="w-full max-w-full overflow-x-hidden">
+            <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 mt-1">Unidad *</label>
-                <select
-                  {...register("unit", { required: "La unidad es requerida" })}
-                  className="input-standard"
-                >
-                  <option value="" className="bg-background text-foreground">
-                    Selecciona una unidad
-                  </option>
-                  {UNITS.map((unit) => (
-                    <option
-                      key={unit.value}
-                      value={unit.value}
-                      className="bg-background text-foreground"
-                    >
-                      {unit.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Controller
-                  control={control}
-                  name="quantity_available"
-                  defaultValue={initialData?.quantity_available ?? undefined}
-                  rules={{
-                    required: "La cantidad es requerida",
-                    min: { value: 0, message: "La cantidad debe ser positiva" },
-                  }}
-                  render={({ field, fieldState }) => (
-                    <AmountInput
-                      label={`Cantidad Disponible (${unitValue}) *`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={fieldState.error?.message}
-                      locale="es-AR"
-                      placeholder="0"
-                    />
-                  )}
-                />
-              </div>
-
-
-              <div className="space-y-2">
-                <Controller
-                  name="price_per_unit"
-                  control={control}
-                  defaultValue={undefined}
-                  rules={{
-                    required: "El precio es requerido",
-                    min: { value: 0, message: "El precio debe ser positivo" },
-                  }}
-                  render={({ field, fieldState }) => (
-                    <AmountInput
-                      label="Precio por Unidad *"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={fieldState.error?.message}
-                      currency="ARS"
-                      locale="es-AR"
-                      placeholder="0,00"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium mb-2">Fecha de Vencimiento *</label>
+                <label className="block text-sm font-medium mb-2">Nombre del Suministro *</label>
                 <input
-                  type="date"
-                  {...register("expiration_date", { required: "La fecha de vencimiento es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                  type="text"
+                  {...register("name", { required: "El nombre del suministro es requerido" })}
+                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Ej: Funguicida Tebuconazole"
                 />
-                {errors.expiration_date && (
-                  <p className="text-destructive text-sm mt-1">{errors.expiration_date.message}</p>
-                )}
+                {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
               </div>
-            </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <>
-                    Guardando...
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-                  </>
-                ) : initialData ? (
-                  "Actualizar"
-                ) : (
-                  "Crear"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+
+                  <CustomSelectWithCreate
+                    label="Categoría"
+                    name="category_id"
+                    options={categories || []}
+                    register={register}
+                    errors={"error en categoria"}
+                    onCreate={async (name: string) => {
+                      await createCategory(name);
+                    }}
+                    mb="0"
+                    selectHeight="h-10"
+                    placeholder="Nueva categoría"
+                  />
+                </div>
+
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 mt-1">Unidad *</label>
+                  <select
+                    {...register("unit", { required: "La unidad es requerida" })}
+                    className="input-standard"
+                  >
+                    <option value="" className="bg-background text-foreground">
+                      Selecciona una unidad
+                    </option>
+                    {UNITS.map((unit) => (
+                      <option
+                        key={unit.value}
+                        value={unit.value}
+                        className="bg-background text-foreground"
+                      >
+                        {unit.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Controller
+                    control={control}
+                    name="quantity_available"
+                    defaultValue={initialData?.quantity_available ?? undefined}
+                    rules={{
+                      required: "La cantidad es requerida",
+                      min: { value: 0, message: "La cantidad debe ser positiva" },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <AmountInput
+                        label={`Cantidad Disponible (${unitValue}) *`}
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={fieldState.error?.message}
+                        locale="es-AR"
+                        placeholder="0"
+                      />
+                    )}
+                  />
+                </div>
+
+
+                <div className="space-y-2">
+                  <Controller
+                    name="price_per_unit"
+                    control={control}
+                    defaultValue={undefined}
+                    rules={{
+                      required: "El precio es requerido",
+                      min: { value: 0, message: "El precio debe ser positivo" },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <AmountInput
+                        label="Precio por Unidad *"
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={fieldState.error?.message}
+                        currency="ARS"
+                        locale="es-AR"
+                        placeholder="0,00"
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium mb-2">Fecha de Vencimiento *</label>
+                  <input
+                    type="date"
+                    {...register("expiration_date", { required: "La fecha de vencimiento es requerida" })}
+                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                  />
+                  {errors.expiration_date && (
+                    <p className="text-destructive text-sm mt-1">{errors.expiration_date.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSaving}
+                  className="w-full sm:w-auto flex items-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      Guardando...
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+                    </>
+                  ) : initialData ? (
+                    "Actualizar"
+                  ) : (
+                    "Crear"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
     );

@@ -28,6 +28,7 @@ import { PageHeader } from "@/admin/components/PageHeader";
 import { useStockStats } from "@/admin/hooks/useStockStats";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { formatKg } from "@/lib/format-kg";
+import { StockTableMobile } from "./StockTableMobile";
 
 
 export const StockTable = () => {
@@ -69,6 +70,11 @@ export const StockTable = () => {
     });
     setIsDeleteOpen(false);
     setStockToDelete(null);
+  }
+
+  const handleShowDeleteDialog = (item: Stock) => {
+    setStockToDelete(item);
+    setIsDeleteOpen(true);
   }
 
   const handleSave = (item: any) => {
@@ -121,21 +127,21 @@ export const StockTable = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto px-4 py-4 md:p-6 space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <PageHeader
             title="Control de Stock"
             subtitle="Gestiona tus suministros y suministros"
           />
         </div>
-        <Button onClick={handleAdd}>
+        <Button onClick={handleAdd} className="w-full md:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Suministro
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <StockCard
             title="Total Suministros"
@@ -173,14 +179,14 @@ export const StockTable = () => {
           <CardTitle>Suministros</CardTitle>
           <CardDescription>Lista completa de suministros en stock</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-center mb-4">
+        <CardContent className="px-4 md:px-6">
+          <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center">
             {/* Buscar */}
             <Input
               placeholder="Buscar por nombre..."
               defaultValue={searchParams.get("search") || ""}
               onChange={(e) => updateFilter("search", e.target.value)}
-              className="w-60"
+              className="w-full md:w-60"
             />
 
             {/* Categoría */}
@@ -188,7 +194,7 @@ export const StockTable = () => {
               value={categoryFilter}
               onValueChange={handleCategoryFilter}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full md:w-[200px]">
                 <SelectValue placeholder="Categoría" />
               </SelectTrigger>
 
@@ -202,7 +208,7 @@ export const StockTable = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="overflow-x-auto">
+          <div className="md:overflow-x-auto">
             {isLoading && <CustomLoadingCard />}
 
             {!isLoading && stock.length === 0 &&
@@ -215,52 +221,61 @@ export const StockTable = () => {
             {
               !isLoading && stock.length > 0 && (
                 <>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Categoría</TableHead>
-                        <TableHead>Cantidad</TableHead>
-                        <TableHead>Unidad</TableHead>
-                        <TableHead>Nivel</TableHead>
-                        <TableHead>Precio/U</TableHead>
-                        <TableHead>Vencimiento</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stock.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell>{item.category_name}</TableCell>
-                          <TableCell>{formatKg(item.quantity_available || 0)}</TableCell>
-                          <TableCell>{item.unit}</TableCell>
-                          <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
-                          <TableCell className="font-bold">{currencyFormatter(item.price_per_unit)}</TableCell>
-                          <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
-                          <TableCell>{getStatusBadge(item.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button variant="destructive" size="sm" onClick={() => {
-                                setStockToDelete(item);
-                                setIsDeleteOpen(true);
-                              }}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {
-                    stockPagination.totalPages > 1 && <CustomPagination totalPages={Number(stockPagination.totalPages) || 0} />
-                  }
+                  <div className="block md:hidden space-y-3">
+                    <StockTableMobile
+                      stock={stock}
+                      onEdit={handleEdit}
+                      onDelete={handleShowDeleteDialog}
+                    />
+                  </div>
 
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nombre</TableHead>
+                          <TableHead>Categoría</TableHead>
+                          <TableHead>Cantidad</TableHead>
+                          <TableHead>Unidad</TableHead>
+                          <TableHead>Nivel</TableHead>
+                          <TableHead>Precio/U</TableHead>
+                          <TableHead>Vencimiento</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Acciones</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {stock.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-medium">{item.name}</TableCell>
+                            <TableCell>{item.category_name}</TableCell>
+                            <TableCell>{formatKg(item.quantity_available || 0)}</TableCell>
+                            <TableCell>{item.unit}</TableCell>
+                            <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
+                            <TableCell className="font-bold">{currencyFormatter(item.price_per_unit)}</TableCell>
+                            <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
+                            <TableCell>{getStatusBadge(item.status)}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button variant="destructive" size="sm" onClick={() => {
+                                  handleShowDeleteDialog(item);
+                                }}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {
+                      stockPagination.totalPages > 1 && <CustomPagination totalPages={Number(stockPagination.totalPages) || 0} />
+                    }
+
+                  </div>
                 </>
               )}
 
