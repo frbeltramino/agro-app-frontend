@@ -145,18 +145,16 @@
   }
 
   .date-standard {
-    @apply w-full px-3 py-2 border rounded-md bg-background text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full h-11 px-3 border rounded-md bg-background text-sm text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-    /* For native date picker icon */
-    &::-webkit-calendar-picker-indicator {
-      @apply cursor-pointer;
-      filter: invert(0);
-      /* default for light mode */
-    }
+  /* Calendar icon */
+  .date-standard::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
 
-    /* Dark mode inversion for the icon */
-    .dark &::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-    }
+  /* Dark mode icon fix */
+  .dark .date-standard::-webkit-calendar-picker-indicator {
+    filter: invert(1);
   }
 }

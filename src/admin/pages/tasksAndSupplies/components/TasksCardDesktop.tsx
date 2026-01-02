@@ -110,7 +110,7 @@ export const TasksCardDesktop = ({
                                   <TableCell>{formatKg(s.dose_per_ha)} {s.unit}</TableCell>
                                   <TableCell>{formatKg(s.hectares)}</TableCell>
                                   <TableCell>{currencyFormatter(s.price_per_unit)}</TableCell>
-                                  <TableCell className="text-right font-medium">{currencyFormatter(s.total_used * s.price_per_unit)}</TableCell>
+                                  <TableCell className="text-right font-medium">{currencyFormatter((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>

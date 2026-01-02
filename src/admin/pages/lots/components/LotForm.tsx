@@ -1,8 +1,6 @@
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
@@ -12,6 +10,7 @@ import { useLotStore } from "@/admin/store/lot.store";
 import { useEffect, useState } from "react";
 import { useLotsMaster } from "@/admin/hooks/useLotsMaster";
 import { Lot } from "@/interfaces/lots/lot.interface";
+import { BaseModal } from "@/admin/components/BaseModal";
 
 
 interface FormValues {
@@ -110,127 +109,129 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
   const onFormSubmit = (data: FormValues) => {
     onSubmit(data);
     reset();
-    onOpenChange(false);
-    setIsCreatingNew(false);
+    handleOpenChange(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    setIsCreatingNew(false)
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Nuevo Lote</DialogTitle>
-          <DialogDescription>
-            {selectedCampaign && (
-              <span className="block font-medium text-foreground mb-1">
-                Campaña: {selectedCampaign?.name}
-              </span>
-            )}
-            Completa los datos para crear un nuevo lote
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          {formMode === 'create' && (
-            <>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium">
-                  {isCreatingNew ? "Crear Lote Nuevo" : "Seleccionar Lote Maestro"}
-                </label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleCreatingNew}
-                >
-                  {isCreatingNew ? "Seleccionar existente" : "Crear nuevo"}
-                </Button>
-              </div>
-
-              {!isCreatingNew && (
-                <div>
-                  <select
-                    {...register("lot_master_id", {
-                      required: !isCreatingNew ? "Selecciona un lote" : false,
-                    })}
-                    onChange={(e) => {
-                      register("lot_master_id").onChange(e);
-                      handleLotMasterChange(e);
-                    }}
-                    className="select-standard"
-                  >
-                    <option value="">Seleccionar lote...</option>
-                    {lotMasters.map((lot) => (
-                      <option key={lot.id} value={lot.id} className="bg-background text-foreground">
-                        {lot.name}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.lot_master_id && (
-                    <p className="text-sm text-destructive mt-1">{errors.lot_master_id.message}</p>
-                  )}
-                </div>
-              )}
-            </>
+    <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+      <DialogHeader>
+        <DialogTitle>Nuevo Lote</DialogTitle>
+        <DialogDescription>
+          {selectedCampaign && (
+            <span className="block font-medium text-foreground mb-1">
+              Campaña: {selectedCampaign?.name}
+            </span>
           )}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Nombre del Lote *
-            </label>
-            <input
-              {...register("name", { required: "El nombre es requerido" })}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Ej: Lote Norte B"
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+          Completa los datos para crear un nuevo lote
+        </DialogDescription>
+      </DialogHeader>
+
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        {formMode === 'create' && (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium">
+                {isCreatingNew ? "Crear Lote Nuevo" : "Seleccionar Lote Maestro"}
+              </label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={toggleCreatingNew}
+              >
+                {isCreatingNew ? "Seleccionar existente" : "Crear nuevo"}
+              </Button>
+            </div>
+
+            {!isCreatingNew && (
+              <div>
+                <select
+                  {...register("lot_master_id", {
+                    required: !isCreatingNew ? "Selecciona un lote" : false,
+                  })}
+                  onChange={(e) => {
+                    register("lot_master_id").onChange(e);
+                    handleLotMasterChange(e);
+                  }}
+                  className="select-standard"
+                >
+                  <option value="">Seleccionar lote...</option>
+                  {lotMasters.map((lot) => (
+                    <option key={lot.id} value={lot.id} className="bg-background text-foreground">
+                      {lot.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.lot_master_id && (
+                  <p className="text-sm text-destructive mt-1">{errors.lot_master_id.message}</p>
+                )}
+              </div>
             )}
-          </div>
+          </>
+        )}
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Nombre del Lote *
+          </label>
+          <input
+            {...register("name", { required: "El nombre es requerido" })}
+            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Ej: Lote Norte B"
+          />
+          {errors.name && (
+            <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+          )}
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Hectáreas *
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              {...register("hectares", {
-                required: "Las hectáreas son requeridas",
-                min: { value: 0.01, message: "Debe ser mayor a 0" }
-              })}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Ej: 120,5"
-            />
-            {errors.hectares && (
-              <p className="text-sm text-destructive mt-1">{errors.hectares.message}</p>
-            )}
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Hectáreas *
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            {...register("hectares", {
+              required: "Las hectáreas son requeridas",
+              min: { value: 0.01, message: "Debe ser mayor a 0" }
+            })}
+            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Ej: 120,5"
+          />
+          {errors.hectares && (
+            <p className="text-sm text-destructive mt-1">{errors.hectares.message}</p>
+          )}
+        </div>
 
-          <div>
+        <div>
 
-            <input
-              type="number"
-              {...register("campaign_id")}
-              className="hidden"
-            />
-          </div>
+          <input
+            type="number"
+            {...register("campaign_id")}
+            className="hidden"
+          />
+        </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                onOpenChange(false)
-              }
-              }
-            >
-              Cancelar
-            </Button>
-            <Button type="submit">
-              {selectedLot ? "Editar" : "Crear"} Lote
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex justify-end gap-3 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              handleOpenChange(false)
+            }
+            }
+          >
+            Cancelar
+          </Button>
+          <Button type="submit">
+            {selectedLot ? "Editar" : "Crear"} Lote
+          </Button>
+        </div>
+      </form>
+    </BaseModal>
   );
 }
