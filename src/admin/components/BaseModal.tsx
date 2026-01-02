@@ -11,18 +11,16 @@ interface BaseModalProps {
 }
 
 export const BaseModal = forwardRef<HTMLDivElement, BaseModalProps>(
-  ({ isOpen, onClose, children, maxWidth = "sm:max-w-[600px]" }, ref) => {
+  ({ isOpen, onClose, children }, ref) => {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent
           ref={ref}
           className={`
-            w-[95vw] ${maxWidth}
-            max-h-[90vh] overflow-y-auto overflow-x-hidden
+            w-[95vw] sm:max-w-[600px]
+            max-h-[90vh]
+            flex flex-col
             p-4 sm:p-6
-            mt-8 sm:mt-0
-            top-8 sm:top-1/2
-            translate-y-0 sm:-translate-y-1/2
           `}
         >
           {children}
