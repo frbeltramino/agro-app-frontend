@@ -397,203 +397,212 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
     return (
       <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-        <DialogHeader>
-          <DialogTitle>
-            {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
-          </DialogTitle>
-          <DialogDescription>
-            {step === 1
-              ? "Completa los datos generales de la tarea"
-              : "Selecciona y configura los suministros necesarios para esta tarea"}
-          </DialogDescription>
-        </DialogHeader>
-        <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
+        <div className="shrink-0">
+          <DialogHeader>
+            <DialogTitle>
+              {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
+            </DialogTitle>
+            <DialogDescription>
+              {step === 1
+                ? "Completa los datos generales de la tarea"
+                : "Selecciona y configura los suministros necesarios para esta tarea"}
+            </DialogDescription>
+          </DialogHeader>
+          <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
+        </div>
+
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          {
-            step === 1 && (
-              <>
-
-                {/* Tipo de Tarea */}
-                <CustomSelectWithCreate
-                  label="Tipo de tarea"
-                  name="task_type_id"
-                  options={formattedTaskTypes || []}
-                  register={register}
-                  errors={errors}
-                  onCreate={async (name: string) => {
-                    await createTaskTypeMutation.mutateAsync(name);
-                    // opcional: actualizar estado local si lo necesitas
-                  }}
-                />
-
-
-                {/* Descripción */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 sm:mb-2">Descripción</label>
-                  <textarea
-                    {...register("description")}
-                    required={false}
-                    rows={2}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                    placeholder="Describe los detalles de la tarea..."
-                  />
-                </div>
-
-                {/* Proveedor y Fecha */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1 sm:mb-2">Proveedor</label>
-                    <input
-                      type="text"
-                      {...register("provider")}
-                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="Nombre del proveedor"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1 sm:mb-2">Fecha *</label>
-                    <input
-                      type="date"
-                      {...register("date", { required: "La fecha es requerida" })}
-                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
-                    />
-                    {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
-                  </div>
-                </div>
-
-                {/* Nota */}
-                <div>
-                  <label className="block text-sm font-medium mb-1 sm:mb-2">Nota (opcional)</label>
-                  <textarea
-                    {...register("note")}
-                    rows={2}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                    placeholder="Agrega notas adicionales..."
-                  />
-                </div>
-
-                {/* Costo de Mano de Obra */}
-                <div>
-                  <Controller
-                    name="laborCost"
-                    control={control}
-
-                    rules={{
-                      min: { value: 0, message: "El costo debe ser positivo" },
-                    }}
-                    render={({ field, fieldState }) => (
-                      <AmountInput
-                        label="Costo de Mano de Obra (opcional)"
-                        value={field.value}           // RHF controla el valor numérico
-                        onChange={field.onChange}     // RHF actualiza su estado
-                        error={fieldState.error?.message}
-                        currency="ARS"
-                        locale="es-AR"
-                        placeholder="0,00"
-                      />
-                    )}
-                  />
-                </div>
-              </>
-            )
-          }
-
-          {
-            step === 2 && (
-              <>
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="text-sm font-medium">Suministros</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenAddSupply();
-                      }}
-                      className="gap-2 bg-transparent"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Crear Suministro
-                    </Button>
-                  </div>
-
-                  {watchSupplies.length === 0 && (
-                    <p className="text-sm text-muted-foreground mb-4">
-                      No hay suministros agregados. Haz clic en "Crear Suministro" para comenzar.
-                    </p>
-                  )}
-
-                  {createNewSupply &&
-                    <TaskSupplyFormComponent
-                      index={0}
-                      register={supplyForm.register}
-                      control={supplyForm.control}
-                      errors={supplyForm.formState.errors}
-                      watch={supplyForm.watch}
-                      setValue={supplyForm.setValue}
-                      stockSupplies={stock}
-                      categories={categories}
-                      onCancel={() => {
-                        supplyForm.reset();
-                        setCreateNewSupply(false);
-                      }}
-                      onSubmit={handleConfirmSupply}
-                      isEditing={false}
-                    />
-                  }
-                  {watchSupplies.length > 0 && (
-                    <div className="mt-2">
-                      <TaskSuppliesTable
-                        supplies={watchSupplies}
-                        isAddingSupply={createNewSupply}
-                        onEdit={handleEditSupply}
-                        onDelete={handleDeleteSupply}
-                      />
-                    </div>
-                  )}
-
-
-
-                </div>
-              </>
-            )
-          }
-          {/* Suministros */}
-
-
-          <DialogFooter>
+          <div className="flex-1 overflow-y-auto overscroll-contain">
             {
               step === 1 && (
-                <div className="flex justify-end mt-4">
-                  <Button type="button" onClick={() => setStep(2)}>Siguiente</Button>
-                </div>
-              )
-            }
-            {
-              step === 2 && (
                 <>
-                  <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
-                    Volver
-                  </Button>
-                  <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
-                    {isSaving ? (
-                      <>
-                        Guardando...
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      </>
-                    ) : (
-                      "Guardar"
-                    )}
-                  </Button>
+
+                  {/* Tipo de Tarea */}
+                  <CustomSelectWithCreate
+                    label="Tipo de tarea"
+                    name="task_type_id"
+                    options={formattedTaskTypes || []}
+                    register={register}
+                    errors={errors}
+                    onCreate={async (name: string) => {
+                      await createTaskTypeMutation.mutateAsync(name);
+                      // opcional: actualizar estado local si lo necesitas
+                    }}
+                  />
+
+
+                  {/* Descripción */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1 sm:mb-2">Descripción</label>
+                    <textarea
+                      {...register("description")}
+                      required={false}
+                      rows={2}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      placeholder="Describe los detalles de la tarea..."
+                    />
+                  </div>
+
+                  {/* Proveedor y Fecha */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 sm:mb-2">Proveedor</label>
+                      <input
+                        type="text"
+                        {...register("provider")}
+                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Nombre del proveedor"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1 sm:mb-2">Fecha *</label>
+                      <input
+                        type="date"
+                        {...register("date", { required: "La fecha es requerida" })}
+                        className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                      />
+                      {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
+                    </div>
+                  </div>
+
+                  {/* Nota */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1 sm:mb-2">Nota (opcional)</label>
+                    <textarea
+                      {...register("note")}
+                      rows={2}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      placeholder="Agrega notas adicionales..."
+                    />
+                  </div>
+
+                  {/* Costo de Mano de Obra */}
+                  <div>
+                    <Controller
+                      name="laborCost"
+                      control={control}
+
+                      rules={{
+                        min: { value: 0, message: "El costo debe ser positivo" },
+                      }}
+                      render={({ field, fieldState }) => (
+                        <AmountInput
+                          label="Costo de Mano de Obra (opcional)"
+                          value={field.value}           // RHF controla el valor numérico
+                          onChange={field.onChange}     // RHF actualiza su estado
+                          error={fieldState.error?.message}
+                          currency="ARS"
+                          locale="es-AR"
+                          placeholder="0,00"
+                        />
+                      )}
+                    />
+                  </div>
                 </>
               )
             }
 
-          </DialogFooter>
+            {
+              step === 2 && (
+                <>
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <label className="text-sm font-medium">Suministros</label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleOpenAddSupply();
+                        }}
+                        className="gap-2 bg-transparent"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Crear Suministro
+                      </Button>
+                    </div>
+
+                    {watchSupplies.length === 0 && (
+                      <p className="text-sm text-muted-foreground mb-4">
+                        No hay suministros agregados. Haz clic en "Crear Suministro" para comenzar.
+                      </p>
+                    )}
+
+                    {createNewSupply &&
+                      <TaskSupplyFormComponent
+                        index={0}
+                        register={supplyForm.register}
+                        control={supplyForm.control}
+                        errors={supplyForm.formState.errors}
+                        watch={supplyForm.watch}
+                        setValue={supplyForm.setValue}
+                        stockSupplies={stock}
+                        categories={categories}
+                        onCancel={() => {
+                          supplyForm.reset();
+                          setCreateNewSupply(false);
+                        }}
+                        onSubmit={handleConfirmSupply}
+                        isEditing={false}
+                      />
+                    }
+                    {watchSupplies.length > 0 && (
+                      <div className="mt-2">
+                        <TaskSuppliesTable
+                          supplies={watchSupplies}
+                          isAddingSupply={createNewSupply}
+                          onEdit={handleEditSupply}
+                          onDelete={handleDeleteSupply}
+                        />
+                      </div>
+                    )}
+
+
+
+                  </div>
+                </>
+              )
+            }
+          </div>
+          {/* Suministros */}
+
+          <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
+            <DialogFooter>
+              {
+                step === 1 && (
+                  <div className="flex justify-end mt-4">
+                    <Button type="button" onClick={() => setStep(2)}>Siguiente</Button>
+                  </div>
+                )
+              }
+              {
+                step === 2 && (
+                  <>
+                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
+                      Volver
+                    </Button>
+                    <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
+                      {isSaving ? (
+                        <>
+                          Guardando...
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        </>
+                      ) : (
+                        "Guardar"
+                      )}
+                    </Button>
+                  </>
+                )
+              }
+
+            </DialogFooter>
+          </div>
+
         </form>
+
+
       </BaseModal>
     )
   },
