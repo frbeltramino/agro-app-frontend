@@ -127,6 +127,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       reset,
       control,
       watch,
+      trigger
     } = useForm<FormValues>({
       defaultValues: {
         task_type_id: "",
@@ -395,9 +396,18 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       onOpenChange(open);
     };
 
+    const handleNextStep = async () => {
+      const isValid = await trigger(["task_type_id", "date"]);
+
+      if (isValid) {
+        setStep(2);
+      }
+    };
+
     return (
       <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-        <div className="shrink-0">
+
+        <div className="flex flex-col h-full max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>
               {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
@@ -410,9 +420,9 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           </DialogHeader>
           <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
         </div>
+        <main className="flex-1 overflow-y-auto mt-2">
+          <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 overflow-hidden">
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-          <div className="flex-1 overflow-y-auto overscroll-contain">
             {
               step === 1 && (
                 <>
@@ -565,43 +575,48 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                 </>
               )
             }
-          </div>
-          {/* Suministros */}
 
-          <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
-            <DialogFooter>
-              {
-                step === 1 && (
-                  <div className="flex justify-end mt-4">
-                    <Button type="button" onClick={() => setStep(2)}>Siguiente</Button>
-                  </div>
-                )
-              }
-              {
-                step === 2 && (
-                  <>
-                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
-                      Volver
-                    </Button>
-                    <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
-                      {isSaving ? (
-                        <>
-                          Guardando...
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        </>
-                      ) : (
-                        "Guardar"
-                      )}
-                    </Button>
-                  </>
-                )
-              }
+            {/* Suministros */}
 
-            </DialogFooter>
-          </div>
+            <div className="shrink-0">
+              <DialogFooter>
+                {
+                  step === 1 && (
+                    <div className="flex justify-end mt-4 gap-2">
+                      <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => { handleOpenChange(false) }}>
+                        Cerrar
+                      </Button>
+                      <Button type="button" onClick={() => {
+                        handleNextStep();
+                      }}>Siguiente</Button>
+                    </div>
+                  )
+                }
+                {
+                  step === 2 && (
+                    <>
+                      <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
+                        Volver
+                      </Button>
+                      <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
+                        {isSaving ? (
+                          <>
+                            Guardando...
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          </>
+                        ) : (
+                          "Guardar"
+                        )}
+                      </Button>
+                    </>
+                  )
+                }
 
-        </form>
+              </DialogFooter>
+            </div>
 
+          </form>
+        </main>
 
       </BaseModal>
     )
