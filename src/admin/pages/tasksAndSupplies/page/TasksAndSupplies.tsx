@@ -49,7 +49,7 @@ export const TasksAndSupplies = () => {
       (acc, task) =>
         acc +
         (task.supplies?.reduce(
-          (sum, supply) => sum + safeNum(supply.price_per_unit) * safeNum(supply.total_used),
+          (sum, supply) => sum + safeNum(supply.price_per_unit) * (safeNum(supply.dose_per_ha) * safeNum(supply.hectares)),
           0
         ) || 0),
       0

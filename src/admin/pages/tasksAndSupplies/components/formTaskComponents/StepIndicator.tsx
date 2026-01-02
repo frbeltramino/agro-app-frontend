@@ -1,26 +1,52 @@
-interface StepIndicatorProps {
-  step: number;
-  totalSteps: number;
+interface StepperProps {
+  step: number;       // Paso actual (1 o 2)
+  steps: string[];    // Nombres de los pasos
 }
 
-export function StepIndicator({ step, totalSteps }: StepIndicatorProps) {
-  const percentage = (step / totalSteps) * 100;
-
+export function Stepper({ step, steps }: StepperProps) {
   return (
-    <div className="mb-4">
-      <div className="flex justify-between text-sm font-medium mb-1">
-        {[...Array(totalSteps)].map((_, i) => (
-          <span key={i} className={i + 1 === step ? "text-primary" : "text-muted-foreground"}>
-            Paso {i + 1}
-          </span>
-        ))}
-      </div>
-      <div className="w-full h-2 bg-muted rounded-full">
-        <div
-          className="h-2 bg-primary rounded-full transition-all duration-300"
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
+    <div className="flex items-center justify-between mb-6">
+      {steps.map((label, index) => {
+        const isActive = step === index + 1;
+        const isCompleted = step > index + 1;
+
+        return (
+          <div key={index} className="flex-1 flex items-center">
+            {/* Círculo */}
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center border-2
+                ${isActive
+                  ? "border-primary bg-primary text-black shadow-lg"
+                  : isCompleted
+                    ? "border-green-600 bg-green-600 text-white"
+                    : "border-gray-400 bg-gray-100 text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                }`}
+            >
+              {isCompleted ? "✓" : index + 1}
+            </div>
+
+            {/* Texto */}
+            <span className={`ml-2 text-sm font-medium 
+              ${isActive
+                ? "text-primary dark:text-primary"
+                : isCompleted
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-gray-600 dark:text-gray-300"
+              }`}
+            >
+              {label}
+            </span>
+
+            {/* Línea de conexión */}
+            {index < steps.length - 1 && (
+              <div
+                className={`flex-1 h-1 mx-2 rounded
+                  ${isCompleted ? "bg-green-600" : "bg-gray-300 dark:bg-gray-700"}`}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

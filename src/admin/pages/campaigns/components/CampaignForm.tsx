@@ -2,8 +2,6 @@ import { forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -11,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useEffect } from "react";
+import { BaseModal } from "@/admin/components/BaseModal";
 
 
 interface FormValues {
@@ -29,7 +28,7 @@ interface CampaignFormProps {
 }
 
 export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
-  ({ open, onOpenChange, onSubmit }, ref) => {
+  ({ open, onOpenChange, onSubmit }) => {
 
     const { selectedCampaign } = useCampaignStore();
 
@@ -82,70 +81,72 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
     const onFormSubmit = (data: FormValues) => {
       onSubmit(data);
       reset();
-      onOpenChange(false);
+      handleOpenChange(false);
+    };
+
+    const handleOpenChange = (open: boolean) => {
+      onOpenChange(open);
     };
 
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent ref={ref} className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-          <DialogHeader>
-            <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
-            <DialogDescription>
-              Completa los datos de la campaña agrícola
-            </DialogDescription>
-          </DialogHeader>
+      <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+        <DialogHeader>
+          <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
+          <DialogDescription>
+            Completa los datos de la campaña agrícola
+          </DialogDescription>
+        </DialogHeader>
 
-          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Nombre *</label>
+            <input
+              type="text"
+              {...register("name", { required: "El nombre es requerido" })}
+              placeholder="Ej: Campaña Soja Primavera"
+              className="input-standard"
+            />
+            {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
+          </div>
+
+          <div className="grid-2-cols-mobile">
             <div>
-              <label className="block text-sm font-medium mb-2">Nombre *</label>
+              <label className="block text-sm font-medium mb-2">Fecha de Inicio *</label>
               <input
-                type="text"
-                {...register("name", { required: "El nombre es requerido" })}
-                placeholder="Ej: Campaña Soja Primavera"
-                className="input-standard"
+                type="date"
+                {...register("start_date", { required: "La fecha de inicio es requerida" })}
+                className="date-standard"
               />
-              {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
-            </div>
-
-            <div className="grid-2-cols-mobile">
-              <div>
-                <label className="block text-sm font-medium mb-2">Fecha de Inicio *</label>
-                <input
-                  type="date"
-                  {...register("start_date", { required: "La fecha de inicio es requerida" })}
-                  className="date-standard"
-                />
-                {errors.start_date && <p className="text-destructive text-sm mt-1">{errors.start_date.message}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Fecha de Fin</label>
-                <input
-                  type="date"
-                  {...register("end_date")}
-                  className="date-standard"
-                />
-              </div>
+              {errors.start_date && <p className="text-destructive text-sm mt-1">{errors.start_date.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Notas (opcional)</label>
-              <textarea
-                {...register("notes")}
-                rows={3}
-                placeholder="Agrega notas adicionales..."
-                className="textarea-standard"
+              <label className="block text-sm font-medium mb-2">Fecha de Fin</label>
+              <input
+                type="date"
+                {...register("end_date")}
+                className="date-standard"
               />
             </div>
+          </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button type="submit">{selectedCampaign ? "Editar" : "Crear"} Campaña</Button>
-            </DialogFooter>
-          </form>
+          <div>
+            <label className="block text-sm font-medium mb-2">Notas (opcional)</label>
+            <textarea
+              {...register("notes")}
+              rows={3}
+              placeholder="Agrega notas adicionales..."
+              className="textarea-standard"
+            />
+          </div>
 
-        </DialogContent>
-      </Dialog>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="submit">{selectedCampaign ? "Editar" : "Crear"} Campaña</Button>
+          </DialogFooter>
+        </form>
+
+      </BaseModal>
     );
   });
 
