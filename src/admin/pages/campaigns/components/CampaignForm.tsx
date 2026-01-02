@@ -87,7 +87,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent ref={ref} className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogContent ref={ref} className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
             <DialogDescription>
