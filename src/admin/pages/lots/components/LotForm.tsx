@@ -120,7 +120,8 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
 
   return (
     <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-      <div className="shrink-0">
+
+      <div className="shrink-0 pb-4 border-b">
         <DialogHeader>
           <DialogTitle>Nuevo Lote</DialogTitle>
           <DialogDescription>
@@ -134,7 +135,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
         </DialogHeader>
       </div>
 
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
         <div className="flex-1 overflow-y-auto overscroll-contain">
           {formMode === 'create' && (
             <>
@@ -178,7 +179,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
               )}
             </>
           )}
-          <div>
+          <div className="mt-2">
             <label className="block text-sm font-medium mb-2">
               Nombre del Lote *
             </label>
@@ -192,7 +193,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
             )}
           </div>
 
-          <div>
+          <div className="mt-2 pb-4">
             <label className="block text-sm font-medium mb-2">
               Hectáreas *
             </label>
@@ -219,7 +220,7 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
               className="hidden"
             />
           </div>
-          <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
+          <div className="shrink-0 pt-4 border-t bg-background mt-4">
             <DialogFooter>
               <div className="flex justify-end gap-3 pt-4">
                 <Button
@@ -240,6 +241,8 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
           </div>
         </div>
       </form>
+
+
 
 
     </BaseModal>

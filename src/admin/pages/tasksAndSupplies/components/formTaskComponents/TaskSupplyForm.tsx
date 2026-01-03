@@ -103,7 +103,7 @@ export function TaskSupplyFormComponent({
               <Label className="text-sm mb-1.5">Categoría *</Label>
               <input
                 type="text"
-                {...register(`categoryId`)}
+
                 value={categories?.find(c => c.id.toString() === watch(`categoryId`))?.name || ""}
                 readOnly
                 className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm cursor-default focus:outline-none"

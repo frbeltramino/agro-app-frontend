@@ -90,7 +90,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
 
     return (
       <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-        <div className="shrink-0">
+        <div className="shrink-0 pb-4 border-b">
           <DialogHeader>
             <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
             <DialogDescription>
@@ -98,7 +98,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
             </DialogDescription>
           </DialogHeader>
         </div>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
           <div className="flex-1 overflow-y-auto overscroll-contain">
             <div>
               <label className="block text-sm font-medium mb-2">Nombre *</label>
@@ -111,7 +111,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
               {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
             </div>
 
-            <div className="grid-2-cols-mobile">
+            <div className="grid-2-cols-mobile mt-2">
               <div>
                 <label className="block text-sm font-medium mb-2">Fecha de Inicio *</label>
                 <input
@@ -133,7 +133,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Notas (opcional)</label>
+              <label className="block text-sm font-medium mb-2 mt-2">Notas (opcional)</label>
               <textarea
                 {...register("notes")}
                 rows={3}
@@ -142,7 +142,7 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
               />
             </div>
           </div>
-          <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
+          <div className="shrink-0 pt-4 border-t bg-background">
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit">{selectedCampaign ? "Editar" : "Crear"} Campaña</Button>

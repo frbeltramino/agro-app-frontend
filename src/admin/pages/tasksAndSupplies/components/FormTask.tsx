@@ -26,6 +26,7 @@ import { TaskSuppliesTable } from "./formTaskComponents/TaskSuppliesTable"
 import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
 import { Stepper } from "./formTaskComponents/StepIndicator"
 import { BaseModal } from "@/admin/components/BaseModal"
+import { useTaskForm } from "../hooks/useTaskForm"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
@@ -114,11 +115,18 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     const categories = categoriesData?.categories || [];
     const [, setFormatedAmount] = useState("0,00");
     const [, setFormatedLaborCost] = useState("0,00");
-    const [isSaving, setIsSaving] = useState(false);
     const { selectedLot } = useLotStore();
     const [createNewSupply, setCreateNewSupply] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const [step, setStep] = useState(1);
+
+    const { setStep, step, isSaving, setIsSaving, createPurchaseSupply, updateStockSupply, createNewStockSupply } = useTaskForm({
+      selectedLot,
+      stock,
+      taskToEdit,
+      createSupply,
+      adjustStock,
+      selectedCrop,
+    });
 
     const {
       register,
@@ -127,7 +135,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       reset,
       control,
       watch,
-      trigger
+      trigger,
+      setValue
     } = useForm<FormValues>({
       defaultValues: {
         task_type_id: "",
@@ -156,10 +165,10 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       const newSupply = supplyForm.getValues();
 
       if (editingIndex !== null) {
-        // actualizar suministro existente
         const updatedSupplies = [...watchSupplies];
         updatedSupplies[editingIndex] = newSupply;
-        reset({ ...supplyForm.getValues(), supplies: updatedSupplies }); // actualizar RHF
+
+        setValue("supplies", updatedSupplies, { shouldDirty: true });
         setEditingIndex(null);
       } else {
         // agregar nuevo suministro
@@ -202,32 +211,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
       // 1️⃣ Manejo de suministros de compra (igual que antes)
       for (const s of purchaseSupplies) {
-        const existingSupply = taskToEdit?.supplies.find(
-          (supply: TaskSupplyEdit) => supply.supply_id === s.supply_id
-        );
-
-        const payload = {
-          id: existingSupply?.supply_id ?? null,
-          crop_id: selectedCrop!.id,
-          master_supply_id: s.master_supply_id ? Number(s.master_supply_id) : null,
-          name: s.productName ?? "",
-          category_id: Number(s.categoryId),
-          unit: s.unit ?? "kg",
-          dose_per_ha: Number(s.dosagePerHectare),
-          hectares: Number(s.hectareQuantity),
-          price_per_unit: parseAmount(s.pricePerUnit),
-          status: "active",
-        };
-
-        const result = await createSupply.mutateAsync(payload);
-
-        suppliesResult.push({
-          supply_id: result.supply.id,
-          stock_id: null,
-          dose_per_ha: Number(s.dosagePerHectare),
-          hectares: Number(s.hectareQuantity),
-          price_per_unit: parseAmount(s.pricePerUnit),
-        });
+        const result = await createPurchaseSupply(taskToEdit, selectedCrop, s);
+        suppliesResult.push(result);
       }
 
       // 2️⃣ Manejo de stock (optimizado)
@@ -238,69 +223,18 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       stockSupplies.forEach((s) => newStockMap.set(Number(s.stockId), s));
 
       for (const oldS of oldStockSupplies) {
-        const oldUsedQuantity = oldS.dose_per_ha * oldS.hectares;
-        const newS = newStockMap.get(oldS.stock_id!);
-
-        let quantityToAdjust = 0;
-
-        if (newS) {
-          // Suministro actualizado → calcular diferencia
-          const newUsedQuantity = Number(newS.dosagePerHectare) * Number(newS.hectareQuantity);
-          quantityToAdjust = oldUsedQuantity - newUsedQuantity;
-
-          // Ya procesado → lo eliminamos del map para detectar nuevos al final
-          newStockMap.delete(oldS.stock_id!);
-        } else {
-          // Suministro eliminado → devolver stock completo
-          quantityToAdjust = oldUsedQuantity;
+        const stockSupply = await updateStockSupply(oldS, newStockMap, stock);
+        if (stockSupply) {
+          suppliesResult.push(stockSupply);
         }
 
-        try {
-          const resultStock = await adjustStock.mutateAsync({
-            stockId: oldS.stock_id!,
-            quantity: quantityToAdjust,
-          });
-
-          // Solo agregamos al array si aún existe en la edición
-          if (newS) {
-            const selectedStock = stock?.find((itemStock) => itemStock.id === Number(newS.stockId)) ?? null;
-            suppliesResult.push({
-              supply_id: null,
-              stock_id: Number(resultStock.id),
-              dose_per_ha: Number(newS.dosagePerHectare),
-              hectares: Number(newS.hectareQuantity),
-              price_per_unit: parseAmount(selectedStock?.price_per_unit),
-            });
-          }
-        } catch (error: any) {
-          const message =
-            error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
-          throw new Error(message);
-        }
       }
 
       // 🔹 Manejo de nuevos suministros de stock que no existían antes
       for (const s of newStockMap.values()) {
-        const newUsedQuantity = Number(s.dosagePerHectare) * Number(s.hectareQuantity);
-
-        try {
-          const resultStock = await adjustStock.mutateAsync({
-            stockId: Number(s.stockId!),
-            quantity: -newUsedQuantity, // negativo → restar del stock
-          });
-
-          const selectedStock = stock?.find((itemStock) => itemStock.id === Number(s.stockId)) ?? null;
-          suppliesResult.push({
-            supply_id: null,
-            stock_id: Number(resultStock.id),
-            dose_per_ha: Number(s.dosagePerHectare),
-            hectares: Number(s.hectareQuantity),
-            price_per_unit: parseAmount(selectedStock?.price_per_unit),
-          });
-        } catch (error: any) {
-          const message =
-            error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
-          throw new Error(message);
+        const newSupplyStockResult = await createNewStockSupply(s, stock);
+        if (newSupplyStockResult) {
+          suppliesResult.push(newSupplyStockResult);
         }
       }
 
@@ -393,6 +327,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     }, [taskToEdit, reset]);
 
     const handleOpenChange = (open: boolean) => {
+      setStep(1);
       onOpenChange(open);
     };
 
@@ -406,22 +341,26 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
     return (
       <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+        <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 h-full">
 
-        <div className="flex flex-col h-full max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>
-              {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
-            </DialogTitle>
-            <DialogDescription>
-              {step === 1
-                ? "Completa los datos generales de la tarea"
-                : "Selecciona y configura los suministros necesarios para esta tarea"}
-            </DialogDescription>
-          </DialogHeader>
-          <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
-        </div>
-        <main className="flex-1 overflow-y-auto mt-2">
-          <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 overflow-hidden">
+          <div className="shrink-0 border-b bg-background p-2 sm:p-4">
+
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-lg sm:text-xl font-semibold">
+                {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
+              </DialogTitle>
+              <DialogDescription>
+                {step === 1
+                  ? "Completa los datos generales de la tarea"
+                  : "Selecciona y configura los suministros necesarios para esta tarea"}
+              </DialogDescription>
+            </DialogHeader>
+
+            <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
+
+          </div>
+
+          <div className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4 space-y-4 ">
 
             {
               step === 1 && (
@@ -516,7 +455,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
             {
               step === 2 && (
                 <>
-                  <div className="border-t pt-4">
+                  <div className=" pt-4">
                     <div className="flex justify-between items-center mb-4">
                       <label className="text-sm font-medium">Suministros</label>
                       <Button
@@ -578,45 +517,46 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
             {/* Suministros */}
 
-            <div className="shrink-0">
-              <DialogFooter>
-                {
-                  step === 1 && (
-                    <div className="flex justify-end mt-4 gap-2">
-                      <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => { handleOpenChange(false) }}>
-                        Cerrar
-                      </Button>
-                      <Button type="button" onClick={() => {
-                        handleNextStep();
-                      }}>Siguiente</Button>
-                    </div>
-                  )
-                }
-                {
-                  step === 2 && (
-                    <>
-                      <Button type="button" disabled={isSaving || createNewSupply} variant="outline" onClick={() => setStep(1)}>
-                        Volver
-                      </Button>
-                      <Button type="submit" disabled={isSaving || createNewSupply} className="flex items-center gap-2">
-                        {isSaving ? (
-                          <>
-                            Guardando...
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                          </>
-                        ) : (
-                          "Guardar"
-                        )}
-                      </Button>
-                    </>
-                  )
-                }
+          </div>
 
-              </DialogFooter>
-            </div>
+          <div className="shrink-0 border-t bg-background p-4 sm:p-6">
+            <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2">
+              {
+                step === 1 && (
+                  <>
+                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" className=" w-full sm:w-auto" onClick={() => handleOpenChange(false)}>
+                      <span className="sm:hidden">Cerrar</span>
+                      <span className="hidden sm:inline">Cerrar</span>
+                    </Button>
+                    <Button type="button" className=" w-full sm:w-auto" onClick={handleNextStep}>
+                      <span className="flex items-center justify-center gap-2">
+                        Siguiente <span className="sm:hidden">→</span>
+                      </span>
+                    </Button>
+                  </>
+                )
+              }
+              {
+                step === 2 && (
+                  <>
+                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" className=" w-full sm:w-auto" onClick={() => setStep(1)}>
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="sm:hidden">←</span> Volver
+                      </span>
+                    </Button>
+                    <Button type="submit" disabled={isSaving || createNewSupply} className=" w-full sm:w-auto flex items-center justify-center gap-2">
+                      {isSaving && <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />}
+                      Guardar
+                    </Button>
+                  </>
+                )
+              }
 
-          </form>
-        </main>
+            </DialogFooter>
+
+          </div>
+        </form>
+
 
       </BaseModal>
     )
