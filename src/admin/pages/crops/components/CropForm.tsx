@@ -116,7 +116,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
 
   return (
     <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
-      <div className="shrink-0">
+      <div className="shrink-0 pb-4 border-b">
         <DialogHeader>
           <DialogTitle>{mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}</DialogTitle>
           <DialogDescription>
@@ -134,7 +134,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
           </DialogDescription>
         </DialogHeader>
       </div>
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
         <div className="flex-1 overflow-y-auto overscroll-contain">
           <CustomSelectWithCreate
             label="Cultivo"
@@ -151,7 +151,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             }}
           />
 
-          <div>
+          <div className="mt-2">
             <label className="block text-sm font-medium mb-2">
               Fecha de Inicio *
             </label>
@@ -171,7 +171,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             )}
           </div>
 
-          <div>
+          <div className="mt-2">
             <label className="block text-sm font-medium mb-2">
               Fecha de Fin
             </label>
@@ -183,7 +183,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             />
           </div>
 
-          <div>
+          <div className="mt-2">
             <label className="block text-sm font-medium mb-2">
               Tipo de Semilla
             </label>
@@ -197,7 +197,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             )}
           </div>
 
-          <div>
+          <div className="mt-2 pb-4">
             <Controller
               name="real_yield"
               control={control}

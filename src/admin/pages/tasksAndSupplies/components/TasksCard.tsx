@@ -87,11 +87,12 @@ export const TasksCard = () => {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <CardTitleSummary title="Lista de Trabajos" count={tasksPagination.total || 0} label="trabajos registrados" />
             </div>
             <Button
+              className="w-full sm:w-auto"
               onClick={() => {
                 setFormMode('create');
                 setSelectedTask(null);
