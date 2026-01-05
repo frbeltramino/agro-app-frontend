@@ -145,7 +145,7 @@
   }
 
   .date-standard {
-    @apply w-full h-11 px-3 border rounded-md bg-background text-sm text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full min-w-0 appearance-none h-11 px-3 border rounded-md bg-background text-sm text-foreground border-input shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* Calendar icon */

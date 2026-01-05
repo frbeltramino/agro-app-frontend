@@ -393,7 +393,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       <input
                         type="text"
                         {...register("provider")}
-                        className="w-full px-3 py-2 sm:py-2 border rounded-md text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full px-3 py-2 sm:py-2 border rounded-md text-base sm:text-base focus:ring-2 focus:ring-primary focus:border-transparent"
                         placeholder="Nombre del proveedor"
                       />
                     </div>

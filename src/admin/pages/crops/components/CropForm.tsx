@@ -161,7 +161,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
               {...register("start_date", {
                 required: "La fecha de inicio es requerida",
               })}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+              className="date-standard"
             />
 
             {errors.start_date && (
@@ -179,7 +179,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             <input
               type="date"
               {...register("end_date")}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+              className="date-standard"
             />
           </div>
 
