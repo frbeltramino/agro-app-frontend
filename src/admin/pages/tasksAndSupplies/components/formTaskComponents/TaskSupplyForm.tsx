@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { AmountInput } from "@/components/custom/CustomAmountInput";
 import { MasterSupplySelect } from "../MasterSupplySelect";
 import { useLotStore } from "@/admin/store/lot.store";
+import { useEffect } from "react";
 
 interface Props {
   index: number;
@@ -36,6 +37,12 @@ export function TaskSupplyFormComponent({
   const selectedStockId = watch(`stockId`);
   const selectedStock = stockSupplies?.find((s) => s.id === Number(selectedStockId));
   const { selectedLot } = useLotStore();
+
+  useEffect(() => {
+    if (supplyType === "stock" && selectedStock) {
+      setValue("unit", selectedStock.unit);
+    }
+  }, [selectedStockId, supplyType, selectedStock, setValue]);
 
   return (
     <div className="border rounded-lg p-4 bg-muted/30 space-y-4 w-full max-w-full">
@@ -74,6 +81,16 @@ export function TaskSupplyFormComponent({
             {errors?.stockId && (
               <p className="text-destructive text-xs mt-1">{errors.stockId.message}</p>
             )}
+
+            <div >
+              <input
+                type="text"
+                {...register(`unit`)}
+                value={watch(`unit`) || ""}
+                readOnly
+                className="hidden w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm cursor-default focus:outline-none"
+              />
+            </div>
           </div>
         ) : (
           <>
@@ -165,7 +182,7 @@ export function TaskSupplyFormComponent({
           }}
           render={({ field, fieldState }) => (
             <AmountInput
-              label={`Dosis por Hectárea (${supplyType === "stock" ? selectedStock?.unit ?? "unidad" : watch(`unit`) ?? "unidad"}) *`}
+              label={`Dosis por Hectárea (${supplyType === "stock" ? selectedStock?.unit ?? "" : watch(`unit`) ?? "unidad"}) *`}
               value={field.value}
               onChange={field.onChange}
               error={fieldState.error?.message}

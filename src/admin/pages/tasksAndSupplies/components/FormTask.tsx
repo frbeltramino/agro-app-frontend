@@ -27,6 +27,7 @@ import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
 import { Stepper } from "./formTaskComponents/StepIndicator"
 import { BaseModal } from "@/admin/components/BaseModal"
 import { useTaskForm } from "../hooks/useTaskForm"
+import { SidePanel } from "@/admin/components/SidePanel"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
@@ -340,22 +341,22 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     };
 
     return (
-      <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+      <SidePanel
+        isOpen={open}
+        onClose={() => handleOpenChange(false)}
+        title={step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
+        width="lg"
+      >
         <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 h-full">
 
+          <div className="shrink-0 border-b bg-background px-4 py-4 sm:px-6 sm:py-5">
+            <p className="text-sm text-muted-foreground mt-1">
+              {step === 1
+                ? "Completa los datos generales de la tarea"
+                : "Selecciona y configura los suministros necesarios para esta tarea"}
+            </p>
+          </div>
           <div className="shrink-0 border-b bg-background p-2 sm:p-4">
-
-            <DialogHeader className="space-y-1">
-              <DialogTitle className="text-lg sm:text-xl font-semibold">
-                {step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
-              </DialogTitle>
-              <DialogDescription>
-                {step === 1
-                  ? "Completa los datos generales de la tarea"
-                  : "Selecciona y configura los suministros necesarios para esta tarea"}
-              </DialogDescription>
-            </DialogHeader>
-
             <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
 
           </div>
@@ -519,8 +520,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
           </div>
 
-          <div className="shrink-0 border-t bg-background p-4 sm:p-6">
-            <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-2">
+          <div className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-2">
               {
                 step === 1 && (
                   <>
@@ -552,13 +553,13 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                 )
               }
 
-            </DialogFooter>
+            </div>
 
           </div>
         </form>
 
 
-      </BaseModal>
+      </SidePanel>
     )
   },
 )
