@@ -3,6 +3,7 @@ import { getSeedSalesAction } from "../actions/seedSales/get-seed-sales.action";
 import { useSearchParams } from "react-router-dom";
 import { createUpdateSaleAction } from "../actions/seedSales/ceate-update-sale.action";
 import { deleteSeedSaleAction } from "../actions/seedSales/delete-seed-sale.action";
+import { useAuthStore } from "@/auth/store/auth.store";
 
 interface Options {
   page?: number | string;
@@ -24,9 +25,11 @@ export const useSeedSales = ({
   const page = searchParams.get("page") || 1;
   const limit = searchParams.get("limit") || 10;
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+
 
   const query = useQuery({
-    queryKey: ["seedSales", { page, limit, waybill_number, destination, start_date, end_date }],
+    queryKey: ["seedSales", user?.id, { page, limit, waybill_number, destination, start_date, end_date }],
     queryFn: () =>
       getSeedSalesAction({
         page,

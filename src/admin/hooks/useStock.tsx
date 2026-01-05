@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createOrUpdateStockAction } from "../actions/stock/create-update-stock.action";
 import { useSearchParams } from "react-router-dom";
 import { createCropStockAction } from "../actions/stock/create-crop-stock.action";
+import { useAuthStore } from "@/auth/store/auth.store";
 
 
 
@@ -14,11 +15,13 @@ export const useStock = () => {
   const limit = searchParams.get("limit") || 10;
   const q = searchParams.get("search") || "";
   const categoryId = searchParams.get("category_id") || "";
+  const user = useAuthStore((state) => state.user);
+
 
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["stock", { page, limit, q, categoryId }],
+    queryKey: ["stock", user?.id, { page, limit, q, categoryId }],
     queryFn: () =>
       getStockAction({
         page: isNaN(Number(+page)) ? 1 : Number(page),

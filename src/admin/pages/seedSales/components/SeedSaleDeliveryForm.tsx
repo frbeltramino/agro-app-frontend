@@ -110,11 +110,23 @@ export function SeedSaleDeliveryForm({
         </div>
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <Button type="button" variant="outline" size="sm" onClick={onCancel} className="flex-1 sm:flex-none">
+      <div className="flex flex-col sm:flex-row sm:justify-end gap-2 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onCancel}
+          className="w-full sm:w-auto"
+        >
           Cancelar
         </Button>
-        <Button type="button" size="sm" onClick={onSubmit} className="flex-1 sm:flex-none">
+
+        <Button
+          type="button"
+          size="sm"
+          onClick={onSubmit}
+          className="w-full sm:w-auto"
+        >
           {isEditing ? "Actualizar" : "Agregar"}
         </Button>
       </div>
