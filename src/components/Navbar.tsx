@@ -2,13 +2,16 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query"
 
 export const Navbar = () => {
+  const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
+    queryClient.clear();
     toast.success("Sesión cerrada correctamente");
     navigate("/");
   };

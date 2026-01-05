@@ -3,12 +3,7 @@
 import { forwardRef, useState, useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+
 import { toast } from "sonner"
 import { formatNumber } from "@/lib/format-number"
 import { PlusCircle } from "lucide-react"
@@ -20,7 +15,7 @@ import { useSeedSaleForm } from "../hooks/useSeedSaleForm"
 import { SeedSaleDeliveryForm } from "./SeedSaleDeliveryForm"
 import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
 import { Label } from "@/components/ui/label"
-import { BaseModal } from "@/admin/components/BaseModal"
+import { SidePanel } from "@/admin/components/SidePanel"
 
 
 interface FormValues {
@@ -236,17 +231,19 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
     }, [selectedCropNameId, cropsData, setValue, initialData, setDeliveries])
 
     return (
-      <BaseModal isOpen={isOpen} onClose={onClose}>
-        <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">{initialData ? "Editar Venta" : "Nueva Venta de Semillas"}</DialogTitle>
-          <DialogDescription className="text-sm">
-            {initialData
-              ? "Actualiza los datos de la entrega y sus ventas"
-              : "Registra una nueva entrega de semillas y sus ventas"}
-          </DialogDescription>
-        </DialogHeader>
+      <SidePanel
+        isOpen={isOpen}
+        onClose={onClose}
+        title={initialData ? "Editar Venta" : "Nueva Venta de Semillas"}
+        width="lg"
+      >
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 md:space-y-6">
+
+        <form
+          id="seed-sale-form"
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="space-y-4 md:space-y-6"
+        >
           <div className="space-y-4">
             <h3 className="text-base md:text-lg font-semibold">Datos Generales</h3>
 
@@ -421,25 +418,43 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
             )}
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
-              {isSaving ? (
-                <>
-                  Guardando...
-                  <div className="h-4 w-4 animate-spin rounded-full border-2  border-t-transparent" />
-                </>
-              ) : initialData ? (
-                "Actualizar"
-              ) : (
-                "Crear"
-              )}
-            </Button>
-          </DialogFooter>
+
         </form>
-      </BaseModal>
+
+        <div className="border-t bg-background px-4 py-4 safe-area-bottom mt-4">
+          <div className="mx-auto w-full sm:w-[360px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="w-full"
+                disabled={isAddingDelivery}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="submit"
+                form="seed-sale-form"
+                disabled={isSaving || isAddingDelivery}
+                className="w-full"
+              >
+                {isSaving ? (
+                  <>
+                    Guardando...
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                  </>
+                ) : initialData ? (
+                  "Actualizar"
+                ) : (
+                  "Crear"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </SidePanel>
     )
   },
 )

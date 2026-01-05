@@ -12,8 +12,8 @@ interface RegisterOptions {
   email: string;
   password: string;
   name: string;
-  roles: string[];  // array de roles
-  status: boolean;  // true = activo, false = inactivo
+  roles: string[];
+  status: boolean;
 }
 
 
