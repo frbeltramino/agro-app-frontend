@@ -5,7 +5,7 @@ interface StepperProps {
 
 export function Stepper({ step, steps }: StepperProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-center gap-2 pt-4">
       {steps.map((label, index) => {
         const isActive = step === index + 1;
         const isCompleted = step > index + 1;
