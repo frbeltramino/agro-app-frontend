@@ -3,12 +3,6 @@
 import { forwardRef, useEffect, useState } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
 import { Stock } from "@/interfaces/stock/stock.interface"
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories"
@@ -25,7 +19,6 @@ import { useLotStore } from "@/admin/store/lot.store";
 import { TaskSuppliesTable } from "./formTaskComponents/TaskSuppliesTable"
 import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
 import { Stepper } from "./formTaskComponents/StepIndicator"
-import { BaseModal } from "@/admin/components/BaseModal"
 import { useTaskForm } from "../hooks/useTaskForm"
 import { SidePanel } from "@/admin/components/SidePanel"
 
