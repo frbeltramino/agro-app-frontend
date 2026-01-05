@@ -237,7 +237,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                 <input
                   type="date"
                   {...register("expiration_date", { required: "La fecha de vencimiento es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                  className="date-standard"
                 />
                 {errors.expiration_date && (
                   <p className="text-destructive text-sm mt-1">{errors.expiration_date.message}</p>
