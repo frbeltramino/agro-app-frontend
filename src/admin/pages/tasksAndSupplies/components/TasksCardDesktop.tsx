@@ -103,7 +103,14 @@ export const TasksCardDesktop = ({
                             <TableBody>
                               {task.supplies.map(s => (
                                 <TableRow key={s.supply_id ?? s.stock_id} className="border-b last:border-b-0">
-                                  <TableCell className="font-medium">{s.supply_name}</TableCell>
+                                  <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                      <span className="truncate">{s.supply_name}</span>
+                                      <Badge variant={s.stock_id ? "secondary" : "outline"}>
+                                        {s.stock_id ? "Stock" : "Compra"}
+                                      </Badge>
+                                    </div>
+                                  </TableCell>
                                   <TableCell>
                                     <Badge variant="outline">{s.category_name}</Badge>
                                   </TableCell>

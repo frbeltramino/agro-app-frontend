@@ -104,11 +104,14 @@ export const MasterSupplySelect = ({
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Cargando suministros…</p>;
 
-  const filteredSupplies = search != ""
-    ? supplies.filter((s) =>
-      s.name.toLowerCase().includes(search.toLowerCase())
-    )
-    : supplies.slice(0, MAX_RESULTS);
+  const filteredSupplies =
+    search !== ""
+      ? supplies
+        .filter((s) =>
+          s.name.toLowerCase().includes(search.toLowerCase())
+        )
+        .slice(0, MAX_RESULTS)
+      : supplies.slice(0, MAX_RESULTS);
 
   const handleKeyDown = (e: React.KeyboardEvent, field?: any) => {
     if (!filteredSupplies.length) return;

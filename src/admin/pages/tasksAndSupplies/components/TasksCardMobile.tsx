@@ -74,14 +74,51 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                   {task.supplies.map((s) => (
                     <div
                       key={s.supply_id ?? s.stock_id}
-                      className="grid grid-cols-2 gap-2 text-sm py-2 border-b last:border-b-0"
+                      className="py-3 border-b last:border-b-0 space-y-2"
                     >
-                      <span className="font-medium">{s.supply_name}</span>
-                      <Badge variant="outline">{s.category_name}</Badge>
-                      <span>{formatKg(s.dose_per_ha)} {s.unit}</span>
-                      <span>{formatKg(s.hectares)}</span>
-                      <span>{currencyFormatter(s.price_per_unit)}</span>
-                      <span className="font-medium">{currencyFormatter(s.total_used * s.price_per_unit)}</span>
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">
+                            {s.supply_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {s.category_name}
+                          </p>
+                        </div>
+
+                        <Badge
+                          variant={s.stock_id ? "secondary" : "outline"}
+                          className="shrink-0"
+                        >
+                          {s.stock_id ? "Stock" : "Compra"}
+                        </Badge>
+                      </div>
+
+                      {/* Data grid */}
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Dosis/ha</p>
+                          <p>{formatKg(s.dose_per_ha)} {s.unit}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground">Cant/ha</p>
+                          <p>{formatKg(s.hectares)}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground">Costo/U</p>
+                          <p>{currencyFormatter(s.price_per_unit)}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                          <p className="font-medium">
+                            {currencyFormatter(s.total_used * s.price_per_unit)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

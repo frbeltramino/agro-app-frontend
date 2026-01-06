@@ -538,9 +538,17 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                         <span className="sm:hidden">←</span> Volver
                       </span>
                     </Button>
-                    <Button type="submit" disabled={isSaving || createNewSupply} className=" w-full sm:w-auto flex items-center justify-center gap-2">
-                      {isSaving && <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />}
-                      Guardar
+                    <Button
+                      type="submit"
+                      disabled={isSaving || createNewSupply}
+                      className="w-full sm:w-auto flex items-center justify-center gap-2"
+                    >
+                      {
+                        isSaving && (
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        )
+                      }
+                      <span>Guardar</span>
                     </Button>
                   </>
                 )

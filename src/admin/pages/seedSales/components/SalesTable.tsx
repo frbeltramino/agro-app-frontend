@@ -258,12 +258,12 @@ export const SeedSalesTable = () => {
               <div>
                 <label className="block text-sm font-medium mb-1.5">Desde</label>
                 <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="dark:[color-scheme:dark]" />
+                  className="date-standard" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Hasta</label>
                 <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-                  className="dark:[color-scheme:dark]" />
+                  className="date-standard" />
               </div>
             </div>
           </CardContent>

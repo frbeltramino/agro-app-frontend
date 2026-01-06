@@ -11,9 +11,9 @@ interface SidePanelProps {
 }
 
 const widths = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md lg:max-w-xl",
+  lg: "sm:max-w-lg lg:max-w-2xl xl:max-w-3xl",
 };
 
 export const SidePanel = ({
@@ -48,7 +48,10 @@ export const SidePanel = ({
       {/* Panel */}
       <aside
         className={cn(
-          "fixed top-0 right-0 h-full bg-background shadow-xl flex flex-col animate-in slide-in-from-right duration-300 w-full sm:" + widths[width]
+          "fixed top-0 right-0 h-full bg-background shadow-xl flex flex-col",
+          "animate-in slide-in-from-right duration-300",
+          "w-full",
+          widths[width]
         )}
       >
         {/* Header */}
