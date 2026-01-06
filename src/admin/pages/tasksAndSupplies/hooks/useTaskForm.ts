@@ -48,7 +48,7 @@ export function useTaskForm({
 
 
     const existingSupply = taskToEdit?.supplies.find(
-      (supply: TaskSupplyEdit) => supply.supply_id === supply.supply_id
+      (s: TaskSupplyEdit) => s.supply_id === supply.supply_id
     );
 
     const payload = {
