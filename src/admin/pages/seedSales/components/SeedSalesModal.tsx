@@ -373,7 +373,13 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                 onClick={() => {
                   setIsAddingDelivery(true)
                   setEditingDeliveryIndex(null)
-                  resetDelivery()
+                  resetDelivery({
+                    waybill_delivery_number: "",
+                    delivery_date: "",
+                    destination: "",
+                    tn_delivered: undefined,
+                    price_per_tn: undefined,
+                  })
                 }}
                 disabled={isAddingDelivery || totalTnDelivered === 0}
               >
@@ -393,7 +399,13 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                 onSubmit={handleSubmitDelivery(onDeliverySubmit)}
                 onCancel={() => {
                   setIsAddingDelivery(false)
-                  resetDelivery()
+                  resetDelivery({
+                    waybill_delivery_number: "",
+                    delivery_date: "",
+                    destination: "",
+                    tn_delivered: undefined,
+                    price_per_tn: undefined,
+                  })
                   setEditingDeliveryIndex(null)
                 }}
               />
