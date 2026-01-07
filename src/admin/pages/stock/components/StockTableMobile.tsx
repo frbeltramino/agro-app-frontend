@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit2, Package } from "lucide-react";
 import { currencyFormatter } from "@/lib/currency-formatter";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { useState } from "react";
 import { Stock } from "@/interfaces/stock/stock.interface";
 
@@ -80,7 +80,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Cantidad: {formatKg(item.quantity_available)} {item.unit}
+                Cantidad: {formatTn(item.quantity_available)} {item.unit}
               </p>
             </CardHeader>
 

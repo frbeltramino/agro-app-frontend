@@ -1,4 +1,4 @@
-export const formatKg = (value: number) => {
+export const formatTn = (value: number) => {
   return value
     .toLocaleString("es-AR", {
       minimumFractionDigits: 2,

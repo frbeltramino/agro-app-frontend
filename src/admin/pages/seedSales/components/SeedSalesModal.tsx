@@ -10,7 +10,7 @@ import { PlusCircle } from "lucide-react"
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
 import { CropSale } from "@/interfaces/crops/crop.sales.response";
 import { AmountInput } from "@/components/custom/CustomAmountInput"
-import { formatKg } from "@/lib/format-kg"
+import { formatTn } from "@/lib/format-tn"
 import { useSeedSaleForm } from "../hooks/useSeedSaleForm"
 import { SeedSaleDeliveryForm } from "./SeedSaleDeliveryForm"
 import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
@@ -23,7 +23,7 @@ interface FormValues {
   waybill_number: string
   destination: string
   date: string
-  kg_delivered: number
+  tn_delivered: number
   status: string
 }
 
@@ -31,8 +31,8 @@ interface DeliveryFormValues {
   waybill_delivery_number: string | undefined | null
   delivery_date: string
   destination: string
-  kg_delivered: number | undefined
-  price_per_kg: number | undefined
+  tn_delivered: number | undefined
+  price_per_tn: number | undefined
 }
 
 interface SeedSalesModalProps {
@@ -52,7 +52,7 @@ const statuses = [
 export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
   ({ isOpen, onClose, onSave, initialData, crops }) => {
     const [isSaving, setIsSaving] = useState(false)
-    const [, setKgDeliveredDisplay] = useState("")
+    const [, setTnDeliveredDisplay] = useState("")
 
     const [isAddingDelivery, setIsAddingDelivery] = useState(false);
 
@@ -72,7 +72,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         waybill_number: initialData?.waybill_number || "",
         destination: initialData?.destination || "",
         date: initialData?.sale_date || new Date().toISOString().split("T")[0],
-        kg_delivered: initialData?.kg_delivered || 0,
+        tn_delivered: initialData?.tn_delivered || 0,
         status: initialData?.status || "pending",
       },
     })
@@ -88,15 +88,15 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         waybill_delivery_number: "",
         delivery_date: new Date().toISOString().split("T")[0],
         destination: "",
-        kg_delivered: undefined,
-        price_per_kg: undefined,
+        tn_delivered: undefined,
+        price_per_tn: undefined,
       },
     })
 
-    const [, setDeliveryKgDisplay] = useState("")
+    const [, setDeliveryTnDisplay] = useState("")
     const [, setDeliveryPriceDisplay] = useState("")
 
-    const totalKgDelivered = watch("kg_delivered") || 0;
+    const totalTnDelivered = watch("tn_delivered") || 0;
     const selectedCropNameId = watch("crop_name_id");
 
     const {
@@ -108,7 +108,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
     } = useSeedSaleForm();
 
     const selectedCrop = crops?.find(c => c.crop_name_id === selectedCropNameId);
-    const totalKgSold = selectedCrop?.total_sold_kg || 0;
+    const totalTnSold = selectedCrop?.total_sold_tn || 0;
 
     const onDeliverySubmit = (data: DeliveryFormValues) => {
 
@@ -117,9 +117,9 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         deliveries,
         editingDeliveryIndex,
         initialData,
-        totalKgDelivered,
+        totalTnDelivered,
         selectedCropNameId,
-        totalKgSold
+        totalTnSold
       });
 
       setIsAddingDelivery(false)
@@ -127,10 +127,10 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         waybill_delivery_number: "",
         delivery_date: "",
         destination: "",
-        kg_delivered: undefined,
-        price_per_kg: undefined,
+        tn_delivered: undefined,
+        price_per_tn: undefined,
       })
-      setDeliveryKgDisplay("")
+      setDeliveryTnDisplay("")
       setDeliveryPriceDisplay("")
     }
 
@@ -143,22 +143,22 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       const delivery = deliveries[index]
       setEditingDeliveryIndex(index)
       setIsAddingDelivery(true)
-      setDeliveryKgDisplay(formatNumber(delivery.kg_delivered.toString()))
-      setDeliveryPriceDisplay(formatNumber(delivery.price_per_kg.toString()))
+      setDeliveryTnDisplay(formatNumber(delivery.tn_delivered.toString()))
+      setDeliveryPriceDisplay(formatNumber(delivery.price_per_tn.toString()))
       resetDelivery({
         waybill_delivery_number: delivery.waybill_number,
         delivery_date: delivery.delivery_date,
         destination: delivery.destination,
-        kg_delivered: delivery.kg_delivered,
-        price_per_kg: delivery.price_per_kg,
+        tn_delivered: delivery.tn_delivered,
+        price_per_tn: delivery.price_per_tn,
       })
     }
 
     const onFormSubmit = (data: FormValues) => {
       setIsSaving(true)
 
-      if (totalKgSold > Number(data.kg_delivered)) {
-        toast.error("Los kg de las entregas no pueden exceder los kg entregados totales")
+      if (totalTnSold > Number(data.tn_delivered)) {
+        toast.error("Las tn de las entregas no pueden exceder las tn entregados totales")
         setIsSaving(false)
         return
       }
@@ -169,8 +169,8 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
         waybill_number: data.waybill_number,
         sale_date: data.date,
         destination: data.destination,
-        kg_delivered: Number(data.kg_delivered),
-        kg_sold: totalKgSold,
+        tn_delivered: Number(data.tn_delivered),
+        tn_sold: totalTnSold,
         status: data.status,
         deliveries: deliveries,
         deleted_at: null,
@@ -187,26 +187,26 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       if (!isOpen) return;
 
       if (initialData) {
-        setKgDeliveredDisplay(formatNumber(initialData.kg_delivered.toString()))
+        setTnDeliveredDisplay(formatNumber(initialData.tn_delivered.toString()))
         setDeliveries(initialData.deliveries || []) // ✅ acá seteamos el hook
         reset({
           crop_name_id: initialData.crop_name_id || (cropsData.length > 0 ? cropsData[0].crop_name_id : 0),
           waybill_number: initialData.waybill_number,
           destination: initialData.destination,
           date: initialData.sale_date,
-          kg_delivered: initialData.kg_delivered,
+          tn_delivered: initialData.tn_delivered,
           status: initialData.status,
         })
       } else if (cropsData.length > 0) {
         const selectedCropDefault = cropsData.find(c => c.crop_name_id === Number(cropsData[0].crop_name_id));
-        const formatted = selectedCropDefault?.total_harvested_kg.toString() || "";
-        setKgDeliveredDisplay(formatted);
+        const formatted = selectedCropDefault?.total_harvested_tn.toString() || "";
+        setTnDeliveredDisplay(formatted);
         reset({
           crop_name_id: cropsData[0].crop_name_id,
           waybill_number: "",
           destination: "",
           date: new Date().toISOString().split("T")[0],
-          kg_delivered: Number(formatted),
+          tn_delivered: Number(formatted),
           status: "pending",
         })
         setDeliveries([]) // solo al crear nueva venta
@@ -217,11 +217,11 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       if (!selectedCropNameId || !cropsData.length) return;
 
       const crop = cropsData.find(c => c.crop_name_id === Number(selectedCropNameId));
-      if (!crop || crop.total_harvested_kg == null) return;
+      if (!crop || crop.total_harvested_tn == null) return;
 
-      const formatted = formatNumber(crop.total_harvested_kg.toString());
-      setKgDeliveredDisplay(formatted);
-      setValue("kg_delivered", Number(crop.total_harvested_kg), {
+      const formatted = formatNumber(crop.total_harvested_tn.toString());
+      setTnDeliveredDisplay(formatted);
+      setValue("tn_delivered", Number(crop.total_harvested_tn), {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -323,15 +323,15 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
 
               <div>
                 <Controller
-                  name="kg_delivered"
+                  name="tn_delivered"
                   control={controlSale}
                   rules={{
-                    required: "KG totales entregados es obligatorio",
+                    required: "tn totales entregadas es obligatorio",
                     min: { value: 0.01, message: "Debe ser mayor a 0" },
                   }}
                   render={({ field, fieldState }) => (
                     <AmountInput
-                      label="KG Entregados *"
+                      label="tn Entregadas *"
                       value={field.value}
                       onChange={field.onChange}
                       error={fieldState.error?.message}
@@ -346,17 +346,17 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
             <div className="bg-muted p-3 md:p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs text-muted-foreground">KG Totales</p>
-                  <p className="text-lg md:text-2xl font-bold">{formatKg(totalKgDelivered)}</p>
+                  <p className="text-xs text-muted-foreground">tn Totales</p>
+                  <p className="text-lg md:text-2xl font-bold">{formatTn(totalTnDelivered)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">KG Vendidos</p>
-                  <p className="text-lg md:text-2xl font-bold text-green-600">{formatKg(totalKgSold)}</p>
+                  <p className="text-xs text-muted-foreground">tn Vendidas</p>
+                  <p className="text-lg md:text-2xl font-bold text-green-600">{formatTn(totalTnSold)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">KG Disponibles</p>
+                  <p className="text-xs text-muted-foreground">tn Disponibles</p>
                   <p className="text-lg md:text-2xl font-bold text-blue-600">
-                    {formatKg((totalKgDelivered - totalKgSold))}
+                    {formatTn((totalTnDelivered - totalTnSold))}
                   </p>
                 </div>
               </div>
@@ -375,7 +375,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
                   setEditingDeliveryIndex(null)
                   resetDelivery()
                 }}
-                disabled={isAddingDelivery || totalKgDelivered === 0}
+                disabled={isAddingDelivery || totalTnDelivered === 0}
               >
                 <PlusCircle className="w-4 h-4 mr-1.5" />
                 <span className="hidden sm:inline">Agregar Venta</span>
@@ -403,7 +403,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
             {deliveries.length > 0 && (
               <SeedSaleDeliveriesTable
                 deliveries={deliveries}
-                totalKgSold={totalKgSold}
+                totalTnSold={totalTnSold}
                 isAddingDelivery={isAddingDelivery}
                 onEdit={handleEditDelivery}
                 onDelete={handleDeleteDelivery}

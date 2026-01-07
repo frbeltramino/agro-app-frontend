@@ -17,7 +17,7 @@ import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CustomPagination } from "@/components/custom/CustomPagination"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
-import { formatKg } from "@/lib/format-kg"
+import { formatTn } from "@/lib/format-tn"
 import { currencyFormatter } from "@/lib/currency-formatter"
 import { useCropsToSale } from "@/admin/hooks/useCropsToSale"
 import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
@@ -118,13 +118,13 @@ export const SeedSalesTable = () => {
         for (const delivery of item.deliveries) {
           await mutationDelivery.mutateAsync({
             id: delivery.id ?? null,
-            waybill_number: existingSale.waybill_number,
+            waybill_number: delivery.waybill_number,
             seed_sale_id: existingSale.id,
             crop_name_id: item.crop_name_id,
             delivery_date: delivery.delivery_date,
             destination: delivery.destination,
-            kg_delivered: delivery.kg_delivered,
-            price_per_kg: delivery.price_per_kg,
+            tn_delivered: delivery.tn_delivered,
+            price_per_tn: delivery.price_per_tn,
           });
         }
 
@@ -145,8 +145,8 @@ export const SeedSalesTable = () => {
             crop_name_id: item.crop_name_id,
             delivery_date: delivery.delivery_date,
             destination: delivery.destination,
-            kg_delivered: delivery.kg_delivered,
-            price_per_kg: delivery.price_per_kg,
+            tn_delivered: delivery.tn_delivered,
+            price_per_tn: delivery.price_per_tn,
           });
         }
 
@@ -173,12 +173,12 @@ export const SeedSalesTable = () => {
     return <Badge variant={badge.variant}>{badge.label}</Badge>
   }
 
-  const calculatePercentage = (kg_sold: number, kg_delivered: number) => {
-    return kg_delivered > 0 ? ((kg_sold / kg_delivered) * 100).toFixed(1) : "0"
+  const calculatePercentage = (tn_sold: number, tn_delivered: number) => {
+    return tn_delivered > 0 ? ((tn_sold / tn_delivered) * 100).toFixed(1) : "0"
   }
 
-  const totalDelivered = seedSalesData.reduce((sum, item) => sum + item.kg_delivered, 0)
-  const totalSold = seedSalesData.reduce((sum, item) => sum + item.kg_sold, 0)
+  const totalDelivered = seedSalesData.reduce((sum, item) => sum + item.tn_delivered, 0)
+  const totalSold = seedSalesData.reduce((sum, item) => sum + item.tn_sold, 0)
 
   return (
     <div className="container mx-auto  p-4 md:p-6 space-y-4 md:space-y-6">
@@ -195,8 +195,8 @@ export const SeedSalesTable = () => {
         <Card>
           <StockCard
             title="Total Entregas"
-            value={formatKg(totalDelivered) + " kg"}
-            description="Kilogramos entregados"
+            value={formatTn(totalDelivered) + " tn"}
+            description="Toneladas entregadas"
             isLoading={isLoading}
             isStatsError={false}
           />
@@ -205,8 +205,8 @@ export const SeedSalesTable = () => {
         <Card>
           <StockCard
             title="Total Vendido"
-            value={formatKg(totalSold) + " kg"}
-            description="Kilogramos vendidos"
+            value={formatTn(totalSold) + " tn"}
+            description="Toneladas vendidas"
             isLoading={isLoading}
             isStatsError={false}
           />
@@ -300,7 +300,7 @@ export const SeedSalesTable = () => {
                       onEdit={() => handleEdit(item)}
                       onDelete={() => handleDelete(item.id)}
                       getStatusBadge={getStatusBadge}
-                      formatKg={formatKg}
+                      formatTn={formatTn}
                       currencyFormatter={currencyFormatter}
                       calculatePercentage={calculatePercentage}
                     />
@@ -315,8 +315,8 @@ export const SeedSalesTable = () => {
                         <TableHead>Carta de Porte</TableHead>
                         <TableHead>Destino</TableHead>
                         <TableHead>Fecha</TableHead>
-                        <TableHead className="text-right">KG Entregados</TableHead>
-                        <TableHead className="text-right">KG Vendidos</TableHead>
+                        <TableHead className="text-right">tn Entregadas</TableHead>
+                        <TableHead className="text-right">tn Vendidas</TableHead>
                         <TableHead className="text-center">% Venta</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
@@ -336,10 +336,10 @@ export const SeedSalesTable = () => {
                             <TableCell className="font-medium">{item.waybill_number}</TableCell>
                             <TableCell>{item.destination}</TableCell>
                             <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
-                            <TableCell className="text-right font-semibold">{formatKg(item.kg_delivered || 0)}</TableCell>
-                            <TableCell className="text-right font-semibold">{formatKg(item.kg_sold || 0)}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatTn(item.tn_delivered || 0)}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatTn(item.tn_sold || 0)}</TableCell>
                             <TableCell className="text-center">
-                              {calculatePercentage(item.kg_sold, item.kg_delivered)}%
+                              {calculatePercentage(item.tn_sold, item.tn_delivered)}%
                             </TableCell>
                             <TableCell>{getStatusBadge(item.status)}</TableCell>
                             <TableCell className="text-right">
@@ -370,42 +370,44 @@ export const SeedSalesTable = () => {
                                       <Table>
                                         <TableHeader>
                                           <TableRow>
+                                            <TableHead>Carta de Porte</TableHead>
                                             <TableHead>Fecha de Entrega</TableHead>
                                             <TableHead>Destino</TableHead>
-                                            <TableHead className="text-right">KG Vendidos</TableHead>
-                                            <TableHead className="text-right">Precio/KG</TableHead>
+                                            <TableHead className="text-right">tn Vendidas</TableHead>
+                                            <TableHead className="text-right">Precio/tn</TableHead>
                                             <TableHead className="text-right">Total</TableHead>
                                           </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                           {item.deliveries.map((delivery) => (
                                             <TableRow key={delivery.id}>
+                                              <TableCell>{delivery.waybill_number}</TableCell>
                                               <TableCell>
                                                 {new Date(delivery.delivery_date).toLocaleDateString()}
                                               </TableCell>
                                               <TableCell>{delivery.destination}</TableCell>
                                               <TableCell className="text-right">
-                                                {formatKg(delivery.kg_delivered)}
+                                                {formatTn(delivery.tn_delivered)}
                                               </TableCell>
                                               <TableCell className="text-right">
-                                                {currencyFormatter(delivery.price_per_kg)}
+                                                {currencyFormatter(delivery.price_per_tn)}
                                               </TableCell>
                                               <TableCell className="text-right font-semibold">
-                                                {currencyFormatter(delivery.kg_delivered * delivery.price_per_kg)}
+                                                {currencyFormatter(delivery.tn_delivered * delivery.price_per_tn)}
                                               </TableCell>
                                             </TableRow>
                                           ))}
                                           <TableRow className="font-semibold bg-muted/50">
-                                            <TableCell colSpan={2}>Total</TableCell>
+                                            <TableCell colSpan={3}>Total</TableCell>
                                             <TableCell className="text-right">
-                                              {formatKg(item.deliveries.reduce((sum, d) => sum + d.kg_delivered, 0))}
+                                              {formatTn(item.deliveries.reduce((sum, d) => sum + d.tn_delivered, 0))}
                                             </TableCell>
                                             <TableCell></TableCell>
                                             <TableCell className="text-right">
 
                                               {currencyFormatter(
                                                 item.deliveries.reduce(
-                                                  (sum, d) => sum + d.kg_delivered * d.price_per_kg,
+                                                  (sum, d) => sum + d.tn_delivered * d.price_per_tn,
                                                   0,
                                                 ),
                                               )}
@@ -450,7 +452,7 @@ export const SeedSalesTable = () => {
           { label: "Carta de Porte", value: deletingItem?.waybill_number || "" },
           { label: "Fecha", value: new Date(deletingItem?.sale_date || 0).toLocaleDateString() },
           { label: "Destino", value: deletingItem?.destination || "" },
-          { label: "KG Vendidos", value: deletingItem?.kg_sold.toString() || "" },
+          { label: "tn Vendidas", value: deletingItem?.tn_sold.toString() || "" },
         ]}
         isOpen={isDeleteDialogOpen}
         onConfirm={handleDelete}

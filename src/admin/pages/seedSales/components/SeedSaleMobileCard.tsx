@@ -9,9 +9,9 @@ interface SeedSaleMobileCardProps {
   onEdit: () => void
   onDelete: () => void
   getStatusBadge: (status: string) => React.ReactNode
-  formatKg: (value: number) => string
+  formatTn: (value: number) => string
   currencyFormatter: (value: number) => string
-  calculatePercentage: (kg_sold: number, kg_delivered: number) => string
+  calculatePercentage: (tn_sold: number, tn_delivered: number) => string
 }
 
 export const SeedSaleMobileCard = ({
@@ -21,7 +21,7 @@ export const SeedSaleMobileCard = ({
   onEdit,
   onDelete,
   getStatusBadge,
-  formatKg,
+  formatTn,
   currencyFormatter,
   calculatePercentage,
 }: SeedSaleMobileCardProps) => {
@@ -52,16 +52,16 @@ export const SeedSaleMobileCard = ({
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 text-center bg-muted/50 rounded-lg p-2">
             <div>
-              <p className="text-xs text-muted-foreground">Entregados</p>
-              <p className="font-semibold text-sm">{formatKg(item.kg_delivered)} kg</p>
+              <p className="text-xs text-muted-foreground">Entregadas</p>
+              <p className="font-semibold text-sm">{formatTn(item.tn_delivered)} tn</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Vendidos</p>
-              <p className="font-semibold text-sm text-green-600">{formatKg(item.kg_sold)} kg</p>
+              <p className="text-xs text-muted-foreground">Vendidas</p>
+              <p className="font-semibold text-sm text-green-600">{formatTn(item.tn_sold)} tn</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">% Venta</p>
-              <p className="font-semibold text-sm">{calculatePercentage(item.kg_sold, item.kg_delivered)}%</p>
+              <p className="font-semibold text-sm">{calculatePercentage(item.tn_sold, item.tn_delivered)}%</p>
             </div>
           </div>
 
@@ -94,17 +94,17 @@ export const SeedSaleMobileCard = ({
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
-                    <p className="text-xs text-muted-foreground">KG</p>
-                    <p className="font-medium">{formatKg(delivery.kg_delivered)}</p>
+                    <p className="text-xs text-muted-foreground">tn</p>
+                    <p className="font-medium">{formatTn(delivery.tn_delivered)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Precio/KG</p>
-                    <p className="font-medium">{currencyFormatter(delivery.price_per_kg)}</p>
+                    <p className="text-xs text-muted-foreground">Precio/tn</p>
+                    <p className="font-medium">{currencyFormatter(delivery.price_per_tn)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total</p>
                     <p className="font-semibold text-green-600">
-                      {currencyFormatter(delivery.kg_delivered * delivery.price_per_kg)}
+                      {currencyFormatter(delivery.tn_delivered * delivery.price_per_tn)}
                     </p>
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export const SeedSaleMobileCard = ({
               <span className="font-semibold text-sm">Total</span>
               <span className="font-bold">
                 {currencyFormatter(
-                  item.deliveries.reduce((sum: number, d: any) => sum + d.kg_delivered * d.price_per_kg, 0)
+                  item.deliveries.reduce((sum: number, d: any) => sum + d.tn_delivered * d.price_per_tn, 0)
                 )}
               </span>
             </div>

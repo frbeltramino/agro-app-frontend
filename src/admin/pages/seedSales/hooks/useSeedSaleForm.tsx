@@ -9,10 +9,10 @@ export const useSeedSaleForm = () => {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [editingDeliveryIndex, setEditingDeliveryIndex] = useState<number | null>(null);
 
-  const createOrUpdateDeliveries = ({ data, deliveries, editingDeliveryIndex, initialData, totalKgDelivered, totalKgSold }: any) => {
+  const createOrUpdateDeliveries = ({ data, deliveries, editingDeliveryIndex, initialData, totalTnDelivered, totalTnSold }: any) => {
     const availableKg =
-      totalKgDelivered -
-      (totalKgSold - (editingDeliveryIndex !== null ? deliveries[editingDeliveryIndex].kg_delivered : 0))
+      totalTnDelivered -
+      (totalTnSold - (editingDeliveryIndex !== null ? deliveries[editingDeliveryIndex].tn_delivered : 0))
 
     if (data.kg_delivered !== undefined && data.kg_delivered > availableKg) {
       toast.error(`Solo hay ${formatNumber(availableKg.toString())} kg disponibles`)
@@ -26,8 +26,8 @@ export const useSeedSaleForm = () => {
       crop_name_id: initialData?.crop_name_id || null,
       delivery_date: data.delivery_date,
       destination: data.destination,
-      kg_delivered: Number(data.kg_delivered || 0),
-      price_per_kg: Number(data.price_per_kg),
+      tn_delivered: Number(data.tn_delivered || 0),
+      price_per_tn: Number(data.price_per_tn),
     }
 
     if (editingDeliveryIndex !== null) {

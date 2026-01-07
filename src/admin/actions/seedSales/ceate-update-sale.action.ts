@@ -4,7 +4,7 @@ import { SeedSale } from "@/interfaces/sales/seed.sale.interface";
 
 
 export const createUpdateSaleAction = async (seedSaleItem: SeedSale): Promise<SeedSaleCreateResponse> => {
-  const { crop_name_id, id, waybill_number, sale_date, destination, kg_delivered, status } = seedSaleItem;
+  const { crop_name_id, id, waybill_number, sale_date, destination, tn_delivered, status } = seedSaleItem;
   const isCreating = !id
   const { data } = await agroApi<SeedSaleCreateResponse>({
     url: isCreating ? 'sales/seed/new' : `sales/seed/${id}`,
@@ -14,7 +14,7 @@ export const createUpdateSaleAction = async (seedSaleItem: SeedSale): Promise<Se
       waybill_number,
       sale_date,
       destination,
-      kg_delivered,
+      tn_delivered,
       status
     }
   })

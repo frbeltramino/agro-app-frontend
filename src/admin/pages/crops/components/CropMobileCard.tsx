@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
 import { Crop } from "@/interfaces/crops/crop.interface"
-import { formatKg } from "@/lib/format-kg"
+import { formatTn } from "@/lib/format-tn"
 
 interface CropMobileCardProps {
   crop: Crop
@@ -38,7 +38,7 @@ export const CropMobileCard = ({
 
             <p className="text-xs text-muted-foreground">
               Rendimiento:{" "}
-              {crop.real_yield ? formatKg(crop.real_yield) : "—"}
+              {crop.real_yield ? formatTn(crop.real_yield) : "—"}
             </p>
           </div>
         </div>

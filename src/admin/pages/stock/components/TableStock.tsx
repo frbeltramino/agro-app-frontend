@@ -27,7 +27,7 @@ import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { useStockStats } from "@/admin/hooks/useStockStats";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { StockTableMobile } from "./StockTableMobile";
 
 
@@ -249,7 +249,7 @@ export const StockTable = () => {
                           <TableRow key={item.id}>
                             <TableCell className="font-medium">{item.name}</TableCell>
                             <TableCell>{item.category_name}</TableCell>
-                            <TableCell>{formatKg(item.quantity_available || 0)}</TableCell>
+                            <TableCell>{formatTn(item.quantity_available || 0)}</TableCell>
                             <TableCell>{item.unit}</TableCell>
                             <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
                             <TableCell className="font-bold">{currencyFormatter(item.price_per_unit)}</TableCell>
