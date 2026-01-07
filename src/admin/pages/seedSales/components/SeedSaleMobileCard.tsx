@@ -81,45 +81,75 @@ export const SeedSaleMobileCard = ({
 
         {/* Expanded deliveries */}
         {isExpanded && item.deliveries && item.deliveries.length > 0 && (
-          <div className="border-t bg-muted/30 p-3 space-y-2">
+          <div className="border-t bg-muted/30 p-3 space-y-4">
             {item.deliveries.map((delivery: any) => (
-              <div key={delivery.id} className="bg-background rounded-lg p-3 space-y-2">
-                <div className="flex justify-between items-start">
+              <div
+                key={delivery.id}
+                className="bg-background rounded-lg p-4 shadow-sm border border-muted/30"
+              >
+                {/* Fila superior */}
+                <div className="grid grid-cols-3 gap-4 items-start mb-2">
                   <div>
                     <p className="font-medium text-sm">{delivery.destination}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(delivery.delivery_date).toLocaleDateString()}
                     </p>
                   </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground">Carta de Porte</p>
+                    <p className="font-medium">{delivery.waybill_number}</p>
+                  </div>
+
+                  {/* Columna vacía para alinear con Total */}
+                  <div />
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-sm">
+
+                {/* Fila inferior */}
+                <div className="grid grid-cols-3 gap-4 text-sm border-t border-muted/20 pt-2">
                   <div>
                     <p className="text-xs text-muted-foreground">tn</p>
-                    <p className="font-medium">{formatTn(delivery.tn_delivered)}</p>
+                    <p className="font-medium">
+                      {formatTn(delivery.tn_delivered)}
+                    </p>
                   </div>
+
                   <div>
-                    <p className="text-xs text-muted-foreground">Precio/tn</p>
-                    <p className="font-medium">{currencyFormatter(delivery.price_per_tn)}</p>
+                    <p className="text-xs text-muted-foreground">Precio / tn</p>
+                    <p className="font-medium">
+                      {currencyFormatter(delivery.price_per_tn)}
+                    </p>
                   </div>
+
                   <div>
                     <p className="text-xs text-muted-foreground">Total</p>
                     <p className="font-semibold text-green-600">
-                      {currencyFormatter(delivery.tn_delivered * delivery.price_per_tn)}
+                      {currencyFormatter(
+                        delivery.tn_delivered * delivery.price_per_tn
+                      )}
                     </p>
                   </div>
                 </div>
               </div>
             ))}
-            {/* Total row */}
-            <div className="bg-primary/10 rounded-lg p-3 flex justify-between items-center">
-              <span className="font-semibold text-sm">Total</span>
-              <span className="font-bold">
+
+            {/* Total general */}
+            <div className="bg-primary/10 rounded-lg p-4 flex justify-between items-center shadow-sm">
+              <span className="font-semibold text-sm uppercase tracking-wide">
+                Total
+              </span>
+              <span className="font-bold text-base">
                 {currencyFormatter(
-                  item.deliveries.reduce((sum: number, d: any) => sum + d.tn_delivered * d.price_per_tn, 0)
+                  item.deliveries.reduce(
+                    (sum: number, d: any) =>
+                      sum + d.tn_delivered * d.price_per_tn,
+                    0
+                  )
                 )}
               </span>
             </div>
           </div>
+
         )}
       </CardContent>
     </Card>
