@@ -6,7 +6,9 @@ export interface Delivery {
   created_at?: string;
   updated_at?: string;
   destination: string;
-  kg_delivered: number;
-  price_per_kg: number;
+  tn_delivered: number;
+  price_per_tn: number;
   delivery_date: string;
+
+
 }

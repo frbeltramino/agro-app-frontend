@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
 import { useState } from "react";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { currencyFormatter } from "@/lib/currency-formatter";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 
@@ -99,12 +99,12 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                         <div>
                           <p className="text-xs text-muted-foreground">Dosis/ha</p>
-                          <p>{formatKg(s.dose_per_ha)} {s.unit}</p>
+                          <p>{formatTn(s.dose_per_ha)} {s.unit}</p>
                         </div>
 
                         <div>
                           <p className="text-xs text-muted-foreground">Cant/ha</p>
-                          <p>{formatKg(s.hectares)}</p>
+                          <p>{formatTn(s.hectares)}</p>
                         </div>
 
                         <div>

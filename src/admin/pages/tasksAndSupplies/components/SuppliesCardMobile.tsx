@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Package } from "lucide-react";
 import { currencyFormatter } from "@/lib/currency-formatter";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { useState } from "react";
 
 interface SuppliesCardMobileProps {
@@ -46,7 +46,7 @@ export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobilePro
                   <Badge variant="outline">{supply.category_name}</Badge>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  Dosis: {formatKg(supply.dose_per_ha)} {supply.supply_unit} • Cant/ha: {formatKg(supply.hectares)} • Total: {formatKg(totalQuantity)} {supply.supply_unit}
+                  Dosis: {formatTn(supply.dose_per_ha)} {supply.supply_unit} • Cant/ha: {formatTn(supply.hectares)} • Total: {formatTn(totalQuantity)} {supply.supply_unit}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Precio unitario: {currencyFormatter(supply.unit_price)} • Total: {currencyFormatter(totalQuantity * supply.unit_price)}

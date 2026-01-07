@@ -67,36 +67,35 @@ export function SeedSaleDeliveryForm({
           )}
         </div>
 
-        {/* KG */}
         <div>
 
           <Controller
-            name="kg_delivered"
+            name="tn_delivered"
             control={controlDelivery}
-            rules={{ required: "KG vendidos es obligatorio" }}
+            rules={{ required: "tn vendidas es obligatorio" }}
             render={({ field, fieldState }) => (
               <AmountInput
-                label="KG Vendidos *"
+                label="tn Vendidos *"
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
               />
             )}
           />
-          {deliveryErrors.kg_delivered && (
-            <p className="text-destructive text-xs mt-1">{deliveryErrors.kg_delivered.message}</p>
+          {deliveryErrors.tn_delivered && (
+            <p className="text-destructive text-xs mt-1">{deliveryErrors.tn_delivered.message}</p>
           )}
         </div>
 
         {/* Precio */}
         <div>
           <Controller
-            name="price_per_kg"
+            name="price_per_tn"
             control={controlDelivery}
-            rules={{ required: "Precio por KG es obligatorio" }}
+            rules={{ required: "Precio por tn es obligatorio" }}
             render={({ field, fieldState }) => (
               <AmountInput
-                label="Precio por KG *"
+                label="Precio por tn *"
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
@@ -104,8 +103,8 @@ export function SeedSaleDeliveryForm({
               />
             )}
           />
-          {deliveryErrors.price_per_kg && (
-            <p className="text-destructive text-xs mt-1">{deliveryErrors.price_per_kg.message}</p>
+          {deliveryErrors.price_per_tn && (
+            <p className="text-destructive text-xs mt-1">{deliveryErrors.price_per_tn.message}</p>
           )}
         </div>
       </div>

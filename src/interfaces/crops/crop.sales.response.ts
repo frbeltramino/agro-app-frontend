@@ -5,7 +5,7 @@ export interface CropsSalesResponse {
 export interface CropSale {
   crop_name_id: number;
   crop_name: string;
-  total_harvested_kg: number;
-  total_sold_kg: number;
-  available_kg: number;
+  total_harvested_tn: number;
+  total_sold_tn: number;
+  available_tn: number;
 }

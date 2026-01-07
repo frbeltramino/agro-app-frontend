@@ -32,7 +32,7 @@ import { PageHeader } from "../../../components/PageHeader";
 import { CropForm } from "../components/CropForm";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CropMobileCard } from "../components/CropMobileCard";
 
@@ -209,7 +209,7 @@ export const Crops = () => {
                               <TableHead className="hidden sm:table-cell">Variedad</TableHead>
                               <TableHead>Fecha Siembra</TableHead>
                               <TableHead className="hidden md:table-cell">Fecha estimada de cosecha</TableHead>
-                              <TableHead>Rendimiento final (kg)</TableHead>
+                              <TableHead>Rendimiento final (tn)</TableHead>
                               <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -232,7 +232,7 @@ export const Crops = () => {
                                 <TableCell className="hidden md:table-cell">
                                   {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
                                 </TableCell>
-                                <TableCell>{crop.real_yield ? formatKg(crop.real_yield) : "No hay valor real"}</TableCell>
+                                <TableCell>{crop.real_yield ? formatTn(crop.real_yield) : "No hay valor real"}</TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
                                     <Button

@@ -2,7 +2,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { currencyFormatter } from "@/lib/currency-formatter";
 
 interface SuppliesCardDesktopProps {
@@ -43,9 +43,9 @@ export const SuppliesCardDesktop = ({
               <TableCell>
                 <Badge variant="outline">{supply.category_name}</Badge>
               </TableCell>
-              <TableCell>{formatKg(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
-              <TableCell>{formatKg(supply.hectares)}</TableCell>
-              <TableCell>{formatKg(totalQuantity)} {supply.supply_unit}</TableCell>
+              <TableCell>{formatTn(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
+              <TableCell>{formatTn(supply.hectares)}</TableCell>
+              <TableCell>{formatTn(totalQuantity)} {supply.supply_unit}</TableCell>
               <TableCell>{currencyFormatter(supply.unit_price)}</TableCell>
               <TableCell className="font-medium">
                 {calculateTotalCostBySupply(supply.unit_price, totalQuantity)}

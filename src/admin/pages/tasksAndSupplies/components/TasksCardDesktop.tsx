@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
-import { formatKg } from "@/lib/format-kg";
+import { formatTn } from "@/lib/format-tn";
 import { currencyFormatter } from "@/lib/currency-formatter";
 
 
@@ -114,8 +114,8 @@ export const TasksCardDesktop = ({
                                   <TableCell>
                                     <Badge variant="outline">{s.category_name}</Badge>
                                   </TableCell>
-                                  <TableCell>{formatKg(s.dose_per_ha)} {s.unit}</TableCell>
-                                  <TableCell>{formatKg(s.hectares)}</TableCell>
+                                  <TableCell>{formatTn(s.dose_per_ha)} {s.unit}</TableCell>
+                                  <TableCell>{formatTn(s.hectares)}</TableCell>
                                   <TableCell>{currencyFormatter(s.price_per_unit)}</TableCell>
                                   <TableCell className="text-right font-medium">{currencyFormatter((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
                                 </TableRow>
