@@ -5,7 +5,7 @@ import { StockCreateUpdateResponse } from "@/interfaces/stock/stock.update.creat
 
 export const createOrUpdateStockAction = async (stockItem: Stock): Promise<StockCreateUpdateResponse> => {
 
-  const { id, name, category_id, unit, quantity_available, price_per_unit, expiration_date, status } = stockItem;
+  const { id, name, category_id, unit, quantity_available, price_per_unit, expiration_date, status, master_supply_id } = stockItem;
 
   const isCreating = !id
 
@@ -19,7 +19,8 @@ export const createOrUpdateStockAction = async (stockItem: Stock): Promise<Stock
       quantity_available,
       price_per_unit,
       expiration_date,
-      status
+      status,
+      master_supply_id
     }
   })
   return data;

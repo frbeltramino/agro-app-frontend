@@ -155,7 +155,7 @@ export const StockTable = () => {
         <Card>
           <StockCard
             title="Stock Total"
-            value={statsData?.total_quantity ? statsData.total_quantity : 0}
+            value={formatTn(statsData?.total_quantity ? statsData.total_quantity : 0)}
             description="Unidades disponibles"
             isLoading={isStatsLoading}
             isStatsError={isStatsError}

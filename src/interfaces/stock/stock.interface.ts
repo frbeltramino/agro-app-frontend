@@ -10,4 +10,5 @@ export interface Stock {
   created_at?: string;
   updated_at?: string;
   category_name?: string;
+  master_supply_id?: number | undefined;
 }
