@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit2, Package } from "lucide-react";
+import { Trash2, Edit2, ChevronDown } from "lucide-react";
 import { currencyFormatter } from "@/lib/currency-formatter";
 import { formatTn } from "@/lib/format-tn";
 import { useState } from "react";
@@ -53,7 +53,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
                     variant="ghost"
                     onClick={() => toggle(item.id ? item.id : 0)}
                   >
-                    <Package className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
 
                   <div>
@@ -82,6 +82,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
               <p className="text-sm text-muted-foreground">
                 Cantidad: {formatTn(item.quantity_available)} {item.unit}
               </p>
+
             </CardHeader>
 
             {isOpen && (
