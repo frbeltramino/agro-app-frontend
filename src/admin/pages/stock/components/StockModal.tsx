@@ -12,22 +12,22 @@ import {
 
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories";
 import { Stock } from "@/interfaces/stock/stock.interface";
-import { UNITS } from "@/constants/units";
-import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/format-number";
 import { AmountInput } from "@/components/custom/CustomAmountInput";
 import { BaseModal } from "@/admin/components/BaseModal";
+import { MasterSupplySelect } from "../../tasksAndSupplies/components/MasterSupplySelect";
 
 
 interface FormValues {
-  name: string
-  category_id: number
+  productName: string
+  categoryId: number
   unit: string
   quantity_available: number | undefined
   price_per_unit: number | undefined
   expiration_date: string
   status: string
+  master_supply_id: number | undefined
 }
 
 interface StockModalProps {
@@ -41,7 +41,7 @@ interface StockModalProps {
 export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
   ({ isOpen, onClose, onSave, initialData }) => {
     const [isSaving, setIsSaving] = useState(false)
-    const { data: categoriesData, createCategory } = useSupplyCategories();
+    const { data: categoriesData } = useSupplyCategories();
     const categories = categoriesData?.categories || [];
     const [, setQuantityDisplay] = useState("");
 
@@ -53,12 +53,14 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
       formState: { errors },
       reset,
       watch,
-      control
+      control,
+      setValue
     } = useForm<FormValues>({
       defaultValues: {
-        name: initialData?.name || "",
-        category_id: initialData?.category_id || 0,
+        productName: initialData?.name || "",
+        categoryId: initialData?.category_id || 0,
         unit: initialData?.unit || "lt",
+        master_supply_id: initialData?.master_supply_id || undefined,
         quantity_available: initialData?.quantity_available || undefined,
         price_per_unit: initialData?.price_per_unit || undefined,
         expiration_date: initialData?.expiration_date || "",
@@ -69,10 +71,11 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
     useEffect(() => {
       if (initialData) {
         reset({
-          name: initialData.name,
-          category_id: initialData.category_id,
+          productName: initialData.name,
+          categoryId: initialData.category_id,
           unit: initialData.unit,
           quantity_available: initialData.quantity_available ?? undefined,
+          master_supply_id: initialData.master_supply_id ?? undefined,
           price_per_unit: initialData.price_per_unit ?? undefined,
           expiration_date: initialData.expiration_date,
           status: initialData.status,
@@ -81,9 +84,10 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
         setQuantityDisplay(formatNumber(initialData.quantity_available.toString()));
       } else {
         reset({
-          name: "",
-          category_id: 0,
+          productName: "",
+          categoryId: 0,
           unit: "lt",
+          master_supply_id: undefined,
           quantity_available: undefined,
           price_per_unit: undefined,
           expiration_date: "",
@@ -98,9 +102,10 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
       try {
         const item: Stock = {
           id: initialData?.id || null,
-          name: data.name,
-          category_id: data.category_id,
+          name: data.productName,
+          category_id: data.categoryId,
           unit: data.unit,
+          master_supply_id: data.master_supply_id,
           quantity_available: Number(data.quantity_available),
           price_per_unit: Number(data.price_per_unit),
           expiration_date: data.expiration_date,
@@ -129,57 +134,61 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
         </DialogHeader>
         <div className="w-full max-w-full overflow-x-hidden">
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+
+            <div className="space-y-2">
+              <MasterSupplySelect
+                control={control}
+                setValue={setValue}
+                name={`master_supply_id`}
+                errors={errors}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">Nombre del Suministro *</label>
               <input
                 type="text"
-                {...register("name", { required: "El nombre del suministro es requerido" })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Ej: Funguicida Tebuconazole"
+                {...register(`productName`)}
+                value={watch(`productName`) || ""}
+                readOnly
+                className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm cursor-default focus:outline-none"
               />
-              {errors.name && <p className="text-destructive text-sm mt-1">{errors.name.message}</p>}
             </div>
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
 
-                <CustomSelectWithCreate
-                  label="Categoría"
-                  name="category_id"
-                  options={categories || []}
-                  register={register}
-                  errors={"error en categoria"}
-                  onCreate={async (name: string) => {
-                    await createCategory(name);
-                  }}
-                  mb="0"
-                  selectHeight="h-10"
-                  placeholder="Nueva categoría"
+                <label className="block text-sm font-medium mb-2">Categoría *</label>
+                <input
+                  type="text"
+
+                  value={categories?.find(c => c.id.toString() === watch(`categoryId`).toString())?.name || ""}
+                  readOnly
+                  className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm cursor-default focus:outline-none"
                 />
               </div>
 
 
               <div>
                 <label className="block text-sm font-medium mb-1 mt-1">Unidad *</label>
-                <select
-                  {...register("unit", { required: "La unidad es requerida" })}
-                  className="input-standard"
-                >
-                  <option value="" className="bg-background text-foreground">
-                    Selecciona una unidad
-                  </option>
-                  {UNITS.map((unit) => (
-                    <option
-                      key={unit.value}
-                      value={unit.value}
-                      className="bg-background text-foreground"
-                    >
-                      {unit.label}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="text"
+                  {...register(`unit`)}
+                  value={watch(`unit`) || ""}
+                  readOnly
+                  className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm shadow-sm cursor-default focus:outline-none"
+                />
+                {errors?.unit && (
+                  <p className="text-destructive text-xs mt-1">{errors.unit.message}</p>
+                )}
               </div>
+              <input
+                type="hidden"
+                {...register(`master_supply_id`)}
+                value={watch(`master_supply_id`) || ""}
+              />
+
 
             </div>
 
