@@ -142,28 +142,6 @@ export function useTaskForm({
         error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
       throw new Error(message);
     }
-
-    // const newUsedQuantity = Number(s.dosagePerHectare) * Number(s.hectareQuantity);
-
-    // try {
-    //   const resultStock = await adjustStock.mutateAsync({
-    //     stockId: Number(s.stockId!),
-    //     quantity: -newUsedQuantity, // negativo → restar del stock
-    //   });
-
-    //   const selectedStock = stock?.find((itemStock) => itemStock.id === Number(s.stockId)) ?? null;
-    //   suppliesResult.push({
-    //     supply_id: null,
-    //     stock_id: Number(resultStock.id),
-    //     dose_per_ha: Number(s.dosagePerHectare),
-    //     hectares: Number(s.hectareQuantity),
-    //     price_per_unit: parseAmount(selectedStock?.price_per_unit),
-    //   });
-    // } catch (error: any) {
-    //   const message =
-    //     error?.response?.data?.message || error?.message || "Error desconocido al ajustar el stock";
-    //   throw new Error(message);
-    // }
   }
 
 

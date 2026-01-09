@@ -29,7 +29,7 @@ export const TasksCard = () => {
   const [, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const [openTaskForm, setOpenTaskForm] = useState(false)
-  const { data: dataStock } = useStock();
+  const { data: dataStock, adjustStock } = useStock();
   const { data: taskTypesData } = useTaskTypes();
   const [workTypeFilter, setWorkTypeFilter] = useState("all");
   const { selectedCrop } = useCropStore();
@@ -63,10 +63,23 @@ export const TasksCard = () => {
 
   const handleDeleteTask = async (task: CropTask) => {
     if (!task) return;
+    // Si hay suministros de stock, ajustar el stock
+    const stockSupplies = task.supplies.filter(s => s.from_stock);
+
+    if (stockSupplies.length > 0) {
+      for (const s of stockSupplies) {
+        await adjustStock.mutateAsync({
+          stockId: Number(s.stock_id),
+          quantity: Number(s.total_used),
+        });
+      }
+    }
+
     await deleteTask.mutateAsync({
       crop_id: selectedCrop?.id,
       task_id: task.id,
     });
+
     setIsDeleteDialogOpen(false);
     setCurrentPage(1);
   };
