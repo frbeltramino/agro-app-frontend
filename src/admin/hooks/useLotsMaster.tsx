@@ -3,7 +3,6 @@ import { getLotsMasterAction } from "../actions/lots/get-lots-master.action";
 
 export const useLotsMaster = () => {
 
-  // Obtener categorías
   const lotsMasterQuery = useQuery({
     queryKey: ["lots-master"],
     queryFn: () => getLotsMasterAction(),

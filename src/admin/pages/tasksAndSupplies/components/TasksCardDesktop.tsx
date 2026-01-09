@@ -58,7 +58,7 @@ export const TasksCardDesktop = ({
                   <TableCell className="font-medium">{task.type}</TableCell>
                   <TableCell>{task.description || "No hay descripción"}</TableCell>
                   <TableCell>{new Date(task.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{task.provider}</TableCell>
+                  <TableCell>{task.provider_name ?? "-"}</TableCell>
                   <TableCell>{currencyFormatter(Number(task.laborCost))}</TableCell>
                   <TableCell>{currencyFormatter(Number(task.total_price))}</TableCell>
 

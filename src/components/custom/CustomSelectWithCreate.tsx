@@ -38,7 +38,7 @@ export const CustomSelectWithCreate = ({
   return (
     <div>
       <div className={`flex items-center justify-between ${mb ? `mb-${mb}` : "mb-2"}`}>
-        <label className="block text-sm font-medium">{label} *</label>
+        <label className="block text-sm font-medium">{label}</label>
 
         {onCreate && (
           <Button

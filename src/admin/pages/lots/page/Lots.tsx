@@ -243,6 +243,7 @@ export const Lots = () => {
                               </Button>
                               <Button
                                 variant="ghost"
+                                className="text-destructive"
                                 size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();

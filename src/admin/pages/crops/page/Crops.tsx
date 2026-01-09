@@ -247,6 +247,7 @@ export const Crops = () => {
                                     </Button>
                                     <Button
                                       variant="ghost"
+                                      className="text-destructive"
                                       size="icon"
                                       onClick={(e) => {
                                         e.stopPropagation();
