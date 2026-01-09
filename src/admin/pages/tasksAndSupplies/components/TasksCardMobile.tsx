@@ -46,7 +46,7 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                 </div>
                 <span className="text-sm text-muted-foreground">{task.description || "Sin descripción"}</span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(task.date).toLocaleDateString()} • {task.provider} • Costo: {currencyFormatter(Number(task.total_price))}
+                  {new Date(task.date).toLocaleDateString()} • {task.provider_name ?? "-"} • Costo: {currencyFormatter(Number(task.total_price))}
                 </span>
               </div>
               <div className="flex gap-2">

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit2, Trash2 } from "lucide-react";
+import { formatTn } from "@/lib/format-tn";
 
 interface Props {
   supplies: any[];
@@ -46,7 +47,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Dosis / Hectárea</p>
-                <p className="font-medium">{s.dosagePerHectare}</p>
+                <p className="font-medium">{formatTn(s.dosagePerHectare)}</p>
               </div>
             </div>
           </div>
@@ -71,7 +72,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
                 <TableCell className="max-w-[250px] truncate">{s.productName || s.stockName || "Suministro"}</TableCell>
                 <TableCell>{s.supplyType === "stock" ? "De Stock" : "Compra"}</TableCell>
                 <TableCell className="text-right">{s.unit}</TableCell>
-                <TableCell className="text-right">{s.dosagePerHectare}</TableCell>
+                <TableCell className="text-right">{formatTn(s.dosagePerHectare)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
                     <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(index)} disabled={isAddingSupply}>

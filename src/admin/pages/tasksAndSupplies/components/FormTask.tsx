@@ -21,6 +21,7 @@ import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
 import { Stepper } from "./formTaskComponents/StepIndicator"
 import { useTaskForm } from "../hooks/useTaskForm"
 import { SidePanel } from "@/admin/components/SidePanel"
+import { useProviders } from "@/admin/hooks/useProviders"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
@@ -53,9 +54,9 @@ interface TaskSupplyEdit {
 interface FormValues {
   id?: number | string | null;
   task_type_id: string;
+  provider_id: string;
   master_supply_id: number | null;
   description: string;
-  provider: string;
   date: string;
   note?: string;
   laborCost?: number | undefined;
@@ -74,8 +75,8 @@ interface TaskFormProps {
     id: number
     crop_id: number
     task_type_id: number
+    provider_id: number
     description?: string
-    provider: string
     total_price: number
     date: string
     note?: string
@@ -101,6 +102,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
     const { data: categoriesData } = useSupplyCategories();
     const { data: taskTypesData, createTaskTypeMutation } = useTaskTypes();
+    const { data: providersData, createProviderMutation } = useProviders();
 
     const { selectedCrop } = useCropStore();
     const { createSupply } = useSupply({ cropId: selectedCrop?.id || 0 });
@@ -134,8 +136,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     } = useForm<FormValues>({
       defaultValues: {
         task_type_id: "",
+        provider_id: "",
         description: "",
-        provider: "",
         date: "",
         note: "",
         laborCost: undefined,
@@ -246,8 +248,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           task_id: taskToEdit?.id || null,
           crop_id: selectedCrop?.id,
           task_type_id: data.task_type_id ? Number(data.task_type_id) : undefined,
+          provider_id: data.provider_id ? Number(data.provider_id) : undefined,
           description: data.description?.trim() !== "" ? data.description : null,
-          provider: data.provider ?? undefined,
           performed_at: data.date ?? null,
           note: data.note ?? null,
           laborCost: data.laborCost ? parseAmount(data.laborCost) : undefined,
@@ -274,6 +276,9 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       typeof t === "string" ? { id: t, name: t } : t
     );
 
+    const formattedProviders = providersData?.providers.map((p: any) =>
+      typeof p === "string" ? { id: p, name: p } : p
+    );
 
     const findCategoryId = (name: string) => {
       const category = categoriesData?.categories.find((c) => c.name === name);
@@ -300,8 +305,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         reset({
           id: taskToEdit.id,
           task_type_id: taskToEdit.task_type_id?.toString() || "",
+          provider_id: taskToEdit.provider_id?.toString() || "",
           description: taskToEdit.description || "",
-          provider: taskToEdit.provider || "",
           date: taskToEdit.date || taskToEdit.performed_at || "",
           note: taskToEdit.note || "",
           laborCost: taskToEdit?.laborCost ?? undefined,
@@ -310,8 +315,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       } else {
         reset({
           task_type_id: "",
+          provider_id: "",
           description: "",
-          provider: "",
           date: "",
           note: "",
           laborCost: undefined,
@@ -362,7 +367,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
                   {/* Tipo de Tarea */}
                   <CustomSelectWithCreate
-                    label="Tipo de tarea"
+                    label="Tipo de tarea *"
                     name="task_type_id"
                     options={formattedTaskTypes || []}
                     register={register}
@@ -389,21 +394,25 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                   {/* Proveedor y Fecha */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1 sm:mb-2">Proveedor</label>
-                      <input
-                        type="text"
-                        {...register("provider")}
-                        className="w-full px-3 py-2 sm:py-2 border rounded-md text-base sm:text-base focus:ring-2 focus:ring-primary focus:border-transparent"
-                        placeholder="Nombre del proveedor"
+
+                      <CustomSelectWithCreate
+                        label="Proveedor"
+                        name="provider_id"
+                        options={formattedProviders || []}
+                        register={register}
+                        errors={errors}
+                        onCreate={async (name: string) => {
+                          await createProviderMutation.mutateAsync(name);
+                        }}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1 sm:mb-2">Fecha *</label>
+                      <label className="block text-sm font-medium mt-1 mb-1 sm:mb-2">Fecha *</label>
                       <input
                         type="date"
                         {...register("date", { required: "La fecha es requerida" })}
-                        className="w-full min-w-0 appearance-none px-3 py-2 sm:py-2 border rounded-md text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                        className="w-full min-w-0 appearance-none mt-1 px-3 py-2 sm:py-2 border rounded-md text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-transparent dark:scheme-dark"
                       />
                       {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
                     </div>

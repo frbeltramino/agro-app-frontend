@@ -188,13 +188,10 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
               Tipo de Semilla
             </label>
             <input
-              {...register("seed_type", { required: "El tipo de semilla es requerido" })}
+              {...register("seed_type")}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Ej: DK72-10"
             />
-            {errors.seed_type && (
-              <p className="text-sm text-destructive mt-1">{errors.seed_type.message}</p>
-            )}
           </div>
 
           <div className="mt-2 pb-4">
@@ -206,7 +203,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
               }}
               render={({ field, fieldState }) => (
                 <AmountInput
-                  label="Rendimiento Real"
+                  label="Rendimiento Final (tn)"
                   value={field.value}
                   onChange={field.onChange}
                   error={fieldState.error?.message}

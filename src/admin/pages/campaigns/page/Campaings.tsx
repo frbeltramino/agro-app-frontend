@@ -243,6 +243,7 @@ export const Campaigns = () => {
                               </Button>
                               <Button
                                 variant="ghost"
+                                className="text-destructive"
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();

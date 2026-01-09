@@ -3,7 +3,6 @@ export interface CropTask {
   crop_id: number;
   task_type_id: number;
   description: string;
-  provider: string;
   total_price: number;
   laborCost: number;
   date: string;
@@ -13,6 +12,8 @@ export interface CropTask {
   updated_at: string;
   performed_at: string | null;
   type: string;
+  provider_name: string | null;
+  provider_id: string | number | null;
   supplies: CropTaskSupply[];
 }
 
@@ -29,5 +30,6 @@ export interface CropTaskSupply {
   total_used: number;
   from_stock: boolean;
 }
+
 
 
