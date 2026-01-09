@@ -32,7 +32,7 @@ export function AppSidebar() {
   const { open, isMobile, setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
 
   const handleLogout = () => {
     logout();
@@ -56,6 +56,13 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {open && user && (
+          <div className="px-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Hola, <span className="font-medium text-foreground">{user.name || user.email?.split('@')[0]}</span>!👋
+            </p>
+          </div>
+        )}
         <SidebarGroup>
           <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
           <SidebarGroupContent>
