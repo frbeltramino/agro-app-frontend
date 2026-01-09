@@ -49,7 +49,7 @@ export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobilePro
                   Dosis: {formatTn(supply.dose_per_ha)} {supply.supply_unit} • Cant/ha: {formatTn(supply.hectares)} • Total: {formatTn(totalQuantity)} {supply.supply_unit}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Precio unitario: {currencyFormatter(supply.unit_price)} • Total: {currencyFormatter(totalQuantity * supply.unit_price)}
+                  Precio unitario: {currencyFormatter(supply.unit_price ?? 0)} • Total: {currencyFormatter(totalQuantity * (supply.unit_price ?? 0))}
                 </span>
               </div>
               <div className="flex gap-2">

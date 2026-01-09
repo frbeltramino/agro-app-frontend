@@ -46,9 +46,9 @@ export const SuppliesCardDesktop = ({
               <TableCell>{formatTn(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
               <TableCell>{formatTn(supply.hectares)}</TableCell>
               <TableCell>{formatTn(totalQuantity)} {supply.supply_unit}</TableCell>
-              <TableCell>{currencyFormatter(supply.unit_price)}</TableCell>
+              <TableCell>{currencyFormatter(supply.unit_price ?? 0)}</TableCell>
               <TableCell className="font-medium">
-                {calculateTotalCostBySupply(supply.unit_price, totalQuantity)}
+                {calculateTotalCostBySupply(supply.unit_price ?? 0, totalQuantity)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
