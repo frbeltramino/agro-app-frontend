@@ -11,7 +11,6 @@ import { Edit2, Trash2 } from "lucide-react"
 
 interface Props {
   deliveries: any[]
-  totalTnSold: number
   isAddingDelivery: boolean
   onEdit: (index: number) => void
   onDelete: (index: number) => void
@@ -19,7 +18,6 @@ interface Props {
 
 export function SeedSaleDeliveriesTable({
   deliveries,
-  totalTnSold,
   isAddingDelivery,
   onEdit,
   onDelete,
@@ -27,6 +25,12 @@ export function SeedSaleDeliveriesTable({
   const formatTn = (value: number) => value.toLocaleString("es-AR")
   const currencyFormatter = (value: number) =>
     new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(value)
+
+  const totalTnSoldDisplay = () => {
+    if (deliveries.length > 0) {
+      return formatTn(deliveries.reduce((sum, d) => sum + d.tn_delivered, 0))
+    }
+  }
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -37,7 +41,7 @@ export function SeedSaleDeliveriesTable({
             key={index}
             className="p-4 rounded-lg shadow-md border border-muted/30"
           >
-            {/* Fila superior: destino, fecha, carta de porte y acciones */}
+            {/* Fila superior: destino, fecha, Liquidación primaria y acciones */}
             <div className="grid grid-cols-3 gap-4 items-start mb-2">
               <div>
                 <p className="font-medium text-sm">{d.destination}</p>
@@ -46,8 +50,8 @@ export function SeedSaleDeliveriesTable({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Carta de Porte</p>
-                <p className="font-medium">{d.waybill_number}</p>
+                <p className="text-xs text-muted-foreground">Liquidación Primaria</p>
+                <p className="font-medium">{d.primary_liquidation_number}</p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button
@@ -95,7 +99,7 @@ export function SeedSaleDeliveriesTable({
 
         {/* Total row mobile */}
         <div className="p-3 bg-muted/50 rounded-lg flex justify-between items-center font-semibold text-sm">
-          <span>Total: {formatTn(totalTnSold)} tn</span>
+          <span>Total: {totalTnSoldDisplay()} tn</span>
           <span>
             {currencyFormatter(
               deliveries.reduce((sum, d) => sum + d.tn_delivered * d.price_per_tn, 0)
@@ -106,10 +110,10 @@ export function SeedSaleDeliveriesTable({
 
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto">
-        <Table className="w-full table-fixed">
+        <Table className="w-full ">
           <TableHeader>
             <TableRow>
-              <TableHead>Carta de Porte</TableHead>
+              <TableHead>Liquidación Primaria</TableHead>
               <TableHead>Fecha</TableHead>
               <TableHead>Destino</TableHead>
               <TableHead className="text-right">tn</TableHead>
@@ -121,7 +125,7 @@ export function SeedSaleDeliveriesTable({
           <TableBody>
             {deliveries.map((d, index) => (
               <TableRow key={index}>
-                <TableCell>{d.waybill_number}</TableCell>
+                <TableCell>{d.primary_liquidation_number}</TableCell>
                 <TableCell>{new Date(d.delivery_date).toLocaleDateString()}</TableCell>
                 <TableCell>{d.destination}</TableCell>
                 <TableCell className="text-right">{formatTn(d.tn_delivered)}</TableCell>
@@ -155,7 +159,7 @@ export function SeedSaleDeliveriesTable({
             ))}
             <TableRow className="bg-muted/50 font-semibold">
               <TableCell colSpan={3}>Total</TableCell>
-              <TableCell className="text-right">{formatTn(totalTnSold)}</TableCell>
+              <TableCell className="text-right">{totalTnSoldDisplay()}</TableCell>
               <TableCell />
               <TableCell className="text-right">
                 {currencyFormatter(deliveries.reduce((sum, d) => sum + d.tn_delivered * d.price_per_tn, 0))}

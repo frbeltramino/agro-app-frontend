@@ -8,8 +8,9 @@ interface Props {
   controlDelivery: any
   deliveryErrors: any
   onCancel: () => void
-  onSubmit: () => void
+  onSubmit?: () => void
   isEditing: boolean
+  commonSubmit?: (data: any) => void
 }
 
 export function SeedSaleDeliveryForm({
@@ -18,26 +19,26 @@ export function SeedSaleDeliveryForm({
   deliveryErrors,
   onCancel,
   onSubmit,
-  isEditing,
+  isEditing
 }: Props) {
   return (
     <div className="border rounded-lg p-3 md:p-4 bg-muted/30 space-y-3">
       <h4 className="font-medium text-sm">{isEditing ? "Editar Venta" : "Nueva Venta"}</h4>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Carta de Porte */}
+        {/* Liquidacion primaria */}
         <div className="sm:col-span-2">
-          <Label className="text-sm">Carta de Porte *</Label>
+          <Label className="text-sm mb-1.5">Liquidación Primaria *</Label>
           <input
             type="text"
-            placeholder="CP-2025"
-            {...registerDelivery("waybill_delivery_number", {
-              required: "La carta de porte es requerida",
+            placeholder="LP-2025-0001"
+            {...registerDelivery("primary_liquidation_number", {
+              required: "La liquidación primaria es requerida",
             })}
             className="w-full px-3 py-2 border rounded-md"
           />
-          {deliveryErrors.waybill_delivery_number && (
-            <p className="text-destructive text-xs mt-1">{deliveryErrors.waybill_delivery_number.message}</p>
+          {deliveryErrors.primary_liquidation_number && (
+            <p className="text-destructive text-xs mt-1">{deliveryErrors.primary_liquidation_number.message}</p>
           )}
         </div>
 
@@ -47,7 +48,7 @@ export function SeedSaleDeliveryForm({
           <input
             type="date"
             {...registerDelivery("delivery_date", { required: "La fecha es requerida" })}
-            className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+            className="date-standard"
           />
           {deliveryErrors.delivery_date && (
             <p className="text-destructive text-xs mt-1">{deliveryErrors.delivery_date.message}</p>
@@ -75,16 +76,13 @@ export function SeedSaleDeliveryForm({
             rules={{ required: "tn vendidas es obligatorio" }}
             render={({ field, fieldState }) => (
               <AmountInput
-                label="tn Vendidos *"
+                label="tn a Vender *"
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
               />
             )}
           />
-          {deliveryErrors.tn_delivered && (
-            <p className="text-destructive text-xs mt-1">{deliveryErrors.tn_delivered.message}</p>
-          )}
         </div>
 
         {/* Precio */}
@@ -103,9 +101,6 @@ export function SeedSaleDeliveryForm({
               />
             )}
           />
-          {deliveryErrors.price_per_tn && (
-            <p className="text-destructive text-xs mt-1">{deliveryErrors.price_per_tn.message}</p>
-          )}
         </div>
       </div>
 
@@ -128,6 +123,8 @@ export function SeedSaleDeliveryForm({
         >
           {isEditing ? "Actualizar" : "Agregar"}
         </Button>
+
+
       </div>
     </div>
   )

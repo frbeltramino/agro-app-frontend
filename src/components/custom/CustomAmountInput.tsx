@@ -104,12 +104,14 @@ export function AmountInput({
     }
   }
 
-  const handleBlur = () => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false)
-    // Format on blur
+
     if (value !== undefined) {
       setDisplayValue(formatCurrency(value))
     }
+    // 👉 reenviar onBlur al padre (Controller / RHF)
+    props.onBlur?.(e)
   }
 
   return (
@@ -117,10 +119,7 @@ export function AmountInput({
       {label && (
         <label
           htmlFor={props.id}
-          className={cn(
-            "block text-sm font-medium mb-2",
-            error && "text-destructive"
-          )}
+          className="block text-sm font-medium mb-2"
         >
           {label}
         </label>
@@ -148,7 +147,7 @@ export function AmountInput({
           {...props}
         />
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

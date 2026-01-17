@@ -13,8 +13,11 @@ export interface SeedSale {
   created_at?: string;
   updated_at?: string;
   crop_name_id: number;
+  campaign_id: number;
+  campaign_name?: string;
   crop_name: string;
   deliveries: Delivery[];
 }
+
 
 

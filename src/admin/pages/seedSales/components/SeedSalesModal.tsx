@@ -1,24 +1,30 @@
 "use client"
 
 import { forwardRef, useState, useEffect } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 
 import { toast } from "sonner"
 import { formatNumber } from "@/lib/format-number"
 import { PlusCircle } from "lucide-react"
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
-import { CropSale } from "@/interfaces/crops/crop.sales.response";
-import { AmountInput } from "@/components/custom/CustomAmountInput"
-import { formatTn } from "@/lib/format-tn"
+
 import { useSeedSaleForm } from "../hooks/useSeedSaleForm"
 import { SeedSaleDeliveryForm } from "./SeedSaleDeliveryForm"
 import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
-import { Label } from "@/components/ui/label"
 import { SidePanel } from "@/admin/components/SidePanel"
+import { useCampaignsForSale } from "@/admin/hooks/useCampaignsForSale"
+import { Campaign } from "@/interfaces/campaigns/campaigns-for-sale.response"
+import { Stepper } from "@/components/custom/StepIndicator"
+import { useCropsToSale } from "@/admin/hooks/useCropsToSale"
+import { SaleStep1 } from "./SaleStep1"
+import { SeleStep2 } from "./SaleStep2"
+import { SaleSummary } from "./SaleSummary"
 
 
-interface FormValues {
+
+export interface FormValues {
+  campaign_id: number
   crop_name_id: number
   waybill_number: string
   destination: string
@@ -28,7 +34,7 @@ interface FormValues {
 }
 
 interface DeliveryFormValues {
-  waybill_delivery_number: string | undefined | null
+  primary_liquidation_number: string | undefined | null
   delivery_date: string
   destination: string
   tn_delivered: number | undefined
@@ -39,43 +45,62 @@ interface SeedSalesModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (item: SeedSale) => void
-  initialData: SeedSale | null
-  crops?: CropSale[]
 }
 
-const statuses = [
-  { value: "pending", label: "Pendiente" },
-  { value: "completed", label: "Completado" },
-  { value: "cancelled", label: "Cancelado" },
-]
 
 export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
-  ({ isOpen, onClose, onSave, initialData, crops }) => {
-    const [isSaving, setIsSaving] = useState(false)
-    const [, setTnDeliveredDisplay] = useState("")
+  ({ isOpen, onClose, onSave }) => {
+    const [isSaving, setIsSaving] = useState(false);
 
     const [isAddingDelivery, setIsAddingDelivery] = useState(false);
 
-    const cropsData: CropSale[] = crops || [];
+    const { data: campaignsForSale } = useCampaignsForSale();
+
+    const campaignsData: Campaign[] = campaignsForSale?.campaigns || [];
+
+    const [step, setStep] = useState(1);
+
+    const {
+      createOrUpdateDeliveries,
+      deliveries,
+      editingDeliveryIndex,
+      setDeliveries,
+      setEditingDeliveryIndex,
+      setAvailableTn,
+      availableTn,
+      setTotalTnSold,
+      totalTnSold,
+      setSelectedCrop,
+      selectedCrop,
+      getCropInfo,
+      setTotalTn,
+      setCropsData,
+      cropsData,
+      selectedCampaign,
+      setSelectedCampaign
+    } = useSeedSaleForm();
 
     const {
       register,
       handleSubmit,
       formState: { errors },
       reset,
-      setValue,
       control: controlSale,
-      watch
+      watch,
+      trigger,
+      clearErrors,
+      setValue
     } = useForm<FormValues>({
       defaultValues: {
-        crop_name_id: initialData?.crop_name_id || (cropsData.length > 0 ? cropsData[0].crop_name_id : 0),
-        waybill_number: initialData?.waybill_number || "",
-        destination: initialData?.destination || "",
-        date: initialData?.sale_date || new Date().toISOString().split("T")[0],
-        tn_delivered: initialData?.tn_delivered || 0,
-        status: initialData?.status || "pending",
+        campaign_id: 0,
+        crop_name_id: 0,
+        waybill_number: "",
+        destination: "",
+        date: new Date().toISOString().split("T")[0] + "Z",
+        tn_delivered: 0,
+        status: "pending",
       },
-    })
+    });
 
     const {
       register: registerDelivery,
@@ -85,7 +110,7 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       control: controlDelivery,
     } = useForm<DeliveryFormValues>({
       defaultValues: {
-        waybill_delivery_number: "",
+        primary_liquidation_number: "",
         delivery_date: new Date().toISOString().split("T")[0],
         destination: "",
         tn_delivered: undefined,
@@ -93,48 +118,65 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       },
     })
 
-    const [, setDeliveryTnDisplay] = useState("")
-    const [, setDeliveryPriceDisplay] = useState("")
-
     const totalTnDelivered = watch("tn_delivered") || 0;
     const selectedCropNameId = watch("crop_name_id");
+    const selectedCampaignId = watch("campaign_id");
+    const summaryValues = watch([
+      "waybill_number",
+      "destination",
+      "date",
+      "status",
+      "tn_delivered",
+    ]);
+
+
+    const handleCampaignChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedId = Number(e.target.value);
+      const campaign = campaignsData.find(c => c.id === selectedId);
+      setSelectedCampaign(campaign?.name || "");
+    };
 
     const {
-      createOrUpdateDeliveries,
-      deliveries,
-      editingDeliveryIndex,
-      setDeliveries,
-      setEditingDeliveryIndex
-    } = useSeedSaleForm();
-
-    const selectedCrop = crops?.find(c => c.crop_name_id === selectedCropNameId);
-    const totalTnSold = selectedCrop?.total_sold_tn || 0;
+      data: cropsToSale,
+      isLoading: cropsCampaignLoading,
+      error: cropsCampaignError,
+    } = useCropsToSale({
+      campaignId: selectedCampaignId ?? 0,
+      enabled: !!selectedCampaignId,
+    });
 
     const onDeliverySubmit = (data: DeliveryFormValues) => {
+
+      const tnTotalAvailable = summaryValues[4] || 0;
+
+      if (data.tn_delivered !== undefined && data.tn_delivered > tnTotalAvailable) {
+        toast.error(`Solo hay ${formatNumber(tnTotalAvailable.toString())} tn disponibles`)
+        return
+      }
 
       createOrUpdateDeliveries({
         data,
         deliveries,
         editingDeliveryIndex,
-        initialData,
-        totalTnDelivered,
         selectedCropNameId,
-        totalTnSold
       });
 
       setIsAddingDelivery(false)
       resetDelivery({
-        waybill_delivery_number: "",
+        primary_liquidation_number: "",
         delivery_date: "",
         destination: "",
         tn_delivered: undefined,
         price_per_tn: undefined,
       })
-      setDeliveryTnDisplay("")
-      setDeliveryPriceDisplay("")
     }
 
     const handleDeleteDelivery = (index: number) => {
+      const delivery = deliveries[index];
+      const updateTotalTnSold = totalTnSold - Number(delivery.tn_delivered);
+      const updateAvilableTn = availableTn + Number(delivery.tn_delivered);
+      setTotalTnSold(updateTotalTnSold);
+      setAvailableTn(updateAvilableTn);
       const updatedDeliveries = deliveries.filter((_, deliveryIndex) => deliveryIndex !== index);
       setDeliveries(updatedDeliveries)
     }
@@ -143,10 +185,8 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       const delivery = deliveries[index]
       setEditingDeliveryIndex(index)
       setIsAddingDelivery(true)
-      setDeliveryTnDisplay(formatNumber(delivery.tn_delivered.toString()))
-      setDeliveryPriceDisplay(formatNumber(delivery.price_per_tn.toString()))
       resetDelivery({
-        waybill_delivery_number: delivery.waybill_number,
+        primary_liquidation_number: delivery.primary_liquidation_number,
         delivery_date: delivery.delivery_date,
         destination: delivery.destination,
         tn_delivered: delivery.tn_delivered,
@@ -164,7 +204,8 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       }
 
       const item: SeedSale = {
-        id: initialData?.id || null,
+        id: null,
+        campaign_id: Number(data.campaign_id),
         crop_name_id: Number(data.crop_name_id),
         waybill_number: data.waybill_number,
         sale_date: data.date,
@@ -183,289 +224,283 @@ export const SeedSalesModal = forwardRef<HTMLDivElement, SeedSalesModalProps>(
       onClose()
       setIsSaving(false)
     }
+
     useEffect(() => {
       if (!isOpen) return;
 
-      if (initialData) {
-        setTnDeliveredDisplay(formatNumber(initialData.tn_delivered.toString()))
-        setDeliveries(initialData.deliveries || []) // ✅ acá seteamos el hook
-        reset({
-          crop_name_id: initialData.crop_name_id || (cropsData.length > 0 ? cropsData[0].crop_name_id : 0),
-          waybill_number: initialData.waybill_number,
-          destination: initialData.destination,
-          date: initialData.sale_date,
-          tn_delivered: initialData.tn_delivered,
-          status: initialData.status,
-        })
-      } else if (cropsData.length > 0) {
-        const selectedCropDefault = cropsData.find(c => c.crop_name_id === Number(cropsData[0].crop_name_id));
-        const formatted = selectedCropDefault?.total_harvested_tn.toString() || "";
-        setTnDeliveredDisplay(formatted);
-        reset({
-          crop_name_id: cropsData[0].crop_name_id,
-          waybill_number: "",
-          destination: "",
-          date: new Date().toISOString().split("T")[0],
-          tn_delivered: Number(formatted),
-          status: "pending",
-        })
-        setDeliveries([]) // solo al crear nueva venta
+      setStep(1);
+
+
+      reset({
+        campaign_id: 0,
+        crop_name_id: 0,
+        waybill_number: "",
+        destination: "",
+        date: new Date().toISOString().split("T")[0],
+        tn_delivered: 0,
+        status: "pending",
+      });
+
+      setDeliveries([]);
+      setSelectedCrop(null);
+      setCropsData([]);
+      setTotalTn(0);
+      setTotalTnSold(0);
+      setAvailableTn(0);
+
+    }, [isOpen]);
+
+    // useEffect(() => {
+    //   reset({
+    //     ...watch(),
+    //     crop_name_id: 0,
+    //   });
+
+    //   setSelectedCrop(null);
+    //   setCropsData([]);
+    // }, [selectedCampaignId]);
+
+    // useEffect(() => {
+    //   if (!isOpen || !initialData) return;
+    //   setStep(1);
+    //   const available =
+    //     Number(initialData.tn_delivered) - Number(initialData.tn_sold);
+
+    //   setTotalTnSold(Number(initialData.tn_sold));
+    //   setAvailableTn(Math.max(available, 0));
+    //   setTotalTn(Number(initialData.tn_delivered) || 0);
+    //   setDeliveries(initialData.deliveries || []);
+
+    //   reset({
+    //     campaign_id: initialData.campaign_id,
+    //     crop_name_id: initialData.crop_name_id,
+    //     waybill_number: initialData.waybill_number,
+    //     destination: initialData.destination,
+    //     date: initialData.sale_date,
+    //     tn_delivered: initialData.tn_delivered,
+    //     status: initialData.status,
+    //   });
+    // }, [isOpen, initialData]);
+
+    useEffect(() => {
+      if (!selectedCampaignId) return;
+
+      // Solo limpiamos el cultivo, no reseteamos todo
+      setValue("crop_name_id", 0);  // react-hook-form
+      setSelectedCrop(null);
+      setCropsData([]);
+      setTotalTn(0);
+      setTotalTnSold(0);
+      setAvailableTn(0);
+      setDeliveries([]);
+    }, [selectedCampaignId, setValue]);
+
+    useEffect(() => {
+      if (!cropsToSale?.crops) {
+        setCropsData([]);
+        return;
       }
-    }, [initialData, reset, cropsData, isOpen, setDeliveries])
+
+      setCropsData(cropsToSale.crops);
+      setSelectedCrop(null); // no autoseleccionamos
+    }, [cropsToSale]);
 
     useEffect(() => {
       if (!selectedCropNameId || !cropsData.length) return;
 
-      const crop = cropsData.find(c => c.crop_name_id === Number(selectedCropNameId));
-      if (!crop || crop.total_harvested_tn == null) return;
+      const crop = getCropInfo(selectedCropNameId);
+      if (!crop) return;
 
-      const formatted = formatNumber(crop.total_harvested_tn.toString());
-      setTnDeliveredDisplay(formatted);
-      setValue("tn_delivered", Number(crop.total_harvested_tn), {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+      setSelectedCrop(crop);
+      setAvailableTn(crop.total_harvested_tn - crop.total_delivered_tn || 0);
+      setTotalTn(crop.total_harvested_tn || 0);
+      setTotalTnSold(0);
+    }, [selectedCropNameId, cropsData]);
 
-      // 🔹 Solo limpiar deliveries si estamos creando nueva venta
-      if (!initialData) setDeliveries([]);
-    }, [selectedCropNameId, cropsData, setValue, initialData, setDeliveries])
 
     return (
       <SidePanel
         isOpen={isOpen}
         onClose={onClose}
-        title={initialData ? "Editar Venta" : "Nueva Venta de Semillas"}
+        title={"Nueva Entrega de Semillas"}
         width="lg"
       >
-
+        <Stepper step={step} steps={["Selecciona el cultivo", "Datos De la entrega", "Agregar Ventas"]} />
 
         <form
           id="seed-sale-form"
           onSubmit={handleSubmit(onFormSubmit)}
-          className="space-y-4 md:space-y-6"
+          className="space-y-4 md:space-y-6 mt-2"
         >
           <div className="space-y-4">
-            <h3 className="text-base md:text-lg font-semibold">Datos Generales</h3>
+            <h3 className="text-base md:text-lg font-semibold">
+              {
+                step === 1 ? "Selecciona el cultivo" : step === 2 ? "Datos De la entrega" : "Agregar Ventas"
+              }
+            </h3>
+            {
+              step === 1 && (
+                <>
+                  <SaleStep1
+                    register={register}
+                    errors={errors}
+                    trigger={trigger}
+                    clearErrors={clearErrors}
+                    campaignsData={campaignsData}
+                    cropsData={cropsData}
+                    cropsCampaignLoading={cropsCampaignLoading}
+                    cropsCampaignError={cropsCampaignError}
+                    handleCampaignChange={handleCampaignChange}
+                    onClose={onClose}
+                    setStep={setStep}
+                    isAddingDelivery={isAddingDelivery}
+                  />
+                </>
+              )
+            }
 
-            <div>
-              <Label className="text-sm">Cultivo *</Label>
-              <select
-                {...register("crop_name_id", {
-                  required: "El cultivo es requerido",
-                  valueAsNumber: true,
-                })}
-                className="mt-1.5 w-full px-3 py-2 border rounded-md bg-background text-sm"
-                disabled={cropsData.length === 0}
-              >
-                {cropsData.map((crop) => (
-                  <option key={crop.crop_name_id} value={crop.crop_name_id}>
-                    {crop.crop_name}
-                  </option>
-                ))}
-              </select>
-              {cropsData.length === 0 && (
-                <p className="text-sm text-muted-foreground mt-1">No hay cultivos cocechados</p>
-              )}
-              {errors.crop_name_id && <p className="text-destructive text-xs mt-1">{errors.crop_name_id.message}</p>}
-            </div>
+            {
+              step === 2 && (
+                <>
+                  <SeleStep2
+                    register={register}
+                    errors={errors}
+                    trigger={trigger}
+                    clearErrors={clearErrors}
+                    cropsData={cropsData}
+                    selectedCrop={selectedCrop}
+                    selectedCampaign={selectedCampaign}
+                    setStep={setStep}
+                    isAddingDelivery={isAddingDelivery}
+                    controlSale={controlSale}
+                    watch={watch}
+                    setValue={setValue}
+                  />
+                </>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-sm mb-1.5">Carta de Porte *</Label>
-                <input
-                  type="text"
-                  {...register("waybill_number", { required: "La carta de porte es requerida" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Ej: CP-2024-001"
-                />
-                {errors.waybill_number && (
-                  <p className="text-destructive text-xs mt-1">{errors.waybill_number.message}</p>
-                )}
-              </div>
+              )
+            }
 
-              <div>
-                <Label className="text-sm mb-1.5">Destino Principal *</Label>
-                <input
-                  type="text"
-                  {...register("destination", { required: "El destino es requerido" })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Ej: Buenos Aires"
-                />
-                {errors.destination && <p className="text-destructive text-xs mt-1">{errors.destination.message}</p>}
-              </div>
-            </div>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <Label className="text-sm mb-1.5">Fecha *</Label>
-                <input
-                  type="date"
-                  {...register("date", { required: "La fecha es requerida" })}
-                  className="date-standard"
-                />
-                {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
-              </div>
-
-              <div>
-                <Label className="text-sm mb-1.5">Estado *</Label>
-                <select
-                  {...register("status", { required: "El estado es requerido" })}
-                  className="w-full px-3 py-2 border rounded-md bg-background text-md"
-                >
-                  {statuses.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.status && <p className="text-destructive text-sm mt-1">{errors.status.message}</p>}
-              </div>
-
-              <div>
-                <Controller
-                  name="tn_delivered"
-                  control={controlSale}
-                  rules={{
-                    required: "tn totales entregadas es obligatorio",
-                    min: { value: 0.01, message: "Debe ser mayor a 0" },
+          {
+            step === 3 && (
+              <>
+                <SaleSummary
+                  showContext
+                  showDelivery
+                  formValues={{
+                    waybill_number: summaryValues[0],
+                    destination: summaryValues[1],
+                    date: summaryValues[2],
+                    status: summaryValues[3],
+                    tn_delivered: summaryValues[4],
                   }}
-                  render={({ field, fieldState }) => (
-                    <AmountInput
-                      label="tn Entregadas *"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={fieldState.error?.message}
-                      locale="es-AR"
-                      placeholder="0,00"
+                  cropsData={cropsData}
+                  selectedCampaign={selectedCampaign}
+                  selectedCrop={selectedCrop}
+                  contextOpenValue={false}
+                  deliveryOpenValue={true}
+                />
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-base md:text-lg font-semibold">Ventas</h3>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsAddingDelivery(true)
+                        setEditingDeliveryIndex(null)
+                        resetDelivery({
+                          primary_liquidation_number: "",
+                          delivery_date: "",
+                          destination: "",
+                          tn_delivered: undefined,
+                          price_per_tn: undefined,
+                        })
+                      }}
+                      disabled={isAddingDelivery || totalTnDelivered === 0}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-1.5" />
+                      <span className="hidden sm:inline">Agregar Venta</span>
+                      <span className="sm:hidden">Agregar</span>
+                    </Button>
+                  </div>
+
+                  {isAddingDelivery && (
+
+                    <SeedSaleDeliveryForm
+                      registerDelivery={registerDelivery}
+                      controlDelivery={controlDelivery}
+                      deliveryErrors={deliveryErrors}
+                      isEditing={editingDeliveryIndex !== null}
+                      onSubmit={handleSubmitDelivery(onDeliverySubmit)}
+                      onCancel={() => {
+                        setIsAddingDelivery(false)
+                        resetDelivery({
+                          primary_liquidation_number: "",
+                          delivery_date: "",
+                          destination: "",
+                          tn_delivered: undefined,
+                          price_per_tn: undefined,
+                        })
+                        setEditingDeliveryIndex(null)
+                      }}
+                    />
+
+                  )}
+
+                  {deliveries.length > 0 && (
+                    <SeedSaleDeliveriesTable
+                      deliveries={deliveries}
+                      isAddingDelivery={isAddingDelivery}
+                      onEdit={handleEditDelivery}
+                      onDelete={handleDeleteDelivery}
                     />
                   )}
-                />
-              </div>
-            </div>
 
-            <div className="bg-muted p-3 md:p-4 rounded-lg">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-xs text-muted-foreground">tn Totales</p>
-                  <p className="text-lg md:text-2xl font-bold">{formatTn(totalTnDelivered)}</p>
+                  {deliveries.length === 0 && !isAddingDelivery && (
+                    <div className="text-center py-6 text-muted-foreground border rounded-lg border-dashed">
+                      <p className="text-sm">No hay ventas registradas</p>
+                      <p className="text-xs">Haz clic en "Agregar Venta" para comenzar</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">tn Vendidas</p>
-                  <p className="text-lg md:text-2xl font-bold text-green-600">{formatTn(totalTnSold)}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStep(2)}
+                    className="w-full"
+                    disabled={isAddingDelivery}
+                  >
+                    Volver
+                  </Button>
+                  <Button
+                    type="submit"
+                    form="seed-sale-form"
+                    disabled={isSaving || isAddingDelivery}
+                    className="w-full"
+                  >
+                    {isSaving ? (
+                      <>
+                        Guardando...
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                      </>
+                    ) :
+                      "Crear"
+                    }
+                  </Button>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">tn Disponibles</p>
-                  <p className="text-lg md:text-2xl font-bold text-blue-600">
-                    {formatTn((totalTnDelivered - totalTnSold))}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+              </>
+            )
+          }
 
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="text-base md:text-lg font-semibold">Ventas</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsAddingDelivery(true)
-                  setEditingDeliveryIndex(null)
-                  resetDelivery({
-                    waybill_delivery_number: "",
-                    delivery_date: "",
-                    destination: "",
-                    tn_delivered: undefined,
-                    price_per_tn: undefined,
-                  })
-                }}
-                disabled={isAddingDelivery || totalTnDelivered === 0}
-              >
-                <PlusCircle className="w-4 h-4 mr-1.5" />
-                <span className="hidden sm:inline">Agregar Venta</span>
-                <span className="sm:hidden">Agregar</span>
-              </Button>
-            </div>
-
-            {isAddingDelivery && (
-
-              <SeedSaleDeliveryForm
-                registerDelivery={registerDelivery}
-                controlDelivery={controlDelivery}
-                deliveryErrors={deliveryErrors}
-                isEditing={editingDeliveryIndex !== null}
-                onSubmit={handleSubmitDelivery(onDeliverySubmit)}
-                onCancel={() => {
-                  setIsAddingDelivery(false)
-                  resetDelivery({
-                    waybill_delivery_number: "",
-                    delivery_date: "",
-                    destination: "",
-                    tn_delivered: undefined,
-                    price_per_tn: undefined,
-                  })
-                  setEditingDeliveryIndex(null)
-                }}
-              />
-
-            )}
-
-            {deliveries.length > 0 && (
-              <SeedSaleDeliveriesTable
-                deliveries={deliveries}
-                totalTnSold={totalTnSold}
-                isAddingDelivery={isAddingDelivery}
-                onEdit={handleEditDelivery}
-                onDelete={handleDeleteDelivery}
-              />
-            )}
-
-            {deliveries.length === 0 && !isAddingDelivery && (
-              <div className="text-center py-6 text-muted-foreground border rounded-lg border-dashed">
-                <p className="text-sm">No hay ventas registradas</p>
-                <p className="text-xs">Haz clic en "Agregar Venta" para comenzar</p>
-              </div>
-            )}
-          </div>
 
 
         </form>
 
-        <div className="border-t bg-background px-4 py-4 safe-area-bottom mt-4">
-          <div className="mx-auto w-full sm:w-[360px]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="w-full"
-                disabled={isAddingDelivery}
-              >
-                Cancelar
-              </Button>
-
-              <Button
-                type="submit"
-                form="seed-sale-form"
-                disabled={isSaving || isAddingDelivery}
-                className="w-full"
-              >
-                {isSaving ? (
-                  <>
-                    Guardando...
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-                  </>
-                ) : initialData ? (
-                  "Actualizar"
-                ) : (
-                  "Crear"
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
       </SidePanel>
     )
   },

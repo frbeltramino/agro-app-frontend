@@ -32,10 +32,20 @@ export const SeedSaleMobileCard = ({
         <div className="p-4 space-y-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
+              <div className="space-y-0.5 mb-1">
+                <p className="text-sm flex items-center gap-1">
+                  🌱 <span className="font-medium">{item.crop_name}</span>
+                </p>
+                <p className="text-xs flex items-center gap-1 text-muted-foreground">
+                  📅 {item.campaign_name}
+                </p>
+              </div>
+
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-semibold text-sm">{item.waybill_number}</span>
                 {getStatusBadge(item.status)}
               </div>
+
               <p className="text-muted-foreground text-sm">{item.destination}</p>
               <p className="text-muted-foreground text-xs">{new Date(item.sale_date).toLocaleDateString()}</p>
             </div>
@@ -96,9 +106,9 @@ export const SeedSaleMobileCard = ({
                     </p>
                   </div>
 
-                  <div>
-                    <p className="text-xs text-muted-foreground">Carta de Porte</p>
-                    <p className="font-medium">{delivery.waybill_number}</p>
+                  <div className="col-span-2">
+                    <p className="text-xs text-muted-foreground">Liquidación Primaria</p>
+                    <p className="font-medium">{delivery.primary_liquidation_number}</p>
                   </div>
 
                   {/* Columna vacía para alinear con Total */}

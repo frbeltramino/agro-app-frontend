@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -19,11 +19,13 @@ import { CustomPagination } from "@/components/custom/CustomPagination"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { formatTn } from "@/lib/format-tn"
 import { currencyFormatter } from "@/lib/currency-formatter"
-import { useCropsToSale } from "@/admin/hooks/useCropsToSale"
+
 import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
 import { Delivery } from "@/interfaces/sales/seed.sale.delivery.interface"
-import { CropSale } from "@/interfaces/crops/crop.sales.response"
+
 import { SeedSaleMobileCard } from "./SeedSaleMobileCard"
+import { SeedSaleEdit } from "./SeedSaleEdit"
+import { useSeedSaleEditStore } from "@/admin/pages/seedSales/store/seed.sale.store"
 
 export const SeedSalesTable = () => {
   const [deletingItem, setDeletingItem] = useState<SeedSale | null>(null)
@@ -34,12 +36,12 @@ export const SeedSalesTable = () => {
   const [searchDestination, setSearchDestination] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
-  const { data: cropsToSale } = useCropsToSale();
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const crops: CropSale[] = cropsToSale?.crops || [];
   const { mutation: mutationDelivery, deleteSaleDelivery } = useSeedSaleDelivery();
   const [showFilters, setShowFilters] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
+  const { originalSale, clearOriginalSale } = useSeedSaleEditStore();
   const {
     data: seedSales,
     isLoading,
@@ -72,13 +74,15 @@ export const SeedSalesTable = () => {
 
   const handleAdd = () => {
     setEditingItem(null)
+    clearOriginalSale()
     setIsModalOpen(true)
   }
 
   const handleEdit = (item: SeedSale) => {
     console.log({ item })
-    setEditingItem(item)
-    setIsModalOpen(true)
+    setEditingItem(item);
+    setIsEditDialogOpen(true)
+    console.log({ editingItem })
   }
 
   const handleDelete = (itemId: any) => {
@@ -97,39 +101,8 @@ export const SeedSalesTable = () => {
       // Vlaidar si la venta ya existe
       const existingSale = seedSalesData?.find(s => s.waybill_number === item.waybill_number);
       if (existingSale) {
-        // si existe debo buscar los deliveries existentes y ver si se agregaron o se eliminaron algunos
-        // 2️⃣ Obtener los deliveries existentes en la DB
-        const existingDeliveries: Delivery[] = existingSale.deliveries || [];
-        const existingIds = existingDeliveries.map(d => d.id);
-
-        // 3️⃣ Obtener los IDs de los deliveries que vinieron del frontend
-        const incomingIds = item.deliveries.filter(d => d.id).map(d => d.id);
-
-        // 4️⃣ Detectar deliveries que se eliminaron (existían antes, pero no vienen en la edición)
-        const toDeleteIds = existingIds.filter(id => !incomingIds.includes(id));
-
-        // 5️⃣ Eliminar esos deliveries
-        for (const id of toDeleteIds) {
-          await deleteSaleDelivery.mutateAsync(
-            id
-          );
-        }
-
-        for (const delivery of item.deliveries) {
-          await mutationDelivery.mutateAsync({
-            id: delivery.id ?? null,
-            waybill_number: delivery.waybill_number,
-            seed_sale_id: existingSale.id,
-            crop_name_id: item.crop_name_id,
-            delivery_date: delivery.delivery_date,
-            destination: delivery.destination,
-            tn_delivered: delivery.tn_delivered,
-            price_per_tn: delivery.price_per_tn,
-          });
-        }
-
-        //Actualizo la data de la venta 
-        await mutation.mutateAsync(item);
+        toast.error("La venta con número de carta porte " + item.waybill_number + " ya existe");
+        return;
       } else {
         // si no existe debo guardar la venta
         // 1️⃣ Guardar venta primero
@@ -140,7 +113,7 @@ export const SeedSalesTable = () => {
         for (const delivery of item.deliveries) {
           await mutationDelivery.mutateAsync({
             id: delivery.id ?? null,
-            waybill_number: delivery.waybill_number,
+            primary_liquidation_number: delivery.primary_liquidation_number,
             seed_sale_id: seedSaleId,
             crop_name_id: item.crop_name_id,
             delivery_date: delivery.delivery_date,
@@ -162,6 +135,67 @@ export const SeedSalesTable = () => {
       });
     }
   };
+
+  const handelSaveEdit = async (item: SeedSale) => {
+    try {
+
+      // Vlaidar si la venta ya existe
+      if (!originalSale) return;
+      const existingSale = originalSale;
+      if (existingSale) {
+
+        // si existe debo buscar los deliveries existentes y ver si se agregaron o se eliminaron algunos
+        // 2️⃣ Obtener los deliveries existentes en la DB
+        const existingDeliveries: Delivery[] = existingSale.deliveries || [];
+        const existingIds = existingDeliveries
+          .map(d => d.id)
+          .filter((id): id is number => id != null);
+
+        // 3️⃣ Obtener los IDs de los deliveries que vinieron del frontend
+        const incomingIds = item.deliveries
+          .map(d => d.id)
+          .filter((id): id is number => typeof id === "number");
+
+        // 4️⃣ Detectar deliveries que se eliminaron (existían antes, pero no vienen en la edición)
+        const toDeleteIds = existingIds.filter(id => !incomingIds.includes(id));
+
+        // 5️⃣ Eliminar esos deliveries
+        if (toDeleteIds.length > 0) {
+          for (const id of toDeleteIds) {
+            await deleteSaleDelivery.mutateAsync(
+              id
+            );
+          }
+        }
+
+
+        for (const delivery of item.deliveries) {
+          await mutationDelivery.mutateAsync({
+            id: delivery.id ?? null,
+            primary_liquidation_number: delivery.primary_liquidation_number,
+            seed_sale_id: existingSale.id,
+            crop_name_id: item.crop_name_id,
+            delivery_date: delivery.delivery_date,
+            destination: delivery.destination,
+            tn_delivered: delivery.tn_delivered,
+            price_per_tn: delivery.price_per_tn,
+          });
+        }
+        //Actualizo la data de la venta
+        await mutation.mutateAsync(item);
+      }
+
+      toast.success("Venta de semillas actualizada correctamente");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || error?.message || "Error desconocido al crear la venta";
+
+      toast.error(message, {
+        position: "top-right",
+      });
+    }
+    clearOriginalSale();
+  }
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { variant: any; label: string }> = {
@@ -186,7 +220,7 @@ export const SeedSalesTable = () => {
         <PageHeader title="Venta de Semillas" subtitle="Gestiona tus ventas y entregas" />
         <Button onClick={handleAdd} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
-          Nueva Venta
+          Nueva Entrega
         </Button>
       </div>
 
@@ -312,6 +346,7 @@ export const SeedSalesTable = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-12"></TableHead>
+                        <TableHead>Cultivo/Campaña</TableHead>
                         <TableHead>Carta de Porte</TableHead>
                         <TableHead>Destino</TableHead>
                         <TableHead>Fecha</TableHead>
@@ -324,8 +359,8 @@ export const SeedSalesTable = () => {
                     </TableHeader>
                     <TableBody>
                       {seedSalesData.map((item) => (
-                        <>
-                          <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50">
+                        <React.Fragment key={item.id}>
+                          <TableRow className="cursor-pointer hover:bg-muted/50">
                             <TableCell onClick={() => toggleRow(item.id!)}>
                               {expandedRows.has(item.id!) ? (
                                 <ChevronDown className="h-4 w-4" />
@@ -333,7 +368,18 @@ export const SeedSalesTable = () => {
                                 <ChevronRight className="h-4 w-4" />
                               )}
                             </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium">
+                                  🌱 {item.crop_name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  Campaña · {item.campaign_name}
+                                </span>
+                              </div>
+                            </TableCell>
                             <TableCell className="font-medium">{item.waybill_number}</TableCell>
+
                             <TableCell>{item.destination}</TableCell>
                             <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
                             <TableCell className="text-right font-semibold">{formatTn(item.tn_delivered || 0)}</TableCell>
@@ -370,7 +416,7 @@ export const SeedSalesTable = () => {
                                       <Table>
                                         <TableHeader>
                                           <TableRow>
-                                            <TableHead>Carta de Porte</TableHead>
+                                            <TableHead>Liquidación Primaria</TableHead>
                                             <TableHead>Fecha de Entrega</TableHead>
                                             <TableHead>Destino</TableHead>
                                             <TableHead className="text-right">tn Vendidas</TableHead>
@@ -381,7 +427,7 @@ export const SeedSalesTable = () => {
                                         <TableBody>
                                           {item.deliveries.map((delivery) => (
                                             <TableRow key={delivery.id}>
-                                              <TableCell>{delivery.waybill_number}</TableCell>
+                                              <TableCell>{delivery.primary_liquidation_number}</TableCell>
                                               <TableCell>
                                                 {new Date(delivery.delivery_date).toLocaleDateString()}
                                               </TableCell>
@@ -423,7 +469,7 @@ export const SeedSalesTable = () => {
                               </TableCell>
                             </TableRow>
                           )}
-                        </>
+                        </React.Fragment>
                       ))}
                     </TableBody>
                   </Table>
@@ -441,8 +487,7 @@ export const SeedSalesTable = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
-        initialData={editingItem}
-        crops={crops}
+      // initialData={editingItem}
       />
       <DeleteDialog
         title="Eliminar venta"
@@ -457,6 +502,12 @@ export const SeedSalesTable = () => {
         isOpen={isDeleteDialogOpen}
         onConfirm={handleDelete}
         onCancel={() => setIsDeleteDialogOpen(false)}
+      />
+      <SeedSaleEdit
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        seedSale={editingItem}
+        onSave={handelSaveEdit}
       />
     </div>
   )
