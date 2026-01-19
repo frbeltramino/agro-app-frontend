@@ -1,5 +1,4 @@
 import { agroApi } from "@/api/agroApi";
-import { SeedSalesResponse } from "@/interfaces/sales/seed.sales.response";
 import { CampaignSalesResponse } from "@/interfaces/sales/campaign.sales.response";
 
 interface Options {
