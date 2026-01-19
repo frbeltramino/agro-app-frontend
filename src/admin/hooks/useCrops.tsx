@@ -45,6 +45,8 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
     mutationFn: deleteCropAction,
     onSuccess: () => {
       QueryClient.invalidateQueries({ queryKey: ["crops"] });
+      QueryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      QueryClient.invalidateQueries({ queryKey: ["campaignsForSale"] });
     },
     onError: (error) => {
       console.log(error);

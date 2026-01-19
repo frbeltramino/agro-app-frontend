@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Edit2, Trash2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 
 interface Props {
   deliveries: any[]
@@ -19,7 +19,6 @@ interface Props {
 export function SeedSaleDeliveriesTable({
   deliveries,
   isAddingDelivery,
-  onEdit,
   onDelete,
 }: Props) {
   const formatTn = (value: number) => value.toLocaleString("es-AR")
@@ -54,7 +53,7 @@ export function SeedSaleDeliveriesTable({
                 <p className="font-medium">{d.primary_liquidation_number}</p>
               </div>
               <div className="flex justify-end gap-2">
-                <Button
+                {/* <Button
                   type="button"
                   variant="ghost"
                   size="icon"
@@ -63,7 +62,7 @@ export function SeedSaleDeliveriesTable({
                   disabled={isAddingDelivery}
                 >
                   <Edit2 className="w-3.5 h-3.5" />
-                </Button>
+                </Button> */}
                 <Button
                   type="button"
                   variant="ghost"
@@ -135,7 +134,7 @@ export function SeedSaleDeliveriesTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
-                    <Button
+                    {/* <Button
                       type="button"
                       variant="ghost"
                       size="sm"
@@ -143,7 +142,7 @@ export function SeedSaleDeliveriesTable({
                       disabled={isAddingDelivery}
                     >
                       <Edit2 className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                     <Button
                       type="button"
                       variant="ghost"
