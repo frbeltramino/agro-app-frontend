@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Wheat, Leaf, Sun, Flower2, Package, Edit2, Trash2, ChevronDown, ChevronRight } from "lucide-react";
-import { Campaign, Crop, Delivery } from "@/interfaces/sales/campaign.sales.response";
+import { Leaf, Edit2, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Campaign, Crop, } from "@/interfaces/sales/campaign.sales.response";
 import { Button } from "@/components/ui/button";
 import { useSalesActionsStore } from "@/admin/pages/seedSales/store/useSalesActionsStore";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
