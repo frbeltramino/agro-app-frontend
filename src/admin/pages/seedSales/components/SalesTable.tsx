@@ -1,47 +1,49 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
+import { Plus, X, Search } from "lucide-react"
+import { toast } from "sonner"
+
+import { useSeedSales } from "@/admin/hooks/useSeedSales"
+import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
+import { useSalesActionsStore } from "../store/useSalesActionsStore"
+import { formatTn } from "@/lib/format-tn"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, X, Search } from "lucide-react"
-import { toast } from "sonner"
-import { SeedSalesModal } from "./SeedSalesModal"
-import { useSeedSales } from "@/admin/hooks/useSeedSales"
-import type { SeedSale } from "@/interfaces/sales/seed.sale.interface"
 import { PageHeader } from "@/admin/components/PageHeader"
-import { StockCard } from "@/admin/components/StockCard"
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard"
 import { CustomPagination } from "@/components/custom/CustomPagination"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
-import { formatTn } from "@/lib/format-tn"
-import { currencyFormatter } from "@/lib/currency-formatter"
 
-import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
-import { Delivery } from "@/interfaces/sales/seed.sale.delivery.interface"
-
-import { SeedSaleMobileCard } from "./SeedSaleMobileCard"
+import { SeedSalesModal } from "./SeedSalesModal"
 import { SeedSaleEdit } from "./SeedSaleEdit"
-import { useSeedSaleEditStore } from "@/admin/pages/seedSales/store/seed.sale.store"
+import { StockCard } from "@/admin/components/StockCard"
+import { SalesTable } from "./SeedSalesTable2"
+import { SalesTableMobile } from "./SeedSalesMobileCard2"
+
+import type { SeedSale } from "@/interfaces/sales/seed.sale.interface"
 
 export const SeedSalesTable = () => {
-  const [deletingItem, setDeletingItem] = useState<SeedSale | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<SeedSale | null>(null)
   const [searchWaybill, setSearchWaybill] = useState("")
   const [searchDestination, setSearchDestination] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
-  const { mutation: mutationDelivery, deleteSaleDelivery } = useSeedSaleDelivery();
+  const { mutation: mutationDelivery } = useSeedSaleDelivery();
   const [showFilters, setShowFilters] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const { originalSale, clearOriginalSale } = useSeedSaleEditStore();
+
+  const {
+    cropToEdit,
+    cropToDelete,
+    resetEdit,
+    resetDelete,
+  } = useSalesActionsStore();
+
   const {
     data: seedSales,
     isLoading,
@@ -54,7 +56,8 @@ export const SeedSalesTable = () => {
     end_date: endDate,
   })
 
-  const seedSalesData = seedSales?.seed_sales || []
+  const seedSalesData = seedSales?.campaigns || []
+  console.log({ seedSalesData })
   const seedSalesPagination = seedSales?.pagination || {
     page: 1,
     limit: 10,
@@ -62,44 +65,31 @@ export const SeedSalesTable = () => {
     totalPages: 1,
   }
 
-  const toggleRow = (saleId: number) => {
-    const newExpandedRows = new Set(expandedRows)
-    if (newExpandedRows.has(saleId)) {
-      newExpandedRows.delete(saleId)
-    } else {
-      newExpandedRows.add(saleId)
-    }
-    setExpandedRows(newExpandedRows)
-  }
 
   const handleAdd = () => {
-    setEditingItem(null)
-    clearOriginalSale()
+    resetEdit()
     setIsModalOpen(true)
   }
 
-  const handleEdit = (item: SeedSale) => {
-    console.log({ item })
-    setEditingItem(item);
-    setIsEditDialogOpen(true)
-    console.log({ editingItem })
-  }
-
-  const handleDelete = (itemId: any) => {
-    deleteSale.mutateAsync(itemId, {
-      onSuccess: () => toast.success("Venta eliminada correctamente"),
-      onError: (error) => {
-        console.log(error)
-        toast.error("Error al eliminar la venta de semillas", { position: "top-right" })
+  const handleDelete = (id: number | null) => {
+    if (!id) return;
+    deleteSale.mutate(id, {
+      onSuccess: () => {
+        toast.success("Venta eliminada correctamente");
       },
-    })
-  }
+      onError: () => {
+        toast.error("Error al eliminar la venta");
+      },
+    });
+  };
 
   const handleSave = async (item: SeedSale) => {
     try {
 
       // Vlaidar si la venta ya existe
-      const existingSale = seedSalesData?.find(s => s.waybill_number === item.waybill_number);
+      const campaigns = seedSalesData;
+      const crops = campaigns.flatMap(c => c.crops);
+      const existingSale = crops?.find(s => s.waybill_number === item.waybill_number);
       if (existingSale) {
         toast.error("La venta con número de carta porte " + item.waybill_number + " ya existe");
         return;
@@ -136,83 +126,11 @@ export const SeedSalesTable = () => {
     }
   };
 
-  const handelSaveEdit = async (item: SeedSale) => {
-    try {
 
-      // Vlaidar si la venta ya existe
-      if (!originalSale) return;
-      const existingSale = originalSale;
-      if (existingSale) {
+  //TODO: crear servicio y mostrar data de estadisticas de entregas/ventas
 
-        // si existe debo buscar los deliveries existentes y ver si se agregaron o se eliminaron algunos
-        // 2️⃣ Obtener los deliveries existentes en la DB
-        const existingDeliveries: Delivery[] = existingSale.deliveries || [];
-        const existingIds = existingDeliveries
-          .map(d => d.id)
-          .filter((id): id is number => id != null);
-
-        // 3️⃣ Obtener los IDs de los deliveries que vinieron del frontend
-        const incomingIds = item.deliveries
-          .map(d => d.id)
-          .filter((id): id is number => typeof id === "number");
-
-        // 4️⃣ Detectar deliveries que se eliminaron (existían antes, pero no vienen en la edición)
-        const toDeleteIds = existingIds.filter(id => !incomingIds.includes(id));
-
-        // 5️⃣ Eliminar esos deliveries
-        if (toDeleteIds.length > 0) {
-          for (const id of toDeleteIds) {
-            await deleteSaleDelivery.mutateAsync(
-              id
-            );
-          }
-        }
-
-
-        for (const delivery of item.deliveries) {
-          await mutationDelivery.mutateAsync({
-            id: delivery.id ?? null,
-            primary_liquidation_number: delivery.primary_liquidation_number,
-            seed_sale_id: existingSale.id,
-            crop_name_id: item.crop_name_id,
-            delivery_date: delivery.delivery_date,
-            destination: delivery.destination,
-            tn_delivered: delivery.tn_delivered,
-            price_per_tn: delivery.price_per_tn,
-          });
-        }
-        //Actualizo la data de la venta
-        await mutation.mutateAsync(item);
-      }
-
-      toast.success("Venta de semillas actualizada correctamente");
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message || error?.message || "Error desconocido al crear la venta";
-
-      toast.error(message, {
-        position: "top-right",
-      });
-    }
-    clearOriginalSale();
-  }
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { variant: any; label: string }> = {
-      pending: { variant: "secondary", label: "Pendiente" },
-      completed: { variant: "default", label: "Completado" },
-      cancelled: { variant: "destructive", label: "Cancelado" },
-    }
-    const badge = badges[status] || badges.pending
-    return <Badge variant={badge.variant}>{badge.label}</Badge>
-  }
-
-  const calculatePercentage = (tn_sold: number, tn_delivered: number) => {
-    return tn_delivered > 0 ? ((tn_sold / tn_delivered) * 100).toFixed(1) : "0"
-  }
-
-  const totalDelivered = seedSalesData.reduce((sum, item) => sum + item.tn_delivered, 0)
-  const totalSold = seedSalesData.reduce((sum, item) => sum + item.tn_sold, 0)
+  const totalDelivered = 100
+  const totalSold = 100
 
   return (
     <div className="container mx-auto  p-4 md:p-6 space-y-4 md:space-y-6">
@@ -323,159 +241,24 @@ export const SeedSalesTable = () => {
             {!isLoading && seedSalesData.length > 0 &&
               <>
                 {/* Mobile Cards */}
-
                 <div className="md:hidden space-y-3">
-                  {seedSalesData.map((item) => (
-                    <SeedSaleMobileCard
-                      key={item.id}
-                      item={item}
-                      isExpanded={expandedRows.has(item.id!)}
-                      onToggle={() => toggleRow(item.id!)}
-                      onEdit={() => handleEdit(item)}
-                      onDelete={() => handleDelete(item.id)}
-                      getStatusBadge={getStatusBadge}
-                      formatTn={formatTn}
-                      currencyFormatter={currencyFormatter}
-                      calculatePercentage={calculatePercentage}
-                    />
-                  ))}
+                  <SalesTableMobile campaigns={seedSalesData} />
+                  {
+                    seedSalesPagination.totalPages > 1 && (
+                      <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
+                    )
+                  }
                 </div>
-
+                {/* desktop */}
                 <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12"></TableHead>
-                        <TableHead>Cultivo/Campaña</TableHead>
-                        <TableHead>Carta de Porte</TableHead>
-                        <TableHead>Destino</TableHead>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead className="text-right">tn Entregadas</TableHead>
-                        <TableHead className="text-right">tn Vendidas</TableHead>
-                        <TableHead className="text-center">% Venta</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {seedSalesData.map((item) => (
-                        <React.Fragment key={item.id}>
-                          <TableRow className="cursor-pointer hover:bg-muted/50">
-                            <TableCell onClick={() => toggleRow(item.id!)}>
-                              {expandedRows.has(item.id!) ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium">
-                                  🌱 {item.crop_name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Campaña · {item.campaign_name}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">{item.waybill_number}</TableCell>
-
-                            <TableCell>{item.destination}</TableCell>
-                            <TableCell>{new Date(item.sale_date).toLocaleDateString()}</TableCell>
-                            <TableCell className="text-right font-semibold">{formatTn(item.tn_delivered || 0)}</TableCell>
-                            <TableCell className="text-right font-semibold">{formatTn(item.tn_sold || 0)}</TableCell>
-                            <TableCell className="text-center">
-                              {calculatePercentage(item.tn_sold, item.tn_delivered)}%
-                            </TableCell>
-                            <TableCell>{getStatusBadge(item.status)}</TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
-                                <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => {
-                                    setDeletingItem(item)
-                                    setIsDeleteDialogOpen(true)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                          {expandedRows.has(item.id!) && (
-                            <TableRow>
-                              <TableCell colSpan={9} className="bg-muted/30 p-0">
-                                <div className="p-4">
-                                  <h4 className="font-semibold mb-3 text-sm">Ventas Realizadas</h4>
-                                  {item.deliveries && item.deliveries.length > 0 ? (
-                                    <div className="rounded-lg border">
-                                      <Table>
-                                        <TableHeader>
-                                          <TableRow>
-                                            <TableHead>Liquidación Primaria</TableHead>
-                                            <TableHead>Fecha de Entrega</TableHead>
-                                            <TableHead>Destino</TableHead>
-                                            <TableHead className="text-right">tn Vendidas</TableHead>
-                                            <TableHead className="text-right">Precio/tn</TableHead>
-                                            <TableHead className="text-right">Total</TableHead>
-                                          </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                          {item.deliveries.map((delivery) => (
-                                            <TableRow key={delivery.id}>
-                                              <TableCell>{delivery.primary_liquidation_number}</TableCell>
-                                              <TableCell>
-                                                {new Date(delivery.delivery_date).toLocaleDateString()}
-                                              </TableCell>
-                                              <TableCell>{delivery.destination}</TableCell>
-                                              <TableCell className="text-right">
-                                                {formatTn(delivery.tn_delivered)}
-                                              </TableCell>
-                                              <TableCell className="text-right">
-                                                {currencyFormatter(delivery.price_per_tn)}
-                                              </TableCell>
-                                              <TableCell className="text-right font-semibold">
-                                                {currencyFormatter(delivery.tn_delivered * delivery.price_per_tn)}
-                                              </TableCell>
-                                            </TableRow>
-                                          ))}
-                                          <TableRow className="font-semibold bg-muted/50">
-                                            <TableCell colSpan={3}>Total</TableCell>
-                                            <TableCell className="text-right">
-                                              {formatTn(item.deliveries.reduce((sum, d) => sum + d.tn_delivered, 0))}
-                                            </TableCell>
-                                            <TableCell></TableCell>
-                                            <TableCell className="text-right">
-
-                                              {currencyFormatter(
-                                                item.deliveries.reduce(
-                                                  (sum, d) => sum + d.tn_delivered * d.price_per_tn,
-                                                  0,
-                                                ),
-                                              )}
-                                            </TableCell>
-                                          </TableRow>
-                                        </TableBody>
-                                      </Table>
-                                    </div>
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">No hay entregas registradas</p>
-                                  )}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  {seedSalesPagination.totalPages > 1 && (
-                    <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
-                  )}
+                  <SalesTable
+                    campaigns={seedSalesData}
+                  />
+                  {
+                    seedSalesPagination.totalPages > 1 && (
+                      <CustomPagination totalPages={Number(seedSalesPagination.totalPages) || 0} />
+                    )
+                  }
                 </div>
               </>
             }
@@ -492,22 +275,26 @@ export const SeedSalesTable = () => {
       <DeleteDialog
         title="Eliminar venta"
         description="Esta acción no se puede deshacer."
-        itemId={deletingItem?.id}
         itemData={[
-          { label: "Carta de Porte", value: deletingItem?.waybill_number || "" },
-          { label: "Fecha", value: new Date(deletingItem?.sale_date || 0).toLocaleDateString() },
-          { label: "Destino", value: deletingItem?.destination || "" },
-          { label: "tn Vendidas", value: deletingItem?.tn_sold.toString() || "" },
+          { label: "Carta de Porte", value: cropToDelete?.waybill_number || "" },
+          { label: "Fecha", value: new Date(cropToDelete?.sale_date || 0).toLocaleDateString() },
+          { label: "Destino", value: cropToDelete?.destination || "" },
+          { label: "tn Vendidas", value: `${cropToDelete?.tn_sold.toString()} tn` || "" },
         ]}
-        isOpen={isDeleteDialogOpen}
-        onConfirm={handleDelete}
-        onCancel={() => setIsDeleteDialogOpen(false)}
+        isOpen={!!cropToDelete}
+        itemId={cropToDelete?.id}
+        onConfirm={() => {
+          if (!cropToDelete) return;
+
+          handleDelete(cropToDelete.id);
+          resetDelete();
+        }}
+        onCancel={resetDelete}
       />
       <SeedSaleEdit
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        seedSale={editingItem}
-        onSave={handelSaveEdit}
+        isOpen={!!cropToEdit}
+        onClose={resetEdit}
+        seedSale={cropToEdit}
       />
     </div>
   )

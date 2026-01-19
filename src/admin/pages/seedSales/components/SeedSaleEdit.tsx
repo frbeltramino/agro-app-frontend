@@ -1,24 +1,30 @@
-import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
-import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
-import { Controller, useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { formatNumber } from "@/lib/format-number"
-import { SeedSaleTotals } from "./SeedSaleTotals"
-import { SidePanel } from "@/admin/components/SidePanel"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import { PlusCircle } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { AmountInput } from "@/components/custom/CustomAmountInput"
-import { SaleEditSummary } from "./SaleEditSummary"
+import { Controller, useForm } from "react-hook-form"
+
+import { useSeedSales } from "@/admin/hooks/useSeedSales"
+import { useSalesActionsStore } from "../store/useSalesActionsStore"
+import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery"
 import { useSeedSaleEditForm } from "../hooks/useSeedSaleEditForm"
-import { useSeedSaleEditStore } from "@/admin/pages/seedSales/store/seed.sale.store"
+import { formatNumber } from "@/lib/format-number"
+
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { SidePanel } from "@/admin/components/SidePanel"
+import { AmountInput } from "@/components/custom/CustomAmountInput"
+
+import { SeedSaleTotals } from "./SeedSaleTotals"
+import { SaleEditSummary } from "./SaleEditSummary"
+import { SeedSaleDeliveriesTable } from "./SeedSaleDeliveriesTable"
+
+import { SeedSale } from "@/interfaces/sales/seed.sale.interface"
+
 
 interface SeedSaleEditProps {
   isOpen: boolean
   seedSale: SeedSale | null
   onClose: () => void
-  onSave: (item: SeedSale) => void
 }
 
 interface DeliveryFormValues {
@@ -29,12 +35,24 @@ interface DeliveryFormValues {
   price_per_tn: number | undefined
 }
 
-export const SeedSaleEdit = ({ seedSale, onClose, isOpen, onSave }: SeedSaleEditProps) => {
+export const SeedSaleEdit = ({ seedSale, onClose, isOpen }: SeedSaleEditProps) => {
 
   const [isAddingDelivery, setIsAddingDelivery] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const { setOriginalSale } = useSeedSaleEditStore();
+
+  const { mutation: mutationDelivery, deleteSaleDelivery } = useSeedSaleDelivery();
+
+  const {
+    mutation,
+  } = useSeedSales({
+  })
+
+  const {
+    setCropToEdit,
+    cropToEdit,
+    resetEdit
+  } = useSalesActionsStore();
 
   const {
     editingDeliveryIndex,
@@ -116,13 +134,16 @@ export const SeedSaleEdit = ({ seedSale, onClose, isOpen, onSave }: SeedSaleEdit
   }
 
   const handleSubmit = (data: any) => {
-    setIsSaving(true)
-    //actualizar los deliveries
-    data.deliveries = deliveries;
-    data.tn_sold = totalTnSold;
-    console.log({ data })
+    setIsSaving(true);
 
-    onSave(data);
+    const payload: SeedSale = {
+      ...data,
+      deliveries,
+      tn_sold: totalTnSold,
+    };
+
+    handelSaveEdit(payload);
+
     resetDelivery({
       primary_liquidation_number: "",
       delivery_date: "",
@@ -130,15 +151,69 @@ export const SeedSaleEdit = ({ seedSale, onClose, isOpen, onSave }: SeedSaleEdit
       tn_delivered: undefined,
       price_per_tn: undefined,
     });
+
     setDeliveries([]);
     onClose();
     setIsSaving(false);
-  }
+  };
+
+  const handelSaveEdit = async (item: SeedSale) => {
+    try {
+      if (!cropToEdit) return;
+
+      const existingDeliveries = cropToEdit.deliveries ?? [];
+
+      const existingIds = existingDeliveries
+        .map(d => d.id)
+        .filter((id): id is number => id != null);
+
+      const incomingIds = item.deliveries
+        .map(d => d.id)
+        .filter((id): id is number => id != null);
+
+      // 1️⃣ Deliveries eliminados
+      const toDeleteIds = existingIds.filter(
+        id => !incomingIds.includes(id)
+      );
+
+      for (const id of toDeleteIds) {
+        await deleteSaleDelivery.mutateAsync(id);
+      }
+
+      // 2️⃣ Upsert deliveries
+      for (const delivery of item.deliveries) {
+        await mutationDelivery.mutateAsync({
+          id: delivery.id ?? null,
+          primary_liquidation_number: delivery.primary_liquidation_number,
+          seed_sale_id: cropToEdit.id,
+          crop_name_id: item.crop_name_id,
+          delivery_date: delivery.delivery_date,
+          destination: delivery.destination,
+          tn_delivered: delivery.tn_delivered,
+          price_per_tn: delivery.price_per_tn,
+        });
+      }
+
+      // 3️⃣ Actualizar venta
+      await mutation.mutateAsync(item);
+
+      toast.success("Venta de semillas actualizada correctamente");
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error desconocido al actualizar la venta";
+
+      toast.error(message);
+    } finally {
+      resetEdit();
+    }
+  };
 
 
   useEffect(() => {
     if (!isOpen || !seedSale) return;
-    setOriginalSale(seedSale);
+    setCropToEdit(seedSale);
     const deliveries = seedSale?.deliveries || []
     setDeliveries(deliveries);
     const totalDelivered = seedSale.tn_delivered ?? 0;

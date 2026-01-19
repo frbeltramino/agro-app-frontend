@@ -1,5 +1,6 @@
 import { agroApi } from "@/api/agroApi";
 import { SeedSalesResponse } from "@/interfaces/sales/seed.sales.response";
+import { CampaignSalesResponse } from "@/interfaces/sales/campaign.sales.response";
 
 interface Options {
   page?: number | string;
@@ -10,11 +11,11 @@ interface Options {
   end_date?: string,
 }
 
-export const getSeedSalesAction = async (options: Options): Promise<SeedSalesResponse> => {
+export const getSeedSalesAction = async (options: Options): Promise<CampaignSalesResponse> => {
 
   const { page, limit } = options;
 
-  const response = await agroApi.get<SeedSalesResponse>('/sales/seed', {
+  const response = await agroApi.get<CampaignSalesResponse>('/sales/seed', {
     params: {
       page,
       limit,
