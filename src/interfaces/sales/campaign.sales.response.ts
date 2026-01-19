@@ -8,26 +8,16 @@ export interface CampaignSalesResponse {
 export interface Campaign {
   campaign_id: number;
   campaign_name: string;
-  crops: SeedSale[];
+  crops: Crop[];
 }
 
 export interface Crop {
-  id: number | null;
-  userId?: number;
-  waybill_number: string;
-  sale_date: string;
-  destination: string;
-  tn_delivered: number;
-  tn_sold: number;
-  status: string;
-  deleted_at: null;
-  created_at?: string;
-  updated_at?: string;
-  crop_name_id: number;
+  userId: number;
   campaign_id: number;
-  campaign_name?: string;
+  campaign_name: string;
+  crop_name_id: number;
   crop_name: string;
-  deliveries: Delivery[];
+  seed_sales: SeedSale[];
 }
 
 export interface Delivery {
@@ -49,3 +39,6 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
+
+
+

@@ -6,8 +6,8 @@ interface SalesActionsState {
   cropToEdit: SeedSale | null;
   cropToDelete: SeedSale | null;
 
-  setCropToEdit: (crop: Crop) => void;
-  setCropToDelete: (crop: Crop) => void;
+  setCropToEdit: (SeedSale: SeedSale) => void;
+  setCropToDelete: (SeedSale: SeedSale) => void;
 
   resetEdit: () => void;
   resetDelete: () => void;
@@ -17,8 +17,8 @@ export const useSalesActionsStore = create<SalesActionsState>((set) => ({
   cropToEdit: null,
   cropToDelete: null,
 
-  setCropToEdit: (crop) => set({ cropToEdit: crop }),
-  setCropToDelete: (crop) => set({ cropToDelete: crop }),
+  setCropToEdit: (SeedSale) => set({ cropToEdit: SeedSale }),
+  setCropToDelete: (SeedSale) => set({ cropToDelete: SeedSale }),
 
   resetEdit: () => set({ cropToEdit: null }),
   resetDelete: () => set({ cropToDelete: null }),
