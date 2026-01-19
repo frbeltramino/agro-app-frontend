@@ -89,7 +89,8 @@ export const SeedSalesTable = () => {
       // Vlaidar si la venta ya existe
       const campaigns = seedSalesData;
       const crops = campaigns.flatMap(c => c.crops);
-      const existingSale = crops?.find(s => s.waybill_number === item.waybill_number);
+      const seedSale = crops.flatMap(c => c.seed_sales)
+      const existingSale = seedSale?.find(s => s.waybill_number === item.waybill_number);
       if (existingSale) {
         toast.error("La venta con número de carta porte " + item.waybill_number + " ya existe");
         return;
