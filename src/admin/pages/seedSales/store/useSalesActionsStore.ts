@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { Crop } from "@/interfaces/sales/campaign.sales.response";
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface";
 
 interface SalesActionsState {
