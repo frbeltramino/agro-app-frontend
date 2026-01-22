@@ -109,8 +109,6 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     const { createTaskMutation } = useTasks({ cropId: selectedCrop?.id || 0 });
     const { adjustStock } = useStock();
     const categories = categoriesData?.categories || [];
-    const [, setFormatedAmount] = useState("0,00");
-    const [, setFormatedLaborCost] = useState("0,00");
     const { selectedLot } = useLotStore();
     const [createNewSupply, setCreateNewSupply] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -159,7 +157,12 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
     const handleConfirmSupply = () => {
       const newSupply = supplyForm.getValues();
-
+      if (newSupply.stockId && stock) {
+        const foundStock = stock.find(s => s.id === Number(newSupply.stockId));
+        if (foundStock) {
+          newSupply.productName = foundStock.name;
+        }
+      }
       if (editingIndex !== null) {
         const updatedSupplies = [...watchSupplies];
         updatedSupplies[editingIndex] = newSupply;
@@ -167,7 +170,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         setValue("supplies", updatedSupplies, { shouldDirty: true });
         setEditingIndex(null);
       } else {
-        // agregar nuevo suministro
+        // agregar nuevo insumos
         append(newSupply);
       }
 
@@ -205,7 +208,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
       const suppliesResult: { supply_id: number | null; stock_id: number | null; dose_per_ha: number; hectares: number; price_per_unit: number; }[] = [];
 
-      // 1️⃣ Manejo de suministros de compra (igual que antes)
+      // 1️⃣ Manejo de insumos de compra (igual que antes)
       for (const s of purchaseSupplies) {
         const result = await createPurchaseSupply(taskToEdit, selectedCrop, s);
         suppliesResult.push(result);
@@ -226,7 +229,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
       }
 
-      // 🔹 Manejo de nuevos suministros de stock que no existían antes
+      // 🔹 Manejo de nuevos Insumo de stock que no existían antes
       for (const s of newStockMap.values()) {
         const newSupplyStockResult = await createNewStockSupply(s, stock);
         if (newSupplyStockResult) {
@@ -260,12 +263,10 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
         reset();
         handleOpenChange(false);
-        setFormatedAmount("0,00");
-        setFormatedLaborCost("0,00");
-        toast.success(response.message || "La tarea ha sido creada exitosamente");
+        toast.success(response.message || "La labor ha sido creada exitosamente");
 
       } catch (err: any) {
-        const errorMessage = err?.message || "Error al crear la tarea";
+        const errorMessage = err?.message || "Error al crear la labor";
         toast.error(errorMessage);
       } finally {
         setIsSaving(false); // loading OFF SIEMPRE
@@ -326,6 +327,28 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     }, [taskToEdit, reset]);
 
     const handleOpenChange = (open: boolean) => {
+      if (!open) {
+        // Limpiar formulario principal
+        reset({
+          task_type_id: "",
+          provider_id: "",
+          description: "",
+          date: "",
+          note: "",
+          laborCost: undefined,   // o undefined si querés
+          supplies: [],
+        }, { keepDefaultValues: false });
+
+        // Limpiar formulario de insumos
+        supplyForm.reset({
+          supplyType: "stock",
+          hectareQuantity: selectedLot?.hectares ?? 0,
+        });
+
+        setCreateNewSupply(false);
+        setEditingIndex(null);
+      }
+
       setStep(1);
       onOpenChange(open);
     };
@@ -342,7 +365,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       <SidePanel
         isOpen={open}
         onClose={() => handleOpenChange(false)}
-        title={step === 1 ? "Detalles de la Tarea" : "Agregar Suministros"}
+        title={step === 1 ? "Detalles de la Labor" : "Agregar Insumos"}
         width="lg"
       >
         <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col flex-1 h-full">
@@ -350,12 +373,12 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           <div className="shrink-0 border-b bg-background px-4 py-4 sm:px-6 sm:py-5">
             <p className="text-sm text-muted-foreground mt-1">
               {step === 1
-                ? "Completa los datos generales de la tarea"
-                : "Selecciona y configura los suministros necesarios para esta tarea"}
+                ? "Completa los datos generales de la labor"
+                : "Selecciona y configura los insumos necesarios para esta labor"}
             </p>
           </div>
           <div className="shrink-0 border-b bg-background p-2 sm:p-4">
-            <Stepper step={step} steps={["Detalles de la Tarea", "Agregar Suministros"]} />
+            <Stepper step={step} steps={["Detalles de la labor", "Agregar Insumos"]} />
 
           </div>
 
@@ -365,9 +388,9 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
               step === 1 && (
                 <>
 
-                  {/* Tipo de Tarea */}
+                  {/* Tipo de labor */}
                   <CustomSelectWithCreate
-                    label="Tipo de tarea *"
+                    label="Tipo de labor *"
                     name="task_type_id"
                     options={formattedTaskTypes || []}
                     register={register}
@@ -387,7 +410,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       required={false}
                       rows={2}
                       className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                      placeholder="Describe los detalles de la tarea..."
+                      placeholder="Describe los detalles de la labor..."
                     />
                   </div>
 
@@ -444,7 +467,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                           value={field.value}           // RHF controla el valor numérico
                           onChange={field.onChange}     // RHF actualiza su estado
                           error={fieldState.error?.message}
-                          currency="ARS"
+                          currency="USD"
                           locale="es-AR"
                           placeholder="0,00"
                         />
@@ -460,7 +483,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                 <>
                   <div className=" pt-4">
                     <div className="flex justify-between items-center mb-4">
-                      <label className="text-sm font-medium">Suministros</label>
+                      <label className="text-sm font-medium">Insumos</label>
                       <Button
                         type="button"
                         variant="outline"
@@ -472,13 +495,13 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                         className="gap-2 bg-transparent"
                       >
                         <Plus className="w-4 h-4" />
-                        Crear Suministro
+                        Crear Insumo
                       </Button>
                     </div>
 
                     {watchSupplies.length === 0 && (
                       <p className="text-sm text-muted-foreground mb-4">
-                        No hay suministros agregados. Haz clic en "Crear Suministro" para comenzar.
+                        No hay Insumos agregados. Haz clic en "Crear Insumo" para comenzar.
                       </p>
                     )}
 
@@ -518,48 +541,56 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
               )
             }
 
-            {/* Suministros */}
+            {/* insumos */}
 
           </div>
 
           <div className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-2">
-              {
-                step === 1 && (
-                  <>
-                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" className=" w-full sm:w-auto" onClick={() => handleOpenChange(false)}>
-                      <span className="sm:hidden">Cerrar</span>
-                      <span className="hidden sm:inline">Cerrar</span>
-                    </Button>
-                    <Button type="button" className=" w-full sm:w-auto" onClick={handleNextStep}>
-                      <span className="flex items-center justify-center gap-2">
-                        Siguiente <span className="sm:hidden">→</span>
-                      </span>
-                    </Button>
-                  </>
-                )
-              }
-              {
-                step === 2 && (
-                  <>
-                    <Button type="button" disabled={isSaving || createNewSupply} variant="outline" className=" w-full sm:w-auto" onClick={() => setStep(1)}>
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="sm:hidden">←</span> Volver
-                      </span>
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSaving || createNewSupply}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2"
-                    >
-                      <span>{isSaving ? "Guardando..." : "Guardar"}</span>
-                    </Button>
-                  </>
-                )
-              }
+            <div className="flex gap-2">
+              {step === 1 && (
+                <>
+                  <Button
+                    type="button"
+                    disabled={isSaving || createNewSupply}
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleOpenChange(false)}
+                  >
+                    Cerrar
+                  </Button>
 
+                  <Button
+                    type="button"
+                    className="flex-1"
+                    onClick={handleNextStep}
+                  >
+                    Siguiente
+                  </Button>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <Button
+                    type="button"
+                    disabled={isSaving || createNewSupply}
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setStep(1)}
+                  >
+                    Volver
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    disabled={isSaving || createNewSupply}
+                    className="flex-1"
+                  >
+                    {isSaving ? "Guardando..." : "Guardar"}
+                  </Button>
+                </>
+              )}
             </div>
-
           </div>
         </form>
 

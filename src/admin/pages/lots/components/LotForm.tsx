@@ -1,17 +1,13 @@
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useLotStore } from "@/admin/store/lot.store";
 import { useEffect, useState } from "react";
 import { useLotsMaster } from "@/admin/hooks/useLotsMaster";
 import { Lot } from "@/interfaces/lots/lot.interface";
-import { BaseModal } from "@/admin/components/BaseModal";
+import { SidePanel } from "@/admin/components/SidePanel";
+
 
 
 interface FormValues {
@@ -119,20 +115,24 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
   };
 
   return (
-    <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+    <SidePanel
+      isOpen={open}
+      onClose={() => handleOpenChange(false)}
+      title={selectedLot ? "Editar Lote" : "Nuevo Lote"}
+    >
 
       <div className="shrink-0 pb-4 border-b">
-        <DialogHeader>
-          <DialogTitle>Nuevo Lote</DialogTitle>
-          <DialogDescription>
+        <div>
+
+          <div>
             {selectedCampaign && (
               <span className="block font-medium text-foreground mb-1">
                 Campaña: {selectedCampaign?.name}
               </span>
             )}
             Completa los datos para crear un nuevo lote
-          </DialogDescription>
-        </DialogHeader>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
@@ -221,23 +221,23 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
             />
           </div>
           <div className="shrink-0 pt-4 border-t bg-background mt-4">
-            <DialogFooter>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    handleOpenChange(false)
-                  }
-                  }
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {selectedLot ? "Editar" : "Crear"} Lote
-                </Button>
-              </div>
-            </DialogFooter>
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="submit"
+                className="flex-1"
+              >
+                {selectedLot ? "Editar" : "Crear"} Lote
+              </Button>
+            </div>
           </div>
         </div>
       </form>
@@ -245,6 +245,6 @@ export function LotForm({ open, onOpenChange, onSubmit }: LotFormProps) {
 
 
 
-    </BaseModal>
+    </SidePanel>
   );
 }

@@ -158,7 +158,7 @@ export function TaskSupplyFormComponent({
                   label="Precio por Unidad *"
                   value={field.value != null && field.value !== "" ? Number(field.value) : undefined}
                   onChange={field.onChange}
-                  currency="ARS"
+                  currency="USD"
                   locale="es-AR"
                   placeholder="0,00"
                   error={fieldState.error?.message}
@@ -188,6 +188,7 @@ export function TaskSupplyFormComponent({
               error={fieldState.error?.message}
               locale="es-AR"
               placeholder="0,00"
+              maxDecimals={3}
             />
           )}
         />
@@ -216,11 +217,21 @@ export function TaskSupplyFormComponent({
       </div>
 
       {/* Botones */}
-      <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end w-full">
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none">
+      <div className="flex gap-2 pt-2 w-full">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1"
+        >
           Cancelar
         </Button>
-        <Button type="button" onClick={onSubmit} className="flex-1 sm:flex-none">
+
+        <Button
+          type="button"
+          onClick={onSubmit}
+          className="flex-1"
+        >
           {isEditing ? "Actualizar" : "Agregar"}
         </Button>
       </div>

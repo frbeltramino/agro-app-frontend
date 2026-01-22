@@ -69,7 +69,7 @@ export const MasterSupplySelect = ({
       setIsDialogOpen(false);
     } catch (error: any) {
       const message =
-        error?.response?.data?.message || error?.message || "Error al crear el suministro";
+        error?.response?.data?.message || error?.message || "Error al crear el insumo";
       setServiceError(message);
     }
   };
@@ -102,7 +102,7 @@ export const MasterSupplySelect = ({
     }
   }, [highlightedIndex]);
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando suministros…</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Cargando insumos…</p>;
 
   const filteredSupplies =
     search !== ""
@@ -145,7 +145,7 @@ export const MasterSupplySelect = ({
   return (
     <div className="space-y-2 relative">
       <div className="flex items-center justify-between mb-0.5">
-        <label className="block text-sm font-medium">Suministro *</label>
+        <label className="block text-sm font-medium">Insumo *</label>
         <Button
           type="button"
           variant="ghost"
@@ -160,7 +160,7 @@ export const MasterSupplySelect = ({
       <Controller
         name={name}
         control={control}
-        rules={{ required: "El suministro es requerido" }}
+        rules={{ required: "El insumo es requerido" }}
         render={({ field }) => {
           const selectedSupply = supplies.find((s) => s.id === field.value);
 
@@ -169,7 +169,7 @@ export const MasterSupplySelect = ({
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Buscar suministro..."
+                placeholder="Buscar insumo..."
                 value={search !== "" ? search : selectedSupply?.name || ""}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -235,11 +235,11 @@ export const MasterSupplySelect = ({
         </p>
       )}
 
-      {/* Modal para crear nuevo suministro */}
+      {/* Modal para crear nuevo insumo */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Nuevo Suministro</DialogTitle>
+            <DialogTitle>Nuevo Insumo</DialogTitle>
           </DialogHeader>
 
           <form className="space-y-3 mt-2">

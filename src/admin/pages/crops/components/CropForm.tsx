@@ -1,18 +1,13 @@
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Crop } from "@/interfaces/crops/crop.interface";
 import { useCropNames } from "@/admin/hooks/useCropNames";
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useLotStore } from "@/admin/store/lot.store";
 import { CustomSelectWithCreate } from "@/components/custom/CustomSelectWithCreate";
 import { AmountInput } from "@/components/custom/CustomAmountInput";
-import { BaseModal } from "@/admin/components/BaseModal";
+import { SidePanel } from "@/admin/components/SidePanel";
 
 interface FormValues {
   id: number | string;
@@ -115,24 +110,28 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
 
 
   return (
-    <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+    <SidePanel
+      isOpen={open}
+      onClose={() => handleOpenChange(false)}
+      title={mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}
+    >
       <div className="shrink-0 pb-4 border-b">
-        <DialogHeader>
-          <DialogTitle>{mode === 'edit' ? 'Editar Cultivo' : 'Nuevo Cultivo'}</DialogTitle>
-          <DialogDescription>
-            {campaignName && (
-              <span className="block font-medium text-foreground mb-1">
-                Campaña: {campaignName}
-              </span>
-            )}
-            {lotName && (
-              <span className="block font-medium text-foreground mb-1">
-                Lote: {lotName}
-              </span>
-            )}
-            {mode === 'edit' ? 'Modifica los datos del cultivo' : 'Completa los datos para crear un nuevo cultivo'}
-          </DialogDescription>
-        </DialogHeader>
+
+
+        <div>
+          {campaignName && (
+            <span className="block font-medium text-foreground mb-1">
+              Campaña: {campaignName}
+            </span>
+          )}
+          {lotName && (
+            <span className="block font-medium text-foreground mb-1">
+              Lote: {lotName}
+            </span>
+          )}
+          {mode === 'edit' ? 'Modifica los datos del cultivo' : 'Completa los datos para crear un nuevo cultivo'}
+        </div>
+
       </div>
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
         <div className="flex-1 overflow-y-auto overscroll-contain">
@@ -215,21 +214,26 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
             />
           </div>
         </div>
-        <div className="shrink-0 sticky bottom-0 bg-background pt-4 border-t">
-          <div className="flex justify-end gap-3 pt-4">
+        <div className="pt-4 border-t bg-background mt-4">
+          <div className="flex gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="flex-1"
             >
               Cancelar
             </Button>
-            <Button type="submit">
+
+            <Button
+              type="submit"
+              className="flex-1"
+            >
               {mode === 'edit' ? 'Guardar Cambios' : 'Crear Cultivo'}
             </Button>
           </div>
         </div>
       </form>
-    </BaseModal>
+    </SidePanel>
   );
 }

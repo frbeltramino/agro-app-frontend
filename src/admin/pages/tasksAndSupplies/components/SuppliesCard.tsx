@@ -32,6 +32,7 @@ export const SuppliesCard = () => {
   });
   const { adjustStock } = useStock();
 
+
   const suppliesPagination = {
     page: suppliesData?.page || 1,
     limit: suppliesData?.limit || 10,
@@ -135,7 +136,7 @@ export const SuppliesCard = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitleSummary title="Suministros Utilizados" count={suppliesPagination.total || 0} label="productos" />
+              <CardTitleSummary title="Insumos Utilizados" count={suppliesPagination.total || 0} label="productos" />
             </div>
 
           </div>
@@ -143,7 +144,7 @@ export const SuppliesCard = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar suministros por nombre..."
+                placeholder="Buscar insumos por nombre..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
@@ -159,7 +160,7 @@ export const SuppliesCard = () => {
           {
             !isLoading && filteredSupplies.length === 0 &&
             <CustomNoResultsCard
-              title="No se encontraron suministros"
+              title="No se encontraron insumos"
               message="Prueba cambiando la búsqueda o los filtros."
             />
           }
@@ -197,7 +198,7 @@ export const SuppliesCard = () => {
         usedInTasks={usedInTasksData}
       />
       <DeleteDialog
-        title="Eliminar Suministro"
+        title="Eliminar Insumo"
         description="Esta acción no se puede deshacer."
         itemData={[
           { label: "Nombre", value: deletingItem?.supply_name || "" },

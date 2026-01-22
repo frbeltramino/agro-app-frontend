@@ -17,6 +17,7 @@ import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
 import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { TasksCardMobile } from "./TasksCardMobile"
 import { TasksCardDesktop } from "./TasksCardDesktop"
+import { formatDate } from "@/lib/format-date";
 
 
 
@@ -102,7 +103,7 @@ export const TasksCard = () => {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitleSummary title="Lista de Trabajos" count={tasksPagination.total || 0} label="trabajos registrados" />
+              <CardTitleSummary title="Lista de Labores" count={tasksPagination.total || 0} label="labor/es registradas" />
             </div>
             <Button
               className="w-full sm:w-auto"
@@ -113,13 +114,13 @@ export const TasksCard = () => {
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Nuevo Trabajo
+              Nueva Labor
             </Button>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-4">
             <Select value={workTypeFilter} onValueChange={setWorkTypeFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Tipo de trabajo" />
+                <SelectValue placeholder="Tipo de labor" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
@@ -197,8 +198,8 @@ export const TasksCard = () => {
         item={deletingItem}
         itemData={[
           { label: "Descripción", value: deletingItem?.description || "No hay descripción" },
-          { label: "Proveedor", value: deletingItem?.provider || "" },
-          { label: "Fecha", value: deletingItem?.date ? new Date(deletingItem?.date).toLocaleDateString() : "No hay fecha de vencimiento" },
+          { label: "Proveedor", value: deletingItem?.provider_name || "" },
+          { label: "Fecha", value: deletingItem?.date ? formatDate(deletingItem?.date) : "No hay fecha de vencimiento" },
         ]}
         isOpen={isDeleteDialogOpen}
         onConfirm={handleDeleteTask}

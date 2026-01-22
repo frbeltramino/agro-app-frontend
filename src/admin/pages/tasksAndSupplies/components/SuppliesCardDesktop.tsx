@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { formatTn } from "@/lib/format-tn";
-import { currencyFormatter } from "@/lib/currency-formatter";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
 
 interface SuppliesCardDesktopProps {
   supplies: any[];
@@ -24,11 +24,11 @@ export const SuppliesCardDesktop = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Suministro</TableHead>
+          <TableHead>Insumo</TableHead>
           <TableHead>Categoría</TableHead>
           <TableHead>Dosis/ha</TableHead>
           <TableHead>Cant/h</TableHead>
-          <TableHead>Cantidad total</TableHead>
+          <TableHead>Total Usado</TableHead>
           <TableHead>Precio unitario</TableHead>
           <TableHead>Total</TableHead>
           <TableHead className="text-right">Acciones</TableHead>
@@ -46,7 +46,7 @@ export const SuppliesCardDesktop = ({
               <TableCell>{formatTn(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
               <TableCell>{formatTn(supply.hectares)}</TableCell>
               <TableCell>{formatTn(totalQuantity)} {supply.supply_unit}</TableCell>
-              <TableCell>{currencyFormatter(supply.unit_price ?? 0)}</TableCell>
+              <TableCell>{formatCurrency(supply.unit_price ?? 0)}</TableCell>
               <TableCell className="font-medium">
                 {calculateTotalCostBySupply(supply.unit_price ?? 0, totalQuantity)}
               </TableCell>

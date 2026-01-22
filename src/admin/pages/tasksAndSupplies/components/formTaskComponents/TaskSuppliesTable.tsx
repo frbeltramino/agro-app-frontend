@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit2, Trash2 } from "lucide-react";
-import { formatTn } from "@/lib/format-tn";
+import { formatDose } from "@/lib/format-dose.ts";
 
 interface Props {
   supplies: any[];
@@ -47,7 +47,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Dosis / Hectárea</p>
-                <p className="font-medium">{formatTn(s.dosagePerHectare)}</p>
+                <p className="font-medium">{formatDose(s.dosagePerHectare)}</p>
               </div>
             </div>
           </div>
@@ -61,8 +61,9 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead className="text-right">Unidad</TableHead>
-              <TableHead className="text-right">Dosis/Hectárea</TableHead>
+              <TableHead className="text-right">Cant/ha</TableHead>
+              <TableHead className="text-right">Dosis/ha</TableHead>
+              <TableHead className="text-right">Total usado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -71,8 +72,9 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
               <TableRow key={index}>
                 <TableCell className="max-w-[250px] truncate">{s.productName || s.stockName || "Suministro"}</TableCell>
                 <TableCell>{s.supplyType === "stock" ? "De Stock" : "Compra"}</TableCell>
-                <TableCell className="text-right">{s.unit}</TableCell>
-                <TableCell className="text-right">{formatTn(s.dosagePerHectare)}</TableCell>
+                <TableCell className="text-right">{s.hectareQuantity}</TableCell>
+                <TableCell className="text-right">{formatDose(s.dosagePerHectare)} {s.unit}</TableCell>
+                <TableCell className="text-right">{formatDose(s.dosagePerHectare * s.hectareQuantity)} {s.unit}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
                     <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(index)} disabled={isAddingSupply}>
