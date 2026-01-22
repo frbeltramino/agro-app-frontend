@@ -76,7 +76,7 @@ export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobilePro
 
                 <div>
                   <p className="text-xs text-muted-foreground">Total Usado</p>
-                  <p>{formatDose(s.dose_per_ha * s.hectares)} {s.supply_unit}</p>
+                  <p>{formatDose((s.dose_per_ha ?? 0) * (s.hectares ?? 0))} {s.unit}</p>
                 </div>
 
                 <div>

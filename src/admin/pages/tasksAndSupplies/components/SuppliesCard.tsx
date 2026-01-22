@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { currencyFormatter } from "@/lib/currency-formatter"
 import { Search } from "lucide-react"
 import { useState } from "react"
 import { CardTitleSummary } from "./CardTitleSummary"
@@ -14,6 +13,7 @@ import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { useStock } from "@/admin/hooks/useStock"
 import { SuppliesCardMobile } from "./SuppliesCardMobile"
 import { SuppliesCardDesktop } from "./SuppliesCardDesktop"
+import { formatCurrency } from "@/lib/currency-formatter-usd"
 
 
 export const SuppliesCard = () => {
@@ -49,7 +49,7 @@ export const SuppliesCard = () => {
       return name.includes(normalized) || category.includes(normalized);
     }) || [];
   const calculateTotalCostBySupply = (pricePerUnit: number, quantity: number) => {
-    return currencyFormatter((Number(pricePerUnit) * Number(quantity)))
+    return formatCurrency((Number(pricePerUnit) * Number(quantity)))
   }
 
   const handleSearch = (value: string) => {

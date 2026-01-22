@@ -119,7 +119,7 @@ export const TasksCardDesktop = ({
                                   </TableCell>
                                   <TableCell>{formatDose(s.dose_per_ha)} {s.unit}</TableCell>
                                   <TableCell>{formatTn(s.hectares)}</TableCell>
-                                  <TableCell>{formatDose(s.dose_per_ha * s.hectares)} {s.unit}</TableCell>
+                                  <TableCell>{formatDose((s.dose_per_ha ?? 0) * (s.hectares ?? 0))} {s.unit}</TableCell>
                                   <TableCell>{formatCurrency(s.price_per_unit)}</TableCell>
                                   <TableCell className="text-right font-medium">{formatCurrency((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
                                 </TableRow>

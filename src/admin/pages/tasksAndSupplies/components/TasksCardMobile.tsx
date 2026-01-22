@@ -117,7 +117,7 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
 
                         <div>
                           <p className="text-xs text-muted-foreground">Total Usado</p>
-                          <p>{formatDose(s.dose_per_ha * s.hectares)} {s.unit}</p>
+                          {formatDose((s.dose_per_ha ?? 0) * (s.hectares ?? 0))} {s.unit}
                         </div>
 
                         <div>

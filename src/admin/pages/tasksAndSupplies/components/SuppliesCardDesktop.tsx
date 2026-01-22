@@ -37,7 +37,7 @@ export const SuppliesCardDesktop = ({
       </TableHeader>
       <TableBody>
         {supplies.map((supply, index) => {
-          const totalQuantity = supply.dose_per_ha * supply.hectares;
+          const totalQuantity = (supply.dose_per_ha ?? 0) * (supply.hectares ?? 0);
           return (
             <TableRow key={supply.supply_id ?? `supply-${index}`}>
               <TableCell className="font-medium">{supply.supply_name}</TableCell>
