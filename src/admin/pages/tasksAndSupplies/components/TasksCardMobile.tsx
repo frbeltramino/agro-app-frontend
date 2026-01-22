@@ -128,7 +128,7 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                         <div>
                           <p className="text-xs text-muted-foreground">Total</p>
                           <p className="font-medium">
-                            {formatCurrency(s.total_used * (s.price_per_unit ?? 0))}
+                            {formatCurrency((s.dose_per_ha ?? 0) * (s.hectares ?? 0) * (s.price_per_unit ?? 0))}
                           </p>
                         </div>
                       </div>
