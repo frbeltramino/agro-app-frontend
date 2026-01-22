@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { formatTn } from "@/lib/format-tn";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatDose } from "@/lib/format-dose";
 
 interface SuppliesCardDesktopProps {
   supplies: any[];
@@ -43,9 +44,9 @@ export const SuppliesCardDesktop = ({
               <TableCell>
                 <Badge variant="outline">{supply.category_name}</Badge>
               </TableCell>
-              <TableCell>{formatTn(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
+              <TableCell>{formatDose(supply.dose_per_ha)} {supply.supply_unit}</TableCell>
               <TableCell>{formatTn(supply.hectares)}</TableCell>
-              <TableCell>{formatTn(totalQuantity)} {supply.supply_unit}</TableCell>
+              <TableCell>{formatDose(totalQuantity)} {supply.supply_unit}</TableCell>
               <TableCell>{formatCurrency(supply.unit_price ?? 0)}</TableCell>
               <TableCell className="font-medium">
                 {calculateTotalCostBySupply(supply.unit_price ?? 0, totalQuantity)}

@@ -4,6 +4,7 @@ import { Trash2, Package } from "lucide-react";
 import { formatTn } from "@/lib/format-tn";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { Badge } from "@/components/ui/badge";
+import { formatDose } from "@/lib/format-dose";
 
 
 interface SuppliesCardMobileProps {
@@ -64,7 +65,7 @@ export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobilePro
                 <div>
                   <p className="text-xs text-muted-foreground">Dosis / ha</p>
                   <p>
-                    {formatTn(s.dose_per_ha)} {s.supply_unit}
+                    {formatDose(s.dose_per_ha)} {s.supply_unit}
                   </p>
                 </div>
 
@@ -75,7 +76,7 @@ export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobilePro
 
                 <div>
                   <p className="text-xs text-muted-foreground">Total Usado</p>
-                  <p>{formatTn(s.dose_per_ha * s.hectares)} {s.supply_unit}</p>
+                  <p>{formatDose(s.dose_per_ha * s.hectares)} {s.supply_unit}</p>
                 </div>
 
                 <div>

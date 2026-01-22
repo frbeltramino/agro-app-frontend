@@ -7,6 +7,7 @@ import { formatTn } from "@/lib/format-tn";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 import { formatDate } from "@/lib/format-date";
+import { formatDose } from "@/lib/format-dose";
 
 interface TasksCardMobileProps {
   tasks: CropTask[];
@@ -106,7 +107,7 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                         <div>
                           <p className="text-xs text-muted-foreground">Dosis/ha</p>
-                          <p>{formatTn(s.dose_per_ha)} {s.unit}</p>
+                          <p>{formatDose(s.dose_per_ha)} {s.unit}</p>
                         </div>
 
                         <div>
@@ -116,7 +117,7 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
 
                         <div>
                           <p className="text-xs text-muted-foreground">Total Usado</p>
-                          <p>{formatTn(s.dose_per_ha * s.hectares)} {s.unit}</p>
+                          <p>{formatDose(s.dose_per_ha * s.hectares)} {s.unit}</p>
                         </div>
 
                         <div>
