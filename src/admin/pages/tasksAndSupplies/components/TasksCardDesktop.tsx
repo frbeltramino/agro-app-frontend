@@ -7,6 +7,7 @@ import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 import { formatTn } from "@/lib/format-tn";
 import { formatDate } from "@/lib/format-date";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatDose } from "@/lib/format-dose";
 
 
 interface TasksCardDesktopProps {
@@ -116,9 +117,9 @@ export const TasksCardDesktop = ({
                                   <TableCell>
                                     <Badge variant="outline">{s.category_name}</Badge>
                                   </TableCell>
-                                  <TableCell>{formatTn(s.dose_per_ha)} {s.unit}</TableCell>
+                                  <TableCell>{formatDose(s.dose_per_ha)} {s.unit}</TableCell>
                                   <TableCell>{formatTn(s.hectares)}</TableCell>
-                                  <TableCell>{formatTn(s.dose_per_ha * s.hectares)} {s.unit}</TableCell>
+                                  <TableCell>{formatDose((s.dose_per_ha ?? 0) * (s.hectares ?? 0))} {s.unit}</TableCell>
                                   <TableCell>{formatCurrency(s.price_per_unit)}</TableCell>
                                   <TableCell className="text-right font-medium">{formatCurrency((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
                                 </TableRow>

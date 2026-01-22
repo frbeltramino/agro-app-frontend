@@ -74,7 +74,11 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
                 <TableCell>{s.supplyType === "stock" ? "De Stock" : "Compra"}</TableCell>
                 <TableCell className="text-right">{s.hectareQuantity}</TableCell>
                 <TableCell className="text-right">{formatDose(s.dosagePerHectare)} {s.unit}</TableCell>
-                <TableCell className="text-right">{formatDose(s.dosagePerHectare * s.hectareQuantity)} {s.unit}</TableCell>
+                <TableCell className="text-right">
+                  {formatDose(
+                    (s.dosagePerHectare ?? 0) * (s.hectareQuantity ?? 0)
+                  )} {s.unit}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-1 justify-end">
                     <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(index)} disabled={isAddingSupply}>
