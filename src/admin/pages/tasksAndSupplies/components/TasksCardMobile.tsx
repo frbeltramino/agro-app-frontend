@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
 import { useState } from "react";
 import { formatTn } from "@/lib/format-tn";
-import { currencyFormatter } from "@/lib/currency-formatter";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
+import { formatDate } from "@/lib/format-date";
 
 interface TasksCardMobileProps {
   tasks: CropTask[];
@@ -46,7 +47,13 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                 </div>
                 <span className="text-sm text-muted-foreground">{task.description || "Sin descripción"}</span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(task.date).toLocaleDateString()} • {task.provider_name ?? "-"} • Costo: {currencyFormatter(Number(task.total_price))}
+                  • {formatDate(task.date)}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  • {task.provider_name ?? "-"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  • Costo: {formatCurrency(Number(task.total_price))}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -61,14 +68,14 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
 
             {isOpen && task.supplies.length === 0 && (
               <p className="text-sm text-muted-foreground pl-6">
-                No hay suministros utilizados en este trabajo
+                No hay insumos utilizados en esta labor
               </p>
             )}
 
             {isOpen && task.supplies.length > 0 && (
               <CardContent className="pt-0">
                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  <Package className="h-4 w-4" /> Suministros usados
+                  <Package className="h-4 w-4" /> Insumos usados
                 </h4>
                 <div className="space-y-0">
                   {task.supplies.map((s) => (
@@ -108,14 +115,19 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                         </div>
 
                         <div>
+                          <p className="text-xs text-muted-foreground">Total Usado</p>
+                          <p>{formatTn(s.dose_per_ha * s.hectares)} {s.unit}</p>
+                        </div>
+
+                        <div>
                           <p className="text-xs text-muted-foreground">Costo/U</p>
-                          <p>{currencyFormatter(s.price_per_unit ?? 0)}</p>
+                          <p>{formatCurrency(s.price_per_unit ?? 0)}</p>
                         </div>
 
                         <div>
                           <p className="text-xs text-muted-foreground">Total</p>
                           <p className="font-medium">
-                            {currencyFormatter(s.total_used * (s.price_per_unit ?? 0))}
+                            {formatCurrency(s.total_used * (s.price_per_unit ?? 0))}
                           </p>
                         </div>
                       </div>

@@ -1,15 +1,9 @@
 import { forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useCampaignStore } from "@/admin/store/campaign.store";
 import { useEffect } from "react";
-import { BaseModal } from "@/admin/components/BaseModal";
+import { SidePanel } from "@/admin/components/SidePanel";
 
 
 interface FormValues {
@@ -89,14 +83,15 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
     };
 
     return (
-      <BaseModal isOpen={open} onClose={() => handleOpenChange(false)}>
+      <SidePanel
+        isOpen={open}
+        onClose={() => handleOpenChange(false)}
+        title={selectedCampaign ? "Editar Campaña" : "Nueva Campaña"}
+      >
         <div className="shrink-0 pb-4 border-b">
-          <DialogHeader>
-            <DialogTitle>{selectedCampaign ? "Editar" : "Nueva"} Campaña </DialogTitle>
-            <DialogDescription>
-              Completa los datos de la campaña agrícola
-            </DialogDescription>
-          </DialogHeader>
+          <div>
+            Completa los datos de la campaña agrícola
+          </div>
         </div>
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4 pt-4">
           <div className="flex-1 overflow-y-auto overscroll-contain">
@@ -143,14 +138,27 @@ export const CampaignForm = forwardRef<HTMLDivElement, CampaignFormProps>(
             </div>
           </div>
           <div className="shrink-0 pt-4 border-t bg-background">
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button type="submit">{selectedCampaign ? "Editar" : "Crear"} Campaña</Button>
-            </DialogFooter>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="submit"
+                className="flex-1"
+              >
+                {selectedCampaign ? "Editar" : "Crear"} Campaña
+              </Button>
+            </div>
           </div>
         </form>
 
-      </BaseModal>
+      </SidePanel>
     );
   });
 

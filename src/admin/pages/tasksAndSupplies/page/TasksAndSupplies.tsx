@@ -9,12 +9,12 @@ import { useCropStore } from "../../../store/crop.store";
 import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
 import { useTasks } from "../../../hooks/useTasks";
 import { CustomNoResultsScreen } from "@/components/custom/CustomNoResultsScreen";
-import { currencyFormatter } from "@/lib/currency-formatter";
 import { useSupply } from "../../../hooks/useSupply";
 import { TasksCard } from "../components/TasksCard";
 import { SuppliesCard } from "../components/SuppliesCard";
 import { StatCard } from "@/admin/components/StatCard";
 import { PageHeader } from "@/admin/components/PageHeader";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
 
 
 export const TasksAndSupplies = () => {
@@ -56,7 +56,7 @@ export const TasksAndSupplies = () => {
     );
 
     const total = (totalCostTasks || 0) + (totalCostSupplies || 0);
-    return currencyFormatter(total);
+    return formatCurrency(total);
   };
 
   return (
@@ -66,29 +66,29 @@ export const TasksAndSupplies = () => {
           { label: selectedCampaign?.name || "Campañas", href: "/admin/campaigns" },
           { label: selectedLot?.name || "Lotes", href: `/admin/campaigns/${selectedCampaign?.id}/lots` },
           { label: selectedCrop?.crop_name || "Cultivos", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops` },
-          { label: "Trabajos y Suministros", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops/${selectedCrop?.id}/TasksAndSupplies` },
+          { label: "Labores e Insumos", href: `/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops/${selectedCrop?.id}/TasksAndSupplies` },
         ]}
       />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <PageHeader title="Trabajos y Suministros" subtitle="Gestiona los trabajos realizados y Suministros utilizados" />
+        <PageHeader title="Labores e Insumos" subtitle="Gestiona las Labores realizadas y los insumos utilizados" />
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard
-          title="Total Trabajos"
+          title="Total Labores"
           value={tasksData?.total || 0}
           icon={<Wrench className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Completados"
+          title="Completadas"
           value={tasksData?.tasks.length || 0}
           icon={<CheckCircle className="h-4 w-4 text-green-600" />}
         />
         <StatCard
-          title="Suministros"
+          title="Insumos"
           value={suppliesData?.total || 0}
           icon={<Boxes className="h-4 w-4 text-muted-foreground" />}
         />
@@ -103,8 +103,8 @@ export const TasksAndSupplies = () => {
       {/* Tabs */}
       <Tabs defaultValue="works" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="works">Trabajos Realizados</TabsTrigger>
-          <TabsTrigger value="products">Suministros Utilizados</TabsTrigger>
+          <TabsTrigger value="works">Labores Realizadas</TabsTrigger>
+          <TabsTrigger value="products">Insumos Utilizados</TabsTrigger>
         </TabsList>
 
         <TabsContent value="works" className="space-y-4">

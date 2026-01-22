@@ -1,8 +1,9 @@
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Package } from "lucide-react";
-import { currencyFormatter } from "@/lib/currency-formatter";
 import { formatTn } from "@/lib/format-tn";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { Badge } from "@/components/ui/badge";
 
 
 interface SuppliesCardMobileProps {
@@ -13,52 +14,86 @@ interface SuppliesCardMobileProps {
 export const SuppliesCardMobile = ({ supplies, onDelete }: SuppliesCardMobileProps) => {
 
   if (!supplies || supplies.length === 0) {
-    return <p className="text-muted-foreground">No se encontraron suministros</p>;
+    return <p className="text-muted-foreground">No se encontraron insumos</p>;
   }
 
   return (
-    <div className="space-y-4">
-      {supplies.map((supply) => {
-        const totalQuantity = supply.dose_per_ha * supply.hectares;
+    <div className="space-y-3">
+      {supplies.map((s) => {
+        const totalUsed = s.dose_per_ha * s.hectares
+        const totalCost = totalUsed * (s.unit_price ?? 0)
 
         return (
-          <Card key={supply.supply_id!}>
-            <CardHeader className="flex justify-between items-start">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+          <Card key={s.supply_id ?? s.stock_id}>
+            <CardContent className="pt-4 space-y-3">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3">
+                {/* Izquierda: texto */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <p className="font-medium truncate">
+                      {s.supply_name}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground truncate">
+                    {s.category_name}
+                  </p>
+                </div>
+
+                {/* Derecha: acciones (NO se mueven) */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant={s.stock_id ? "secondary" : "outline"}>
+                    {s.stock_id ? "Stock" : "Compra"}
+                  </Badge>
+
                   <Button
                     size="icon"
-                    variant="ghost"
+                    variant="destructive"
+                    onClick={() => onDelete(s)}
+                    className="shrink-0"
                   >
-                    <Package className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
-                  <div className="flex flex-col gap-0.5 max-w-full">
-                    <span className="font-medium wrap-break-words leading-tight">
-                      {supply.supply_name}
-                    </span>
-                    <span
-                      className="self-start w-fit max-w-full truncate"
-                    >
-                      {supply.category_name}
-                    </span>
-                  </div>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  Dosis: {formatTn(supply.dose_per_ha ?? 0)} {supply.supply_unit} • Cant/ha: {formatTn(supply.hectares)} • Total: {formatTn(totalQuantity)} {supply.supply_unit}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Precio unitario: {currencyFormatter(supply.unit_price ?? 0)} • Total: {currencyFormatter(totalQuantity * (supply.unit_price ?? 0))}
-                </span>
               </div>
-              <div className="flex gap-2">
-                <Button size="icon" variant="ghost" onClick={() => onDelete(supply)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+
+              {/* Data grid */}
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Dosis / ha</p>
+                  <p>
+                    {formatTn(s.dose_per_ha)} {s.supply_unit}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Hectáreas</p>
+                  <p>{formatTn(s.hectares)}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Usado</p>
+                  <p>{formatTn(s.dose_per_ha * s.hectares)} {s.supply_unit}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Costo / u</p>
+                  <p>{formatCurrency(s.unit_price ?? 0)}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="font-medium">
+                    {formatCurrency(totalCost)}
+                  </p>
+                </div>
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}

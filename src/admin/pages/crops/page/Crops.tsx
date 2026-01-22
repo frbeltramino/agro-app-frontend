@@ -35,6 +35,7 @@ import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { formatTn } from "@/lib/format-tn";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CropMobileCard } from "../components/CropMobileCard";
+import { formatDate } from "@/lib/format-date";
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -215,6 +216,7 @@ export const Crops = () => {
                           </TableHeader>
                           <TableBody>
                             {filteredCrops.map((crop: Crop) => (
+
                               <TableRow
                                 key={crop.id}
                                 className="cursor-pointer hover:bg-muted/50"
@@ -227,10 +229,12 @@ export const Crops = () => {
                                 <TableCell className="font-medium">{crop.crop_name}</TableCell>
                                 <TableCell className="hidden sm:table-cell">{crop.seed_type}</TableCell>
                                 <TableCell>
-                                  {new Date(crop.start_date).toLocaleDateString()}
+                                  {
+                                    formatDate(crop.start_date)
+                                  }
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                  {crop.end_date ? new Date(crop.end_date).toLocaleDateString() : "No hay fecha de fin"}
+                                  {crop.end_date ? formatDate(crop.end_date) : "No hay fecha de fin"}
                                 </TableCell>
                                 <TableCell>{crop.real_yield ? formatTn(crop.real_yield) : "No hay valor real"}</TableCell>
                                 <TableCell className="text-right">
@@ -299,7 +303,7 @@ export const Crops = () => {
         description="Esta acción no se puede deshacer."
         itemData={[
           { label: "Nombre", value: selectedCrop?.crop_name || "" },
-          { label: "Fecha de siembra", value: selectedCrop?.start_date ? new Date(selectedCrop.start_date).toLocaleDateString() : "No hay fecha de siembra" },
+          { label: "Fecha de siembra", value: selectedCrop?.start_date ? formatDate(selectedCrop.start_date) : "No hay fecha de siembra" },
         ]}
         isOpen={isDeleteOpen}
         onConfirm={() => handleDeleteCrop(Number(selectedCrop?.id))}

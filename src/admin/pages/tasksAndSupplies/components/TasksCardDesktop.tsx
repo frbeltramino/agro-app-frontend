@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 import { formatTn } from "@/lib/format-tn";
-import { currencyFormatter } from "@/lib/currency-formatter";
+import { formatDate } from "@/lib/format-date";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
 
 
 interface TasksCardDesktopProps {
@@ -57,10 +58,10 @@ export const TasksCardDesktop = ({
                   </TableCell>
                   <TableCell className="font-medium">{task.type}</TableCell>
                   <TableCell>{task.description || "No hay descripción"}</TableCell>
-                  <TableCell>{new Date(task.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(task.date)}</TableCell>
                   <TableCell>{task.provider_name ?? "-"}</TableCell>
-                  <TableCell>{currencyFormatter(Number(task.laborCost))}</TableCell>
-                  <TableCell>{currencyFormatter(Number(task.total_price))}</TableCell>
+                  <TableCell>{formatCurrency(Number(task.laborCost))}</TableCell>
+                  <TableCell>{formatCurrency(Number(task.total_price))}</TableCell>
 
 
                   <TableCell className="text-right">
@@ -68,7 +69,7 @@ export const TasksCardDesktop = ({
                       <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => onDelete(task)}>
+                      <Button variant="destructive" size="icon" onClick={() => onDelete(task)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -81,21 +82,22 @@ export const TasksCardDesktop = ({
                     <TableCell colSpan={8} className="bg-muted/30 p-0">
                       <div className="p-4">
                         <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                          <Package className="h-4 w-4" /> Suministros utilizados en este trabajo
+                          <Package className="h-4 w-4" /> Insumos utilizados en esta labor
                         </h4>
 
                         {task.supplies.length === 0 && (
-                          <p className="text-sm text-muted-foreground ml-4">No hay suministros utilizados en este trabajo</p>
+                          <p className="text-sm text-muted-foreground ml-4">No hay insumos utilizados en esta labor</p>
                         )}
 
                         {task.supplies.length > 0 && (
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Suministro</TableHead>
+                                <TableHead>Insumo</TableHead>
                                 <TableHead>Tipo</TableHead>
                                 <TableHead>Dosis/h</TableHead>
                                 <TableHead>Cant/h</TableHead>
+                                <TableHead>Total Usado</TableHead>
                                 <TableHead>Costo/Unidad</TableHead>
                                 <TableHead className="text-right">Costo Total</TableHead>
                               </TableRow>
@@ -116,8 +118,9 @@ export const TasksCardDesktop = ({
                                   </TableCell>
                                   <TableCell>{formatTn(s.dose_per_ha)} {s.unit}</TableCell>
                                   <TableCell>{formatTn(s.hectares)}</TableCell>
-                                  <TableCell>{currencyFormatter(s.price_per_unit)}</TableCell>
-                                  <TableCell className="text-right font-medium">{currencyFormatter((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
+                                  <TableCell>{formatTn(s.dose_per_ha * s.hectares)} {s.unit}</TableCell>
+                                  <TableCell>{formatCurrency(s.price_per_unit)}</TableCell>
+                                  <TableCell className="text-right font-medium">{formatCurrency((s.dose_per_ha * s.hectares) * s.price_per_unit)}</TableCell>
                                 </TableRow>
                               ))}
                             </TableBody>

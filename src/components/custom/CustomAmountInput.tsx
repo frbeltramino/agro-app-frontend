@@ -13,6 +13,7 @@ interface AmountInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   error?: string
   min?: number
   max?: number
+  maxDecimals?: number
 }
 
 export function AmountInput({
@@ -25,6 +26,7 @@ export function AmountInput({
   className,
   min = 0,
   max,
+  maxDecimals = 2,
   disabled,
   placeholder = "0,00", // Changed placeholder to use comma for decimals
   ...props
@@ -36,8 +38,8 @@ export function AmountInput({
   const formatCurrency = (num: number): string => {
     return new Intl.NumberFormat(locale, {
       style: "decimal",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: maxDecimals,
+      maximumFractionDigits: maxDecimals,
     }).format(num)
   }
 
@@ -81,7 +83,7 @@ export function AmountInput({
     if (parts.length > 2) return
 
     // Limit to 2 decimal places
-    if (parts[1] && parts[1].length > 2) return
+    if (parts[1] && parts[1].length > maxDecimals) return
 
     setDisplayValue(cleaned)
 
@@ -114,6 +116,8 @@ export function AmountInput({
     props.onBlur?.(e)
   }
 
+  const currencyPadding = currency ? (getCurrencySymbol().length > 1 ? "pl-11" : "pl-8") : ""
+
   return (
     <div className="space-y-1 ">
       {label && (
@@ -140,7 +144,7 @@ export function AmountInput({
           disabled={disabled}
           placeholder={placeholder}
           className={cn(
-            currency ? "pl-8 h-10" : "h-10", // si no hay currency no dejar padding extra
+            currencyPadding + " h-10",
             error && "border-destructive focus-visible:ring-destructive",
             className
           )}

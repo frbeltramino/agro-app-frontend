@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
 import { Crop } from "@/interfaces/crops/crop.interface"
 import { formatTn } from "@/lib/format-tn"
+import { formatDate } from "@/lib/format-date"
 
 interface CropMobileCardProps {
   crop: Crop
@@ -26,13 +27,13 @@ export const CropMobileCard = ({
             <h3 className="font-semibold text-sm">{crop.crop_name}</h3>
 
             <p className="text-xs text-muted-foreground">
-              Siembra: {new Date(crop.start_date).toLocaleDateString()}
+              Siembra: {formatDate(crop.start_date)}
             </p>
 
             <p className="text-xs text-muted-foreground">
               Cosecha:{" "}
               {crop.end_date
-                ? new Date(crop.end_date).toLocaleDateString()
+                ? formatDate(crop.end_date)
                 : "Sin fecha"}
             </p>
 
