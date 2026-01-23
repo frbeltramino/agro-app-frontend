@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { useCampaigns } from "../../../hooks/useCampaigns";
 import { Label } from "@/components/ui/label";
 import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
+import { formatTn } from "@/lib/format-tn";
 
 
 
@@ -51,6 +52,11 @@ export const Dashboard = () => {
     return <CustomFullScreenLoading />;
   }
 
+  const calculateTotalCostByLote = () => {
+    const totalCost = currentData.reduce((acc, lot) => acc + lot.insumos + lot.labores + lot.costoVariable, 0);
+    return formatCurrency(totalCost);
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader title="Dashboard" subtitle="Gestiona las estadísticas de tus lotes" />
@@ -60,7 +66,7 @@ export const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Ingreso Total"
-            value={formatCurrency(1000)}
+            value={formatCurrency(0)}
             subtitle="Suma de todos los cultivos"
             icon={Wallet}
             variant="primary"
@@ -68,21 +74,21 @@ export const Dashboard = () => {
           />
           <StatCard
             title="Margen Bruto Total"
-            value={formatCurrency(1000)}
+            value={formatCurrency(0)}
             icon={TrendingUp}
             trend={{ value: 12.5, isPositive: true }}
             isLoading={isLoadingLots}
           />
           <StatCard
             title="Costos Totales"
-            value={formatCurrency(1000)}
+            value={calculateTotalCostByLote()}
             subtitle={`Insumos + Labores + Cosecha + Variable`}
             icon={PiggyBank}
             isLoading={isLoadingLots}
           />
           <StatCard
             title="Eficiencia Promedio"
-            value={formatCurrency(1000)}
+            value={formatCurrency(0)}
             subtitle="Margen / Ingreso"
             icon={Target}
             variant="secondary"
@@ -159,16 +165,10 @@ export const Dashboard = () => {
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
                     Margen Bruto
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Eficiencia
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 {currentData.map((item: any) => {
-                  const totalCosto = item.insumos + item.labores + item.cosecha + item.costoVariable;
-                  const totalIngreso = totalCosto + item.margenBruto;
-                  const eficiencia = ((item.margenBruto / totalIngreso) * 100).toFixed(1);
 
                   return (
                     <tr
@@ -179,25 +179,21 @@ export const Dashboard = () => {
                         {item.name}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        ${item.insumos.toLocaleString()}
+                        {formatCurrency(item.insumos)}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        ${item.labores.toLocaleString()}
+                        {formatCurrency(item.labores)}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        ${item.cosecha.toLocaleString()}
+                        {formatTn(item.cosecha)} tn
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        ${item.costoVariable.toLocaleString()}
+                        {formatCurrency(item.costoVariable)}
                       </td>
                       <td className="py-3 px-4 text-right font-medium text-primary">
-                        ${item.margenBruto.toLocaleString()}
+                        {formatCurrency(item.margenBruto)}
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          {eficiencia}%
-                        </span>
-                      </td>
+
                     </tr>
                   );
                 })}

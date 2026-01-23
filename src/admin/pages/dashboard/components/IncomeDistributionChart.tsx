@@ -12,6 +12,8 @@ import {
 import { useIsMobile } from "@/admin/hooks/useIsMobile";
 import { useWindowWidth } from "@/admin/hooks/useWindowWidth";
 import { Lote } from "@/interfaces/lotsStats/lots.stats.response";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatTn } from "@/lib/format-tn";
 
 
 interface IncomeDistributionChartProps {
@@ -43,14 +45,27 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   />
                   <span className="text-sm text-muted-foreground">{entry.name}</span>
                 </div>
-                <span className="font-medium text-foreground">
-                  ${entry.value.toLocaleString()}
-                </span>
+                {
+                  (entry.name === "Cosecha") && (
+                    <span className="font-medium text-foreground">
+                      {formatTn(entry.value)} tn
+                    </span>
+                  )
+
+
+                }
+                {
+                  (entry.name != "Cosecha") && (
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(entry.value)}
+                    </span>
+                  )
+                }
               </div>
             ))}
             <div className="flex items-center justify-between pt-1 border-t border-border/50">
               <span className="text-sm font-medium text-muted-foreground">Total Costos</span>
-              <span className="font-semibold text-foreground">${totalCostos.toLocaleString()}</span>
+              <span className="font-semibold text-foreground">{formatCurrency(totalCostos)}</span>
             </div>
           </div>
         </div>
@@ -103,7 +118,7 @@ const CustomLegend = ({ payload }: any) => {
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: marginItem.color }}
           />
-          <span className="text-sm font-medium text-foreground">{marginItem.value}</span>
+          <span className="text-sm font-medium text-foreground">{formatCurrency(marginItem.value)}</span>
         </div>
       )}
     </div>
