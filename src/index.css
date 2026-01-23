@@ -61,11 +61,7 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -75,6 +71,29 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --color-yellow: #F8D841;
+
+   /* === CHART COLORS (source of truth) === */
+  --chart-1: oklch(0.65 0.18 145); /* Margen Bruto */
+  --chart-2: oklch(0.75 0.14 65);  /* Insumos */
+  --chart-3: oklch(0.72 0.13 85);  /* Labores */
+  --chart-4: oklch(0.78 0.12 95);  /* Cosecha */
+  --chart-5: oklch(0.68 0.1 35);   /* Costo Variable */
+
+  /* === ALIAS SEMÁNTICOS === */
+  --chart-margin: var(--chart-1);
+  --chart-insumos: var(--chart-2);
+  --chart-labores: var(--chart-3);
+  --chart-cosecha: var(--chart-4);
+  --chart-variable: var(--chart-5);
+
+    /* Custom gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(142 45% 35%) 0%, hsl(142 55% 45%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(35 85% 55%) 0%, hsl(25 90% 60%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(30 10% 15% / 0.08);
+    --shadow-card: 0 2px 12px -2px hsl(30 10% 15% / 0.06);
+
 }
 
 .dark {
@@ -89,18 +108,14 @@
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: oklch(1 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+ 
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -109,6 +124,19 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+    --chart-1: oklch(0.72 0.2 145);
+  --chart-2: oklch(0.8 0.16 65);
+  --chart-3: oklch(0.78 0.15 85);
+  --chart-4: oklch(0.82 0.14 95);
+  --chart-5: oklch(0.72 0.12 35);
+
+  --chart-margin: var(--chart-1);
+  --chart-insumos: var(--chart-2);
+  --chart-labores: var(--chart-3);
+  --chart-cosecha: var(--chart-4);
+  --chart-variable: var(--chart-5);
+
 }
 
 @layer base {
