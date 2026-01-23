@@ -1,51 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TrendingUp, Wallet, PiggyBank, Target } from "lucide-react";
-
 import { StatCard } from "../components/StatCard";
 import { ChartCard } from "../components/ChartCard";
-import { ViewToggle } from "../components/ViewToggle";
 import { IncomeDistributionChart } from "../components/IncomeDistributionChart";
 import { InsightCard } from "../components/InsightCard";
 import { TableSummaryMobile } from "../components/TableSummaryMobile";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { useLotsStats } from "@/admin/hooks/useLotsStats";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
-
-export interface LotData {
-  id: string;
-  lote: string;
-  cultivo: string;
-  superficieHa: number;
-
-  insumos: number;
-  labores: number;
-  cosecha: number;
-  costoVariable: number;
-  margenBruto: number;
-}
+import { useCampaigns } from "../../../hooks/useCampaigns";
+import { Label } from "@/components/ui/label";
+import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
 
 
 
-const viewOptions = [
-  { value: "lote", label: "Por Lote" },
-  { value: "campana", label: "Por Campaña" },
-];
+
 
 export const Dashboard = () => {
-  const [view, setView] = useState("lote");
 
+  // 🔹 Hook campaigns
+  const { data: campaignsData, isLoading: isLoadingCampaigns } = useCampaigns();
 
-  const { data: lotsStatsData } = useLotsStats({ campaignId: 1 });
+  const campaigns = campaignsData?.campaigns || [];
+
+  // 🔹 Estado de campaña seleccionada
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+
+  // 🔹 Cuando cargan campaigns, seleccionar la primera automáticamente
+  useEffect(() => {
+    if (!selectedCampaignId && campaigns.length > 0) {
+      setSelectedCampaignId(campaigns[0].id);
+    }
+  }, [campaigns, selectedCampaignId]);
+
+  // 🔹 Fetch de lotes solo si hay campaña seleccionada
+  const { data: lotsStatsData, isLoading: isLoadingLots } = useLotsStats({
+    campaignId: selectedCampaignId || undefined,
+    enabled: !!selectedCampaignId, // ✅ Solo fetch cuando haya campaña
+  });
 
   const lotData = lotsStatsData?.lotes || [];
 
-  const currentData = view === "lote"
-    ? lotData.map(lot => ({
+  const currentData =
+    lotData.map(lot => ({
       ...lot,
-      name: `${lot.lote}`, // Esto se muestra en el chart y tabla
+      name: lot.lote,
     }))
-    : [];
 
+  if (isLoadingCampaigns) {
+    return <CustomFullScreenLoading />;
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -60,18 +64,21 @@ export const Dashboard = () => {
             subtitle="Suma de todos los cultivos"
             icon={Wallet}
             variant="primary"
+            isLoading={isLoadingLots}
           />
           <StatCard
             title="Margen Bruto Total"
             value={formatCurrency(1000)}
             icon={TrendingUp}
             trend={{ value: 12.5, isPositive: true }}
+            isLoading={isLoadingLots}
           />
           <StatCard
             title="Costos Totales"
             value={formatCurrency(1000)}
             subtitle={`Insumos + Labores + Cosecha + Variable`}
             icon={PiggyBank}
+            isLoading={isLoadingLots}
           />
           <StatCard
             title="Eficiencia Promedio"
@@ -79,6 +86,7 @@ export const Dashboard = () => {
             subtitle="Margen / Ingreso"
             icon={Target}
             variant="secondary"
+            isLoading={isLoadingLots}
           />
         </div>
 
@@ -87,12 +95,23 @@ export const Dashboard = () => {
           title="Distribución de Ingresos"
           description="Visualiza cómo se distribuye el ingreso entre costos variables, fijos y margen bruto"
           actions={
-            <ViewToggle
-              options={viewOptions}
-              value={view}
-              onChange={setView}
-            />
+            <div className="flex items-center space-x-3">
+              <Label className="text-sm">Campaña</Label>
+              <select
+                id="campaignSelect"
+                value={selectedCampaignId ?? ""}
+                onChange={(e) => setSelectedCampaignId(Number(e.target.value))}
+                className="mt-1.5 w-full px-3 py-2 border rounded-md bg-background text-sm"
+              >
+                {campaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           }
+          isLoading={isLoadingLots}
         >
           <IncomeDistributionChart data={currentData} />
         </ChartCard>
@@ -102,22 +121,28 @@ export const Dashboard = () => {
           <InsightCard
             title="Lote Más Rentable"
             description={`El lote A1 presenta la mejor relación margen/costos. Mayor barra verde = mayor rentabilidad.`}
+            isLoading={isLoadingLots}
           />
           <InsightCard
             title="Interpretación del Gráfico"
             description="Barra izquierda: costos desglosados (Insumos, Labores, Cosecha, Variable). Barra derecha: Margen Bruto. Compará alturas para evaluar eficiencia."
+            isLoading={isLoadingLots}
           />
         </div>
 
         {/* Data Table Summary */}
-        <ChartCard title="Resumen por Lote" description="Datos detallados de cada lote">
+        <ChartCard
+          title="Resumen por Lote"
+          description="Datos detallados de cada lote"
+          isLoading={isLoadingLots}
+        >
           <div className="hidden md:block overflow-x-auto">
             {/*desktop*/}
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    {view === "cultivo" ? "Cultivo" : "Campaña"}
+                    {"lote"}
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
                     Insumos

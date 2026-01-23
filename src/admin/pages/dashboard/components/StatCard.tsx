@@ -1,5 +1,7 @@
+
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 
 interface StatCardProps {
   title: string;
@@ -11,6 +13,7 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
+  isLoading?: boolean; // <-- nuevo prop
 }
 
 export function StatCard({
@@ -20,7 +23,12 @@ export function StatCard({
   icon: Icon,
   variant = "default",
   trend,
+  isLoading = false, // <-- default false
 }: StatCardProps) {
+  if (isLoading) {
+    return <CustomLoadingCard />;
+  }
+
   return (
     <div
       className={cn(
@@ -89,3 +97,4 @@ export function StatCard({
     </div>
   );
 }
+

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 
 interface ChartCardProps {
   title: string;
@@ -7,6 +8,7 @@ interface ChartCardProps {
   children: ReactNode;
   className?: string;
   actions?: ReactNode;
+  isLoading?: boolean; // <-- nuevo prop
 }
 
 export function ChartCard({
@@ -15,6 +17,7 @@ export function ChartCard({
   children,
   className,
   actions,
+  isLoading = false, // <-- default false
 }: ChartCardProps) {
   return (
     <div
@@ -35,7 +38,13 @@ export function ChartCard({
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      {children}
+
+      {/* 🔹 Si está cargando, mostrar loading */}
+      {isLoading ? (
+        <CustomLoadingCard />
+      ) : (
+        children
+      )}
     </div>
   );
 }
