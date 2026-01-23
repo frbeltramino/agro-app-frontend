@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 // import Login from "./pages/Login";
-import { Dashboard } from "./admin/pages/Dashboard";
+import { Dashboard } from "./admin/pages/dashboard/page/Dashboard";
 import { Login } from "./auth/login/Login";
 import { SeedSalesPage } from "./admin/pages/seedSales/page/SeedSales";
 import { Settings } from "./admin/pages/settings/page/Settings";
