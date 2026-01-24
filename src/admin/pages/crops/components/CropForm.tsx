@@ -198,7 +198,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
               name="real_yield"
               control={control}
               rules={{
-                min: { value: 0.01, message: "Debe ser mayor a 0" },
+                min: { value: 0, message: "Debe ser mayor o igual a 0" }, // permite 0
               }}
               render={({ field, fieldState }) => (
                 <AmountInput

@@ -7,8 +7,15 @@ export interface Lote {
   lote: string;
   superficieHa: number;
   insumos: number;
+  insumosPorCategoria: InsumosPorCategoria[];
   labores: number;
   cosecha: number;
   costoVariable: number;
   margenBruto: number;
 }
+
+export interface InsumosPorCategoria {
+  categoria: string;
+  total: number;
+}
+
