@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatTn } from "@/lib/format-tn";
 
 export interface MobileTableProps {
   data: any[]; // Tu array de lotes
@@ -7,9 +8,23 @@ export interface MobileTableProps {
 
 export const TableSummaryMobile = ({ data, titleKey = "name" }: MobileTableProps) => {
 
+  //  const insumosPorHa = data.insumos / item.superficieHa;
+  //                 const laboresPorHa = item.labores / item.superficieHa;
+  //                 const costoVariablePorHa = 0;
+  //                 const cosechaPorHa = item.cosecha / item.superficieHa;
+  //                 const ingresosPorHa = cosechaPorHa * item.precioPromedio;
+  //                 const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
+
+  console.log(data)
   return (
     <div className="space-y-4">
       {data.map((item, idx) => {
+        const insumosPorHa = item.insumos / item.superficieHa;
+        const laboresPorHa = item.labores / item.superficieHa;
+        const cosechaPorHa = item.cosecha / item.superficieHa;
+        const ingresosPorHa = cosechaPorHa * (item.precioPromedio ? item.precioPromedio : 0);
+        const costoVariablePorHa = 0;
+        const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
         return (
           <div
             key={idx}
@@ -21,21 +36,38 @@ export const TableSummaryMobile = ({ data, titleKey = "name" }: MobileTableProps
             </div>
 
             {/* Grid de datos */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
-              <div>
-                <span className="font-semibold">Insumos:</span> {formatCurrency(item.insumos)}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm text-muted-foreground">
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Superficie (ha)</span>
+                <span className="text-foreground">{formatTn(item.superficieHa)} ha</span>
               </div>
-              <div>
-                <span className="font-semibold">Labores:</span> {formatCurrency(item.labores)}
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Insumos (U$S/ha)</span>
+                <span className="text-foreground">{formatCurrency(insumosPorHa)}</span>
               </div>
-              <div>
-                <span className="font-semibold">Cosecha:</span> {formatCurrency(item.cosecha)}
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Labores (U$S/ha)</span>
+                <span className="text-foreground">{formatCurrency(laboresPorHa)}</span>
               </div>
-              <div>
-                <span className="font-semibold">Costo Var.:</span> {formatCurrency(item.costoVariable)}
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Cosecha (tn/ha)</span>
+                <span className="text-foreground">{formatTn(cosechaPorHa)} tn</span>
               </div>
-              <div className="col-span-2 font-medium text-primary">
-                <span className="font-semibold">Margen Bruto:</span> {formatCurrency(item.margenBruto)}
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Costo Var. (U$S/ha)</span>
+                <span className="text-foreground">{formatCurrency(costoVariablePorHa)}</span>
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Ingresos (U$S/ha)</span>
+                <span className="text-foreground">{formatCurrency(ingresosPorHa)}</span>
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Precio Promedio (U$S/tn)</span>
+                <span className="text-foreground">{item.precioPromedio ? formatCurrency(item.precioPromedio) : "—"}</span>
+              </div>
+              <div className="col-span-2 flex flex-col items-start font-medium text-primary">
+                <span className="font-semibold">Margen Bruto (U$S/ha)</span>
+                <span>{margenBrutoPorHa <= 0 ? "—" : formatCurrency(margenBrutoPorHa)}</span>
               </div>
             </div>
           </div>
