@@ -32,15 +32,56 @@ const normalizeLotsData = (data: Lote[]) => {
 
   const normalized = data.map((lote) => {
     const categoriasObj: Record<string, number> = {};
+    const superficie = lote.superficieHa || 0;
 
+    // ----- INSUMOS POR CATEGORÍA ($/ha)
     lote.insumosPorCategoria.forEach((i) => {
       categoriasSet.add(i.categoria);
-      categoriasObj[i.categoria] = i.total;
+
+      const valorPorHa =
+        superficie > 0 ? i.total / superficie : 0;
+
+      categoriasObj[i.categoria] = Number(valorPorHa.toFixed(2));
     });
+
+    // ----- COSTOS ($/ha)
+    const insumosPorHa =
+      superficie > 0 ? lote.insumos / superficie : 0;
+
+    const laboresPorHa =
+      superficie > 0 ? lote.labores / superficie : 0;
+
+    // const costoVariablePorHa =
+    //   superficie > 0 ? lote.costoVariable / superficie : 0;
+
+    const costoVariablePorHa = 0;
+
+    const totalCostosPorHa =
+      insumosPorHa + laboresPorHa + costoVariablePorHa;
+
+    // ----- INGRESOS ($/ha)
+    const rendimientoPorHa =
+      superficie > 0 ? lote.cosecha / superficie : 0;
+
+    const ingresosPorHa =
+      rendimientoPorHa * lote.precioPromedio;
+
+    // ----- MARGEN BRUTO ($/ha)
+    const margenBrutoPorHa =
+      ingresosPorHa - totalCostosPorHa;
+
+    // además, agregamos un flag para saber si mostrar la barra
+    const showMargin = ingresosPorHa > 0;
 
     return {
       ...lote,
-      ...categoriasObj, // 👈 claves dinámicas
+      insumos: Number(insumosPorHa.toFixed(2)),
+      labores: Number(laboresPorHa.toFixed(2)),
+      costoVariable: Number(costoVariablePorHa.toFixed(2)),
+      ingresos: Number(ingresosPorHa.toFixed(2)),
+      margenBruto: Number(margenBrutoPorHa.toFixed(2)),
+      showMargin,
+      ...categoriasObj,
     };
   });
 
@@ -60,7 +101,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       if (p.dataKey === "cosecha") return false;
       return true;
     });
-    const marginItem = payload.find((p: any) => p.dataKey === "margenBruto");
+    const marginItem = payload.find(
+      (p: any) => p.dataKey === "margenBruto" && p.payload.ingresos > 0
+    );
     const totalCostos = costItems.reduce(
       (sum: number, entry: any) => sum + entry.value,
       0
@@ -70,7 +113,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
     return (
       <div className="bg-card border border-border rounded-xl shadow-soft p-4 min-w-[220px]">
-        <p className="font-display font-semibold text-foreground mb-3 text-lg">{label}</p>
+        <p className="font-display font-semibold text-foreground mb-1 text-lg">
+          {label}
+        </p>
+        <p className="text-sm text-muted-foreground mb-3">
+          {payload[0]?.payload?.superficieHa} ha
+        </p>
 
         {/* Costos Section */}
         <div className="mb-3">
@@ -88,7 +136,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   </span>
                 </div>
                 <span className="font-medium text-foreground">
-                  {formatCurrency(entry.value)}
+                  {formatCurrency(entry.value)}/ha
                 </span>
               </div>
             ))}
@@ -96,7 +144,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
             <div className="flex items-center justify-between pt-1 border-t border-border/50">
               <span className="text-sm font-medium text-muted-foreground">Total Costos</span>
-              <span className="font-semibold text-foreground">{formatCurrency(totalCostos)}</span>
+              <span className="font-semibold text-foreground">{formatCurrency(totalCostos)}/ha</span>
             </div>
           </div>
         </div>
@@ -112,10 +160,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 />
                 <span className="text-sm font-medium text-foreground">{marginItem.name}</span>
               </div>
-              <span className="font-bold text-primary text-lg">
-                ${marginItem.value.toLocaleString()}
+              <span className="font-medium text-primary">
+                {formatCurrency(marginItem.value)}/ha
               </span>
             </div>
+
           </div>
         )}
       </div>
@@ -171,13 +220,17 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
               }}
               dy={isMobile ? 10 : 20} // mueve los ticks en mobile
               interval={0} // muestra todos los ticks
-              tickFormatter={(value: string) =>
-                isMobile
-                  ? value.length > 10
-                    ? value.slice(0, 10) + "…" // cortar nombres largos
-                    : value
-                  : value
-              }
+              tickFormatter={(value: string, index: number) => {
+                const ha = chartData[index]?.superficieHa;
+
+                const label = `${value} (${ha} ha)`;
+
+                if (isMobile) {
+                  return label.length > 12 ? label.slice(0, 12) + "…" : label;
+                }
+
+                return label;
+              }}
 
             />
             <YAxis
@@ -221,12 +274,17 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
             />
 
             {/* Margin Bar (separate) */}
-            <Bar
-              dataKey="margenBruto"
-              name="Margen Bruto"
-              fill="var(--chart-margin)"
-              radius={[4, 4, 0, 0]}
-            />
+            {chartData.map((lote) =>
+              lote.showMargin ? (
+                <Bar
+                  key={`margen-${lote.id}`}
+                  dataKey="margenBruto"
+                  name="Margen Bruto"
+                  fill="var(--chart-margin)"
+                  radius={[4, 4, 0, 0]}
+                />
+              ) : null
+            )}
 
 
           </BarChart>

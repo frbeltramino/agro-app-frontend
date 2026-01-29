@@ -148,50 +148,68 @@ export const Dashboard = () => {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    {"lote"}
+                    Lote
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Insumos
+                    Superficie (ha)
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Labores
+                    Insumos (U$S/ha)
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Cosecha
+                    Labores (U$S/ha)
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Costo Var.
+                    Cosecha (tn/ha)
                   </th>
                   <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                    Margen Bruto
+                    Precio Promedio (U$S/tn)
+                  </th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
+                    Costo Variable (U$S/ha)
+                  </th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
+                    Margen Bruto (U$S/ha)
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {currentData.map((item: any) => {
-
+                  const insumosPorHa = item.insumos / item.superficieHa;
+                  const laboresPorHa = item.labores / item.superficieHa;
+                  const costoVariablePorHa = 0;
+                  const cosechaPorHa = item.cosecha / item.superficieHa;
+                  const ingresosPorHa = cosechaPorHa * item.precioPromedio;
+                  const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
                   return (
                     <tr
                       key={item.name}
                       className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                     >
+
                       <td className="py-3 px-4 font-medium text-foreground">
                         {item.name}
                       </td>
-                      <td className="py-3 px-4 text-right text-muted-foreground">
-                        {formatCurrency(item.insumos)}
+                      <td className="py-3 px-4 text-right font-medium text-foreground">
+                        {item.superficieHa}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        {formatCurrency(item.labores)}
+                        {formatCurrency(insumosPorHa)}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        {formatTn(item.cosecha)} tn
+                        {formatCurrency(laboresPorHa)}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
-                        {formatCurrency(item.costoVariable)}
+                        {formatTn(cosechaPorHa)}
+                      </td>
+                      <td className="py-3 px-4 text-right text-muted-foreground">
+                        {formatCurrency(item.precioPromedio)}
+                      </td>
+                      <td className="py-3 px-4 text-right text-muted-foreground">
+                        {formatCurrency(costoVariablePorHa)}
                       </td>
                       <td className="py-3 px-4 text-right font-medium text-primary">
-                        {formatCurrency(item.margenBruto)}
+                        {formatCurrency(margenBrutoPorHa)}
                       </td>
 
                     </tr>

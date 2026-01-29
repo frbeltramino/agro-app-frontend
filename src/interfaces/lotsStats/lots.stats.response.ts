@@ -10,6 +10,8 @@ export interface Lote {
   insumosPorCategoria: InsumosPorCategoria[];
   labores: number;
   cosecha: number;
+  ingresos: number;
+  precioPromedio: number;
   costoVariable: number;
   margenBruto: number;
 }
@@ -18,4 +20,3 @@ export interface InsumosPorCategoria {
   categoria: string;
   total: number;
 }
-
