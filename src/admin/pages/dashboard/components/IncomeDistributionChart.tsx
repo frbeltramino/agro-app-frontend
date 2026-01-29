@@ -30,47 +30,45 @@ interface CustomLegendProps {
 const normalizeLotsData = (data: Lote[]) => {
   const categoriasSet = new Set<string>();
 
+  // 1️⃣ Recorrer todos los lotes para recolectar categorías
+  data.forEach((lote) => {
+    lote.insumosPorCategoria?.forEach((i) => {
+      categoriasSet.add(i.categoria);
+    });
+  });
+
+  const categoriasArray = Array.from(categoriasSet);
+
+  // 2️⃣ Normalizar cada lote
   const normalized = data.map((lote) => {
     const categoriasObj: Record<string, number> = {};
     const superficie = lote.superficieHa || 0;
 
-    // ----- INSUMOS POR CATEGORÍA ($/ha)
-    lote.insumosPorCategoria.forEach((i) => {
-      categoriasSet.add(i.categoria);
+    // Inicializar todas las categorías en 0
+    categoriasArray.forEach((cat) => {
+      categoriasObj[cat] = 0;
+    });
 
-      const valorPorHa =
-        superficie > 0 ? i.total / superficie : 0;
-
+    // Si hay datos, asignarlos
+    lote.insumosPorCategoria?.forEach((i) => {
+      const valorPorHa = superficie > 0 ? i.total / superficie : 0;
       categoriasObj[i.categoria] = Number(valorPorHa.toFixed(2));
     });
 
-    // ----- COSTOS ($/ha)
-    const insumosPorHa =
-      superficie > 0 ? lote.insumos / superficie : 0;
-
-    const laboresPorHa =
-      superficie > 0 ? lote.labores / superficie : 0;
-
-    // const costoVariablePorHa =
-    //   superficie > 0 ? lote.costoVariable / superficie : 0;
-
+    // Costos ($/ha)
+    const insumosPorHa = superficie > 0 ? lote.insumos / superficie : 0;
+    const laboresPorHa = superficie > 0 ? lote.labores / superficie : 0;
     const costoVariablePorHa = 0;
+    const totalCostosPorHa = insumosPorHa + laboresPorHa + costoVariablePorHa;
 
-    const totalCostosPorHa =
-      insumosPorHa + laboresPorHa + costoVariablePorHa;
+    // Ingresos ($/ha)
+    const rendimientoPorHa = superficie > 0 ? lote.cosecha / superficie : 0;
+    const ingresosPorHa = rendimientoPorHa * lote.precioPromedio;
 
-    // ----- INGRESOS ($/ha)
-    const rendimientoPorHa =
-      superficie > 0 ? lote.cosecha / superficie : 0;
+    // Margen bruto
+    const margenBrutoPorHa = ingresosPorHa - totalCostosPorHa;
 
-    const ingresosPorHa =
-      rendimientoPorHa * lote.precioPromedio;
-
-    // ----- MARGEN BRUTO ($/ha)
-    const margenBrutoPorHa =
-      ingresosPorHa - totalCostosPorHa;
-
-    // además, agregamos un flag para saber si mostrar la barra
+    // Flag para mostrar la barra
     const showMargin = ingresosPorHa > 0;
 
     return {
@@ -87,7 +85,7 @@ const normalizeLotsData = (data: Lote[]) => {
 
   return {
     data: normalized,
-    categorias: Array.from(categoriasSet),
+    categorias: categoriasArray,
   };
 };
 

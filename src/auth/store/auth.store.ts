@@ -5,6 +5,7 @@ import { checkAuthAction } from '../actions/check-auth.action';
 import { registerAction } from '../actions/register.action';
 import { updateUserProfileAction } from '../actions/updateUserProfile.action';
 import { changePasswordAction } from '../actions/changePassword.action';
+import { useQueryClient } from '@tanstack/react-query';
 
 type AuthStatus = 'authenticated' | 'not-authenticated' | 'checking';
 
@@ -68,6 +69,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("token");
     set({ user: null, token: null, isAuthenticated: 'not-authenticated' });
+    const queryClient = useQueryClient();
+    queryClient.clear();
   },
 
   checkAuthStatus: async () => {

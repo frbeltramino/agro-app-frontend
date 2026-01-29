@@ -49,6 +49,7 @@ export const useSeedSales = ({
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
       queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
       queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -61,6 +62,7 @@ export const useSeedSales = ({
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
       queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
       queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);

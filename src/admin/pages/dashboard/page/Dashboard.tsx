@@ -180,7 +180,8 @@ export const Dashboard = () => {
                   const costoVariablePorHa = 0;
                   const cosechaPorHa = item.cosecha / item.superficieHa;
                   const ingresosPorHa = cosechaPorHa * item.precioPromedio;
-                  const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
+                  const margenBrutoPorHa =
+                    (ingresosPorHa || 0) - (insumosPorHa || 0) - (laboresPorHa || 0) - (costoVariablePorHa || 0);
                   return (
                     <tr
                       key={item.name}

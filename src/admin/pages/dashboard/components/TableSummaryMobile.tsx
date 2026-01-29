@@ -8,13 +8,6 @@ export interface MobileTableProps {
 
 export const TableSummaryMobile = ({ data, titleKey = "name" }: MobileTableProps) => {
 
-  //  const insumosPorHa = data.insumos / item.superficieHa;
-  //                 const laboresPorHa = item.labores / item.superficieHa;
-  //                 const costoVariablePorHa = 0;
-  //                 const cosechaPorHa = item.cosecha / item.superficieHa;
-  //                 const ingresosPorHa = cosechaPorHa * item.precioPromedio;
-  //                 const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
-
   console.log(data)
   return (
     <div className="space-y-4">
