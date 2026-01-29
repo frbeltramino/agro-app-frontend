@@ -10,11 +10,11 @@ interface Options {
   end_date?: string,
 }
 
-export const getSeedSalesAction = async (options: Options): Promise<CampaignSalesResponse> => {
+export const getSeedMovementsAction = async (options: Options): Promise<CampaignSalesResponse> => {
 
   const { page, limit } = options;
 
-  const response = await agroApi.get<CampaignSalesResponse>('/sales/seed', {
+  const response = await agroApi.get<CampaignSalesResponse>('/seed/movements', {
     params: {
       page,
       limit,

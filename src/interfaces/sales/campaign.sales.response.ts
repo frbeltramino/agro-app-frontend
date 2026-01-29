@@ -1,3 +1,4 @@
+import { Delivery } from "./seed.sale.delivery.interface";
 import { SeedSale } from "./seed.sale.interface";
 
 export interface CampaignSalesResponse {
@@ -17,20 +18,8 @@ export interface Crop {
   campaign_name: string;
   crop_name_id: number;
   crop_name: string;
+  seed_deliveries: Delivery[];
   seed_sales: SeedSale[];
-}
-
-export interface Delivery {
-  id: number | null | undefined;
-  primary_liquidation_number?: string | null;
-  seed_sale_id?: number | null;
-  crop_name_id?: number | null;
-  created_at?: string;
-  updated_at?: string;
-  destination: string;
-  tn_delivered: number;
-  price_per_tn: number;
-  delivery_date: string;
 }
 
 export interface Pagination {
@@ -39,6 +28,3 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
-
-
-

@@ -1,13 +1,17 @@
 export interface Delivery {
   id: number | null | undefined;
-  primary_liquidation_number?: string | null;
-  seed_sale_id?: number | null;
-  crop_name_id?: number | null;
+  userId?: number;
+  campaign_id?: number;
+  campaign_name?: string;
+  crop_name_id?: number;
+  crop_name?: string;
+  tn_sold?: number;
+  tn_delivered: number;
+  waybill_number?: string;
+  destination: string;
+  status: string;
+  delivery_date: string;
+  deleted_at?: string | null;
   created_at?: string;
   updated_at?: string;
-  destination: string;
-  tn_delivered: number;
-  price_per_tn: number;
-  delivery_date: string;
-
 }

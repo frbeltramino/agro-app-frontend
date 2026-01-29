@@ -1,9 +1,10 @@
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSeedSalesAction } from "../actions/seedSales/get-seed-sales.action";
+import { getSeedMovementsAction } from "../actions/seedSales/get-seed-movements.action";
 import { useSearchParams } from "react-router-dom";
-import { createUpdateSaleAction } from "../actions/seedSales/ceate-update-sale.action";
 import { deleteSeedSaleAction } from "../actions/seedSales/delete-seed-sale.action";
 import { useAuthStore } from "@/auth/store/auth.store";
+import { createUpdateSaleAction } from "../actions/seedSales/ceate-update-sale.action";
 
 interface Options {
   page?: number | string;
@@ -31,7 +32,7 @@ export const useSeedSales = ({
   const query = useQuery({
     queryKey: ["seedSales", user?.id, { page, limit, waybill_number, destination, start_date, end_date }],
     queryFn: () =>
-      getSeedSalesAction({
+      getSeedMovementsAction({
         page,
         limit,
         waybill_number,
@@ -47,6 +48,7 @@ export const useSeedSales = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
       queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
     },
     onError: (error) => {
       console.log(error);
@@ -58,6 +60,7 @@ export const useSeedSales = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
       queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
     },
     onError: (error) => {
       console.log(error);
