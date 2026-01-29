@@ -1,18 +1,20 @@
 import {
-  FieldErrors,
+
   UseFormRegister,
   UseFormTrigger,
   UseFormClearErrors
 } from "react-hook-form";
-import { FormValues } from "./SeedSalesModal";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { FormValues } from "./SeedDeliveryForm";
 
 interface SeedSaleStep1Props {
   register: UseFormRegister<FormValues>;
-  errors: FieldErrors<FormValues>;
   trigger: UseFormTrigger<FormValues>;
   clearErrors: UseFormClearErrors<FormValues>;
+  onClose: () => void;
+  setStep: (step: number) => void;
 
   campaignsData: { id: number; name: string }[];
   cropsData: { crop_name_id: number; crop_name: string }[];
@@ -21,17 +23,14 @@ interface SeedSaleStep1Props {
   cropsCampaignError?: null | undefined | Error;
 
   handleCampaignChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-
-  onClose: () => void;
-  setStep: (step: number) => void;
-
-  isAddingDelivery: boolean;
 }
 
 
 
 
-export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCampaignLoading, cropsCampaignError, handleCampaignChange, onClose, setStep, isAddingDelivery, trigger, clearErrors }: SeedSaleStep1Props) => {
+
+export const DeliveryStep1 = ({ register, onClose, setStep, trigger, clearErrors, campaignsData, cropsData, cropsCampaignLoading, cropsCampaignError, handleCampaignChange }: SeedSaleStep1Props) => {
+
 
   const handleNextStep = async () => {
     const isValid = await trigger(["campaign_id", "crop_name_id"]);
@@ -50,7 +49,7 @@ export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCam
             required: "La campaña es requerida",
             valueAsNumber: true,
             validate: (value) =>
-              value > 0 || "La campaña es requerida",
+              value ? value > 0 || "La campaña es requerida" : true,
           })}
           onChange={(e) => {
             register("campaign_id").onChange(e);
@@ -78,7 +77,7 @@ export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCam
             required: "El cultivo es requerido",
             valueAsNumber: true,
             validate: (value) =>
-              value > 0 || "El cultivo es requerido",
+              value ? value > 0 || "El cultivo es requerido" : true,
           })}
           onChange={(e) => {
             register("crop_name_id").onChange(e);
@@ -99,7 +98,7 @@ export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCam
         {cropsData.length === 0 && (
           <p className="text-sm text-muted-foreground mt-1">No hay cultivos cosechados</p>
         )}
-        {errors.crop_name_id && <p className="text-destructive text-xs mt-1">{errors.crop_name_id.message}</p>}
+
         {cropsCampaignError && (
           <p className="text-sm text-destructive mt-1">
             Error al cargar cultivos
@@ -113,7 +112,7 @@ export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCam
           variant="outline"
           onClick={onClose}
           className="w-full"
-          disabled={isAddingDelivery}
+          size="lg"
         >
           Cancelar
         </Button>
@@ -122,6 +121,7 @@ export const SaleStep1 = ({ register, errors, campaignsData, cropsData, cropsCam
           form="seed-sale-form"
           className="w-full"
           onClick={() => handleNextStep()}
+          size="lg"
         >
           Siguiente
         </Button>

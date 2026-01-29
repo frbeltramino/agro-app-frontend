@@ -202,7 +202,7 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
                 dataKey={categoria}
                 name={categoria}
                 stackId="costos"
-                fill="oklch(52% 0.105 223.128)"
+                fill="var(--chart-insumos)"
               />))}
 
             <Bar
@@ -233,10 +233,10 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
 
         </ResponsiveContainer>
         <div>
-          <div className="mt-4">
+          <div className="mt-4 pb-2">
             <CustomLegend
               niveles={[
-                { label: "Insumos", color: "oklch(52% 0.105 223.128)" },
+                { label: "Insumos", color: "var(--chart-insumos)" },
                 { label: "Labores", color: "var(--chart-labores)" },
                 { label: "Costo Variable", color: "var(--chart-variable)" },
                 { label: "Margen Bruto", color: "var(--chart-margin)" },

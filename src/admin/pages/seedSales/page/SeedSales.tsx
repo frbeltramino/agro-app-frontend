@@ -1,10 +1,11 @@
 "use client"
 
-import { SeedSalesTable } from "../components/SalesTable"
+import { DeliverySales } from "../components/DeliverySales"
+
 
 export const SeedSalesPage = () => {
   return (
-    <SeedSalesTable />
+    <DeliverySales />
   )
 }
 

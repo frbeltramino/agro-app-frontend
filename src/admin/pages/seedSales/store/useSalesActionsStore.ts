@@ -2,23 +2,31 @@ import { create } from "zustand";
 import { SeedSale } from "@/interfaces/sales/seed.sale.interface";
 
 interface SalesActionsState {
-  cropToEdit: SeedSale | null;
-  cropToDelete: SeedSale | null;
+  saleToEdit: SeedSale | null;
+  saleToDelete: SeedSale | null;
+  isDeleteDialogOpen: boolean;
 
-  setCropToEdit: (SeedSale: SeedSale) => void;
-  setCropToDelete: (SeedSale: SeedSale) => void;
+  setSaleToEdit: (SeedSale: SeedSale) => void;
+  setSaleToDelete: (SeedSale: SeedSale) => void;
+
+  openDeleteDialog: () => void;  // <-- nueva acción
+  closeDeleteDialog: () => void;
 
   resetEdit: () => void;
   resetDelete: () => void;
 }
 
 export const useSalesActionsStore = create<SalesActionsState>((set) => ({
-  cropToEdit: null,
-  cropToDelete: null,
+  saleToEdit: null,
+  saleToDelete: null,
+  isDeleteDialogOpen: false,
 
-  setCropToEdit: (SeedSale) => set({ cropToEdit: SeedSale }),
-  setCropToDelete: (SeedSale) => set({ cropToDelete: SeedSale }),
+  setSaleToEdit: (SeedSale) => set({ saleToEdit: SeedSale }),
+  setSaleToDelete: (SeedSale) => set({ saleToDelete: SeedSale }),
 
-  resetEdit: () => set({ cropToEdit: null }),
-  resetDelete: () => set({ cropToDelete: null }),
+  openDeleteDialog: () => set({ isDeleteDialogOpen: true }),
+  closeDeleteDialog: () => set({ isDeleteDialogOpen: false, saleToDelete: null }),
+
+  resetEdit: () => set({ saleToEdit: null }),
+  resetDelete: () => set({ saleToDelete: null }),
 }));

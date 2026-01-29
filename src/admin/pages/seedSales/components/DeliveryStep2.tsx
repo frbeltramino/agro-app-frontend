@@ -7,20 +7,18 @@ import {
   UseFormWatch,
   UseFormSetValue
 } from "react-hook-form";
-import { FormValues } from "./SeedSalesModal";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CropSale } from "@/interfaces/crops/crop.sales.response";
-
 import { AmountInput } from "@/components/custom/CustomAmountInput";
-import { useSeedSaleForm } from "../hooks/useSeedSaleForm";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SeedSaleTotals } from "./SeedSaleTotals";
+import { FormValues } from "./SeedDeliveryForm"
+import { FormSection } from "@/admin/helpers/formSectionHelper";
 
-import { SaleSummary } from "./SaleSummary";
-import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
-import { toast } from "sonner";
+
 
 interface seedSaleStep2Props {
   register: UseFormRegister<FormValues>;
@@ -30,11 +28,14 @@ interface seedSaleStep2Props {
   clearErrors: UseFormClearErrors<FormValues>;
   setValue: UseFormSetValue<FormValues>;
   controlSale: any;
-  cropsData: { crop_name_id: number; crop_name: string }[];
+
   selectedCrop: CropSale | null;
   selectedCampaign: string | null;
-  setStep: (step: number) => void;
-  isAddingDelivery: boolean;
+  setStep?: (step: number) => void;
+  onErrorClick?: () => void
+  onCancelClick?: () => void
+  onSubmit?: () => void
+  isSaving?: boolean;
 }
 
 const statuses = [
@@ -44,84 +45,44 @@ const statuses = [
 ]
 
 
-export const SeleStep2 = ({ register, errors, cropsData, selectedCrop, selectedCampaign, setStep, isAddingDelivery, controlSale, trigger, clearErrors, watch, setValue }: seedSaleStep2Props) => {
-
-  const { setAvailableTn, setTotalTn, availableTn, totalTn, totalTnSold } = useSeedSaleForm();
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [availableTnBase, setAvailableTnBase] = useState(0);
-  const [availableLocalTn, setAvailableLocalTn] = useState(0);
+export const DeliveryStep2 = ({ register, errors, selectedCrop, selectedCampaign, onErrorClick, onCancelClick, controlSale, clearErrors, watch, onSubmit, isSaving }: seedSaleStep2Props) => {
 
 
-  const formValues = {
-    waybill_number: watch("waybill_number"),
-    destination: watch("destination"),
-    date: watch("date"),
-    status: watch("status"),
-    tn_delivered: watch("tn_delivered"),
-  };
-
-  const handleNextStep = async () => {
-    const isValid = await trigger([
-      "waybill_number",
-      "destination",
-      "date",
-      "status",
-      "tn_delivered",
-    ]);
-
-
-    if (!isValid) {
-      toast.error("Los campos no pueden estar vacios")
-      return
-    }
-    if (!isValidTnToSale(Number(watch("tn_delivered")))) {
-      toast.error("Las tn a entregar no pueden exceder las disponibles")
-      return
-    }
-
-    setStep(3);
-  };
-
-  const isValidTnToSale = (tnToSale: number) => {
+  const isValidTnToDeliver = (tnToSale: number) => {
     //Si las toneladas a disponibles son mayores a las toneladas a entregar, mostrar un error
+    const availableTn = getAvailableTnToDeliver();
     return (availableTn >= tnToSale)
   }
 
   useEffect(() => {
     if (!selectedCrop) return;
 
-    const available =
-      (selectedCrop.total_harvested_tn ?? 0) -
-      (selectedCrop.total_delivered_tn ?? 0);
-    setAvailableTnBase(available);
-    setAvailableLocalTn(available);
-    setAvailableTn(available);
-    setTotalTn(selectedCrop.total_harvested_tn - selectedCrop.total_delivered_tn || 0);
-    setValue("tn_delivered", available);
-
-    setIsInitialized(true);
   }, [selectedCrop]);
 
-  if (!isInitialized) {
-    <CustomLoadingCard />
+  const getAvailableTnToDeliver = () => {
+    if (!selectedCrop) return 0;
+
+    return (selectedCrop.total_harvested_tn || 0) - (selectedCrop.total_delivered_tn || 0);
   }
 
   return (
     <>
 
-      <SaleSummary
-        showContext={true}
-        formValues={formValues}
-        selectedCampaign={selectedCampaign}
-        selectedCrop={selectedCrop}
-        cropsData={cropsData}
-        contextOpenValue={true}
-        deliveryOpenValue={false}
-      />
 
+      <FormSection>
+        <SeedSaleTotals
+          totalTnLabel1="tn Totales cosechadas"
+          totalTnLabel2="tn entregadas"
+          totalTn1={selectedCrop?.total_harvested_tn || 0}
+          totalTn2={selectedCrop?.total_delivered_tn || 0}
+          availableTn={getAvailableTnToDeliver()}
+        />
+      </FormSection>
 
-      {isInitialized && availableTn <= 0 && (
+      {/* {isInitialized && availableTn <= 0 && ( */}
+      {getAvailableTnToDeliver() <= 0 && (
         <>
+
           <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
             <p className="font-medium text-destructive">
               No es posible registrar una nueva entrega
@@ -136,20 +97,23 @@ export const SeleStep2 = ({ register, errors, cropsData, selectedCrop, selectedC
             </p>
 
           </div>
-          <Button
-            variant="outline"
-            className="mt-3 w-full"
-            onClick={() => setStep(1)}
-          >
-            Cambiar cultivo o campaña
-          </Button>
+          <FormSection>
+            <Button
+              variant="outline"
+              className="mt-3 w-full"
+              onClick={onErrorClick}
+            >
+              Cambiar cultivo o campaña
+            </Button>
+          </FormSection>
+
         </>
       )}
 
       {
-        isInitialized && availableTn > 0 && (
+        getAvailableTnToDeliver() > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5">
               <div>
                 <Label className="text-sm mb-1.5">Carta de Porte *</Label>
                 <input
@@ -183,16 +147,16 @@ export const SeleStep2 = ({ register, errors, cropsData, selectedCrop, selectedC
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-5 mt-3">
               <div>
                 <Label className="text-sm mb-1.5">Fecha *</Label>
                 <input
                   type="date"
-                  {...register("date", { required: "La fecha es requerida" })}
+                  {...register("delivery_date", { required: "La fecha es requerida" })}
                   className="date-standard"
                 />
 
-                {errors.date && <p className="text-destructive text-sm mt-1">{errors.date.message}</p>}
+                {errors.delivery_date && <p className="text-destructive text-sm mt-1">{errors.delivery_date.message}</p>}
               </div>
 
               <div>
@@ -218,7 +182,7 @@ export const SeleStep2 = ({ register, errors, cropsData, selectedCrop, selectedC
                     required: "tn totales entregadas es obligatorio",
                     min: { value: 0.01, message: "Debe ser mayor a 0" },
                   }}
-                  defaultValue={availableTn}
+                  defaultValue={100}
                   render={({ field, fieldState }) => (
                     <AmountInput
                       label="tn a Entregar *"
@@ -226,47 +190,46 @@ export const SeleStep2 = ({ register, errors, cropsData, selectedCrop, selectedC
                       onChange={(val) => {
                         const tn = Number(val) || 0;
                         field.onChange(tn)
-                        setTotalTn(Number(tn) || 0)
-                        setAvailableLocalTn(availableTnBase - tn);
+                        // setTotalTn(Number(tn) || 0)
+                        // setAvailableLocalTn(availableTnBase - tn);
                       }}
                       error={fieldState.error?.message}
                       locale="es-AR"
-                      placeholder="0,00"
+                      placeholder="0,000"
+                      maxDecimals={3}
                     />
                   )}
                 />
                 {
-                  !isValidTnToSale(Number(watch("tn_delivered"))) && <p className="text-destructive text-xs mt-1">Las tn a entregar no pueden exceder las disponibles</p>
+                  !isValidTnToDeliver(Number(watch("tn_delivered"))) && <p className="text-destructive text-xs mt-1">Las tn a entregar no pueden exceder las disponibles</p>
                 }
               </div>
 
 
             </div>
 
-            <SeedSaleTotals
-              totalTn={totalTn}
-              totalTnSold={totalTnSold}
-              availableTn={availableLocalTn}
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="w-full"
-                disabled={isAddingDelivery}
-              >
-                Volver
-              </Button>
-              <Button
-                type="button"
-                form="seed-sale-form"
-                className="w-full"
-                onClick={handleNextStep}
-              >
-                Siguiente
-              </Button>
-            </div>
+            <FormSection>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancelClick}
+                  className="w-full"
+                >
+                  Volver
+                </Button>
+
+                <Button
+                  type="button"
+                  form="seed-sale-form"
+                  className="w-full"
+                  onClick={onSubmit}
+                  disabled={isSaving}
+                >
+                  Crear Entrega
+                </Button>
+              </div>
+            </FormSection>
           </>
         )
       }

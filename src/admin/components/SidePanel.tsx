@@ -8,6 +8,9 @@ interface SidePanelProps {
   title?: string;
   children: React.ReactNode;
   width?: "sm" | "md" | "lg";
+
+  icon?: React.ElementType;
+  iconColor?: string;
 }
 
 const widths = {
@@ -22,6 +25,8 @@ export const SidePanel = ({
   title,
   children,
   width = "md",
+  icon: Icon,
+  iconColor = "text-blue-600",
 }: SidePanelProps) => {
   useEffect(() => {
     if (isOpen) {
@@ -56,7 +61,11 @@ export const SidePanel = ({
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background">
-          <h2 className="text-lg font-semibold">{title}</h2>
+          {/*icono si viene*/}
+          <div className="flex items-center gap-2">
+            {Icon && <Icon className={cn("h-6 w-6", iconColor)} />}
+            {title && <h2 className="text-lg font-semibold">{title}</h2>}
+          </div>
           <button
             onClick={onClose}
             className="rounded-md p-1 hover:bg-muted"
