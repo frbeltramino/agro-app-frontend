@@ -260,8 +260,12 @@ export const Dashboard = () => {
                             const costoVariablePorHa = 0;
                             const cosechaPorHa = item.cosecha / item.superficieHa;
                             const ingresosPorHa = cosechaPorHa * item.precioPromedio;
-                            const margenBrutoPorHa =
-                              (ingresosPorHa || 0) - (insumosPorHa || 0) - (laboresPorHa || 0) - (costoVariablePorHa || 0);
+                            let margenBrutoPorHa = 0;
+                            if (item.precioPromedio > 0 && cosechaPorHa > 0) {//si hay al menos una venta en el lote se saca margen brutno sino no
+                              margenBrutoPorHa =
+                                (ingresosPorHa || 0) - (insumosPorHa || 0) - (laboresPorHa || 0) - (costoVariablePorHa || 0);
+                            }
+
                             return (
                               <tr
                                 key={item.name}
@@ -290,7 +294,7 @@ export const Dashboard = () => {
                                   {formatCurrency(costoVariablePorHa)}
                                 </td>
                                 <td className="py-3 px-4 text-right font-medium text-primary">
-                                  {formatCurrency(margenBrutoPorHa)}
+                                  {margenBrutoPorHa != 0 ? formatCurrency(margenBrutoPorHa) : "—"}
                                 </td>
 
                               </tr>

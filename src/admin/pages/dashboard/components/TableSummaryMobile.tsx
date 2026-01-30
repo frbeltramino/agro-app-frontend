@@ -17,7 +17,12 @@ export const TableSummaryMobile = ({ data, titleKey = "name" }: MobileTableProps
         const cosechaPorHa = item.cosecha / item.superficieHa;
         const ingresosPorHa = cosechaPorHa * (item.precioPromedio ? item.precioPromedio : 0);
         const costoVariablePorHa = 0;
-        const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
+        let margenBrutoPorHa = 0;
+        if (item.precioPromedio > 0 && cosechaPorHa > 0) {//si hay al menos una venta en el lote se saca margen brutno sino no
+          margenBrutoPorHa =
+            (ingresosPorHa || 0) - (insumosPorHa || 0) - (laboresPorHa || 0) - (costoVariablePorHa || 0);
+        }
+
         return (
           <div
             key={idx}
@@ -56,11 +61,11 @@ export const TableSummaryMobile = ({ data, titleKey = "name" }: MobileTableProps
               </div>
               <div className="flex flex-col items-start">
                 <span className="font-semibold">Precio Promedio (U$S/tn)</span>
-                <span className="text-foreground">{item.precioPromedio ? formatCurrency(item.precioPromedio) : "—"}</span>
+                <span className="text-foreground">{item.precioPromedio > 0 ? formatCurrency(item.precioPromedio) : "—"}</span>
               </div>
               <div className="col-span-2 flex flex-col items-start font-medium text-primary">
                 <span className="font-semibold">Margen Bruto (U$S/ha)</span>
-                <span>{margenBrutoPorHa <= 0 ? "—" : formatCurrency(margenBrutoPorHa)}</span>
+                <span>{margenBrutoPorHa != 0 ? formatCurrency(margenBrutoPorHa) : "—"}</span>
               </div>
             </div>
           </div>

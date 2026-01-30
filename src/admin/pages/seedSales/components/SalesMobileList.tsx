@@ -114,7 +114,7 @@ export function SalesMobileList({ sales }: SalesMobileListProps) {
 
         <p className="flex justify-between text-primary">
           <span>Total</span>
-          <span>${totalAmount.toLocaleString()}</span>
+          <span>{formatCurrency(totalAmount)}</span>
         </p>
       </div>
     </div>
