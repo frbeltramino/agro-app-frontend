@@ -3,20 +3,15 @@
 import { forwardRef, useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 
 import { useSupplyCategories } from "@/admin/hooks/useSupplyCategories";
 import { Stock } from "@/interfaces/stock/stock.interface";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/format-number";
 import { AmountInput } from "@/components/custom/CustomAmountInput";
-import { BaseModal } from "@/admin/components/BaseModal";
 import { MasterSupplySelect } from "../../tasksAndSupplies/components/MasterSupplySelect";
+import { SidePanel } from "@/admin/components/SidePanel";
 
 
 interface FormValues {
@@ -115,8 +110,8 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
         reset()
         onClose()
       } catch (err) {
-        console.error("Error al guardar el suministro:", err)
-        toast.error("Error al guardar el suministro")
+        console.error("Error al guardar el insumo:", err)
+        toast.error("Error al guardar el insumo")
       } finally {
         setIsSaving(false)
       }
@@ -125,14 +120,20 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
     const unitValue = watch("unit");
 
     return (
-      <BaseModal isOpen={isOpen} onClose={onClose}>
-        <DialogHeader>
-          <DialogTitle>{initialData ? "Editar Suministro" : "Nuevo Suministro"}</DialogTitle>
-          <DialogDescription>
-            {initialData ? "Actualiza los datos del suministro" : "Agrega un nuevo suministro a tu inventario"}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="w-full max-w-full overflow-x-hidden">
+      <SidePanel
+        isOpen={isOpen}
+        onClose={onClose}
+        title={initialData ? "Editar Insumo" : "Nuevo Insumo"}
+      >
+
+        <div className="border-b pb-4">
+          <p>
+            {initialData ? "Actualiza los datos del insumo" : "Agrega un nuevo insumo a tu inventario"}
+          </p>
+
+
+        </div>
+        <div className="w-full max-w-full overflow-x-hidden pt-4">
           <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
 
             <div className="space-y-2">
@@ -145,7 +146,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Nombre del Suministro *</label>
+              <label className="block text-sm font-medium mb-2">Nombre del Insumo *</label>
               <input
                 type="text"
                 {...register(`productName`)}
@@ -209,7 +210,9 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                       onChange={field.onChange}
                       error={fieldState.error?.message}
                       locale="es-AR"
-                      placeholder="0"
+                      currency="USD"
+                      placeholder="0,000"
+                      maxDecimals={3}
                     />
                   )}
                 />
@@ -254,14 +257,20 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
               </div>
             </div>
 
-            <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sticky bottom-0 bg-background sm:bg-transparent p-4 sm:p-0">
-              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onClose}>
+            <div className="flex pt-4 gap-2 border-t bg-background mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={onClose}
+              >
                 Cancelar
               </Button>
+
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="w-full sm:w-auto flex items-center gap-2"
+                className="flex-1"
               >
                 {isSaving ? (
                   <>
@@ -274,10 +283,11 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                   "Crear"
                 )}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </div>
-      </BaseModal>
+
+      </SidePanel>
     );
   },
 )

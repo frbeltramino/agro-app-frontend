@@ -8,7 +8,8 @@ interface ChartCardProps {
   children: ReactNode;
   className?: string;
   actions?: ReactNode;
-  isLoading?: boolean; // <-- nuevo prop
+  isLoading?: boolean;
+  showActions?: boolean;
 }
 
 export function ChartCard({
@@ -18,6 +19,7 @@ export function ChartCard({
   className,
   actions,
   isLoading = false, // <-- default false
+  showActions = true,
 }: ChartCardProps) {
   return (
     <div
@@ -36,7 +38,8 @@ export function ChartCard({
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+
+        {showActions && actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
 
       {/* 🔹 Si está cargando, mostrar loading */}

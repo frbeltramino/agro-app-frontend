@@ -9,7 +9,6 @@ import { toast } from "sonner"
 
 import { StockModal } from "./StockModal"
 import { useStock } from "@/admin/hooks/useStock"
-import { currencyFormatter } from "@/lib/currency-formatter"
 import { Stock } from "@/interfaces/stock/stock.interface"
 import { CustomPagination } from "@/components/custom/CustomPagination"
 import {
@@ -29,6 +28,8 @@ import { useStockStats } from "@/admin/hooks/useStockStats";
 import { DeleteDialog } from "@/admin/components/DeleteDialog";
 import { formatTn } from "@/lib/format-tn";
 import { StockTableMobile } from "./StockTableMobile";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatDate } from "@/lib/format-date";
 
 
 export const StockTable = () => {
@@ -62,10 +63,10 @@ export const StockTable = () => {
 
   const handleDelete = (id: any) => {
     deleteStock.mutateAsync(id, {
-      onSuccess: () => toast.success("Suministro eliminado correctamente"),
+      onSuccess: () => toast.success("Insumo eliminado correctamente"),
       onError: (error) => {
         console.log(error);
-        toast.error("Error al eliminar el suministro", { position: 'top-right' });
+        toast.error("Error al eliminar el insumo", { position: 'top-right' });
       }
     });
     setIsDeleteOpen(false);
@@ -79,10 +80,10 @@ export const StockTable = () => {
 
   const handleSave = (item: any) => {
     mutation.mutateAsync(item, {
-      onSuccess: () => toast.success(editingItem ? "Suministro actualizado correctamente" : "Suministro creado correctamente"),
+      onSuccess: () => toast.success(editingItem ? "Insumo actualizado correctamente" : "Insumo creado correctamente"),
       onError: (error) => {
         console.log(error);
-        toast.error("Error al actualizar el suministro", { position: 'top-right' });
+        toast.error("Error al actualizar el insumo", { position: 'top-right' });
       }
     });
     setIsModalOpen(false)
@@ -132,21 +133,21 @@ export const StockTable = () => {
         <div>
           <PageHeader
             title="Control de Stock"
-            subtitle="Gestiona tus suministros y suministros"
+            subtitle="Gestiona tus insumos"
           />
         </div>
         <Button onClick={handleAdd} className="w-full md:w-auto">
           <Plus className="mr-2 h-4 w-4" />
-          Nuevo Suministro
+          Nuevo Insumo
         </Button>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <StockCard
-            title="Total Suministros"
+            title="Total Insumos"
             value={statsData?.active_count ? statsData.active_count : 0}
-            description="Suministros registrados"
+            description="Insumos registrados"
             isLoading={isStatsLoading}
             isStatsError={isStatsError}
           />
@@ -165,7 +166,7 @@ export const StockTable = () => {
         <Card>
           <StockCard
             title="Valor Total"
-            value={currencyFormatter(statsData?.total_value ? statsData.total_value : 0)}
+            value={formatCurrency(statsData?.total_value ? statsData.total_value : 0)}
             description="Inventario valuado"
             isLoading={isStatsLoading}
             isStatsError={isStatsError}
@@ -176,8 +177,8 @@ export const StockTable = () => {
       <Card>
 
         <CardHeader>
-          <CardTitle>Suministros</CardTitle>
-          <CardDescription>Lista completa de suministros en stock</CardDescription>
+          <CardTitle>Insumos</CardTitle>
+          <CardDescription>Lista completa de insumos en stock</CardDescription>
         </CardHeader>
         <CardContent className="px-4 md:px-6">
           <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center">
@@ -213,7 +214,7 @@ export const StockTable = () => {
 
             {!isLoading && stock.length === 0 &&
               <CustomNoResultsCard
-                title="No se encontraron suministros"
+                title="No se encontraron insumos"
                 message="Prueba cambiando la búsqueda o los filtros."
               />
             }
@@ -252,8 +253,8 @@ export const StockTable = () => {
                             <TableCell>{formatTn(item.quantity_available || 0)}</TableCell>
                             <TableCell>{item.unit}</TableCell>
                             <TableCell>{getStockLevelBadge(item.quantity_available)}</TableCell>
-                            <TableCell className="font-bold">{currencyFormatter(item.price_per_unit)}</TableCell>
-                            <TableCell>{new Date(item.expiration_date).toLocaleDateString()}</TableCell>
+                            <TableCell className="font-bold">{formatCurrency(item.price_per_unit)}</TableCell>
+                            <TableCell>{formatDate(item.expiration_date)}</TableCell>
                             <TableCell>{getStatusBadge(item.status)}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
@@ -287,13 +288,16 @@ export const StockTable = () => {
 
       <StockModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setEditingItem(null)
+          setIsModalOpen(false)
+        }}
         onSave={handleSave}
         initialData={editingItem}
       />
 
       <DeleteDialog
-        title="Eliminar suministro"
+        title="Eliminar insumo"
         description="Esta acción no se puede deshacer."
         itemData={[
           { label: "Nombre", value: stockToDelete?.name || "" },

@@ -19,14 +19,14 @@ export const CustomFormSupply = ({
 }: CustomFormSupplyProps) => {
   return (
     <>
-      {/* Tipo de Suministro */}
+      {/* Tipo de Insumo */}
       <div>
         <label className="block text-sm font-medium mb-1">
-          Tipo de Suministro *
+          Tipo de Insumo *
         </label>
         <select
           {...register(`supplies.${index}.supplyType`, {
-            required: "Selecciona el tipo de suministro",
+            required: "Selecciona el tipo de insumo",
           })}
           className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary text-sm"
         >
@@ -35,19 +35,19 @@ export const CustomFormSupply = ({
         </select>
       </div>
 
-      {/* Si el suministro viene de stock */}
+      {/* Si el insumo viene de stock */}
       {supplyType === "stock" ? (
         <div>
           <label className="block text-sm font-medium mb-1">
-            Seleccionar Suministro de Stock *
+            Seleccionar Insumo de Stock *
           </label>
           <select
             {...register(`supplies.${index}.stockId`, {
-              required: "Selecciona un suministro de stock",
+              required: "Selecciona un insumo de stock",
             })}
             className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary text-sm"
           >
-            <option value="">Selecciona un suministro</option>
+            <option value="">Selecciona un insumo</option>
             {stockSupplies?.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}

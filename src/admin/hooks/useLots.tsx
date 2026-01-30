@@ -33,6 +33,9 @@ export const useLots = ({ campaignId }: UseLotsOptions) => {
     mutationFn: createUpdateLotAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -43,6 +46,9 @@ export const useLots = ({ campaignId }: UseLotsOptions) => {
     mutationFn: deleteLotAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lots"] });
+      queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
   });
 

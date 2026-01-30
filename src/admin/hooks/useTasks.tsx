@@ -34,6 +34,7 @@ export const useTasks = ({ cropId, page, limit, type, search }: UseTasksOptions)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["supply"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -48,6 +49,7 @@ export const useTasks = ({ cropId, page, limit, type, search }: UseTasksOptions)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["supply"] });
+      queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);

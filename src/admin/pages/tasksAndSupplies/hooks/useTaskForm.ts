@@ -85,14 +85,14 @@ export function useTaskForm({
     let quantityToAdjust = 0;
 
     if (newS) {
-      // Suministro actualizado → calcular diferencia
+      // insumo actualizado → calcular diferencia
       const newUsedQuantity = Number(newS.dosagePerHectare) * Number(newS.hectareQuantity);
       quantityToAdjust = oldUsedQuantity - newUsedQuantity;
 
       // Ya procesado → lo eliminamos del map para detectar nuevos al final
       newStockMap.delete(oldStockSupply.stock_id!);
     } else {
-      // Suministro eliminado → devolver stock completo
+      // insumo eliminado → devolver stock completo
       quantityToAdjust = oldUsedQuantity;
     }
 

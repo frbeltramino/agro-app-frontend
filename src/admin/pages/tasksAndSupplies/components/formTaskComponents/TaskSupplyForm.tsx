@@ -46,14 +46,14 @@ export function TaskSupplyFormComponent({
 
   return (
     <div className="border rounded-lg p-4 bg-muted/30 space-y-4 w-full max-w-full">
-      <h4 className="font-medium text-base text-center sm:text-left">{isEditing ? "Editar Suministro" : "Nuevo Suministro"}</h4>
+      <h4 className="font-medium text-base text-center sm:text-left">{isEditing ? "Editar Insumo" : "Nuevo Insumo"}</h4>
 
-      {/* Tipo de suministro */}
+      {/* Tipo de insumo */}
       <div>
         <div>
-          <Label className="text-sm mb-1.5">Tipo de Suministro *</Label>
+          <Label className="text-sm mb-1.5">Tipo de Insumo *</Label>
           <select
-            {...register(`supplyType`, { required: "Selecciona el tipo de suministro" })}
+            {...register(`supplyType`, { required: "Selecciona el tipo de insumo" })}
             className="select-standard w-full"
           >
             <option value="stock">De Stock</option>
@@ -66,12 +66,12 @@ export function TaskSupplyFormComponent({
 
         {supplyType === "stock" ? (
           <div className="mt-2">
-            <Label className="text-sm mb-1.5">Seleccionar Suministro de Stock *</Label>
+            <Label className="text-sm mb-1.5">Seleccionar Insumo de Stock *</Label>
             <select
-              {...register(`stockId`, { required: "Selecciona un suministro de stock" })}
+              {...register(`stockId`, { required: "Selecciona un insumo de stock" })}
               className="select-standard w-full"
             >
-              <option value="">Selecciona un suministro</option>
+              <option value="">Selecciona un insumo</option>
               {stockSupplies?.map((supply) => (
                 <option key={supply.id} value={supply.id?.toString()}>
                   {supply.name} — {supply.quantity_available} {supply.unit} disponibles
@@ -94,7 +94,7 @@ export function TaskSupplyFormComponent({
           </div>
         ) : (
           <>
-            {/* Compra de suministro */}
+            {/* Compra de insumo */}
             <div className="space-y-2 mt-2">
               <MasterSupplySelect
                 control={control}

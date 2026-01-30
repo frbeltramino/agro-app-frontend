@@ -64,7 +64,7 @@ export const TasksCard = () => {
 
   const handleDeleteTask = async (task: CropTask) => {
     if (!task) return;
-    // Si hay suministros de stock, ajustar el stock
+    // Si hay insumos de stock, ajustar el stock
     const stockSupplies = task.supplies.filter(s => s.from_stock);
 
     if (stockSupplies.length > 0) {

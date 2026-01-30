@@ -71,7 +71,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
         campaign_id: selectedCampaign?.id || null,
         lot_id: selectedLot?.id || null,
         seed_type: cropToEdit.seed_type || "",
-        real_yield: cropToEdit.real_yield || undefined,
+        real_yield: cropToEdit.real_yield ?? undefined,
       });
     } else {
       reset({
@@ -105,6 +105,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
   };
 
   const handleOpenChange = (open: boolean) => {
+    if (!open) reset();
     onOpenChange(open);
   };
 
@@ -207,8 +208,9 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
                   onChange={field.onChange}
                   error={fieldState.error?.message}
                   locale="es-AR"
-                  placeholder="0,00"
+                  placeholder="0,000"
                   currency={undefined}
+                  maxDecimals={3}
                 />
               )}
             />
