@@ -35,6 +35,9 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
     onSuccess: () => {
       QueryClient.invalidateQueries({ queryKey: ["crops"] });
       QueryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
+      QueryClient.invalidateQueries({ queryKey: ["campaignsForSale"] });
+      QueryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      QueryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {
       console.log(error);
@@ -47,6 +50,7 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
       QueryClient.invalidateQueries({ queryKey: ["crops"] });
       QueryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
       QueryClient.invalidateQueries({ queryKey: ["campaignsForSale"] });
+      QueryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
       QueryClient.invalidateQueries({ queryKey: ["lotsStats"] });
     },
     onError: (error) => {

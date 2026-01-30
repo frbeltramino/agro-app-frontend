@@ -36,7 +36,7 @@ export const useMasterSupply = () => {
         error?.message ||                 // <- mensaje genérico de Axios
         "Error desconocido";
 
-      console.log("Error al crear suministro:", message);
+      console.log("Error al crear insumo:", message);
     },
   });
 

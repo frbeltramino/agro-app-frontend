@@ -2,10 +2,11 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit2, ChevronDown } from "lucide-react";
-import { currencyFormatter } from "@/lib/currency-formatter";
 import { formatTn } from "@/lib/format-tn";
 import { useState } from "react";
 import { Stock } from "@/interfaces/stock/stock.interface";
+import { formatCurrency } from "@/lib/currency-formatter-usd";
+import { formatDate } from "@/lib/format-date";
 
 interface StockCardMobileProps {
   stock: Stock[];
@@ -23,7 +24,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
   };
 
   if (!stock || stock.length === 0) {
-    return <p className="text-muted-foreground">No se encontraron suministros</p>;
+    return <p className="text-muted-foreground">No se encontraron insumos</p>;
   }
 
   const getStockLevelBadge = (quantity: number) => {
@@ -51,9 +52,12 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => toggle(item.id ? item.id : 0)}
+                    onClick={() => toggle(item.id ?? 0)}
                   >
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown
+                      className={`h-4 w-4 transform transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"
+                        }`}
+                    />
                   </Button>
 
                   <div>
@@ -90,7 +94,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
                 <div className="flex justify-between">
                   <span>Precio unitario</span>
                   <span className="font-medium">
-                    {currencyFormatter(item.price_per_unit)}
+                    {formatCurrency(item.price_per_unit)}
                   </span>
                 </div>
 
@@ -98,7 +102,7 @@ export const StockTableMobile = ({ stock, onEdit, onDelete }: StockCardMobilePro
                   <span>Vencimiento</span>
                   <span>
                     {item.expiration_date
-                      ? new Date(item.expiration_date).toLocaleDateString()
+                      ? formatDate(item.expiration_date)
                       : "Sin vencimiento"}
                   </span>
                 </div>

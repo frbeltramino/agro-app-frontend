@@ -28,7 +28,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
           <div key={index} className="p-3 space-y-2">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium text-sm">{s.productName || s.stockName || "Suministro"}</p>
+                <p className="font-medium text-sm">{s.productName || s.stockName || "Insumo"}</p>
                 <p className="text-xs text-muted-foreground">{s.supplyType === "stock" ? "De Stock" : "Compra"}</p>
               </div>
               <div className="flex gap-1">
@@ -70,7 +70,7 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
           <TableBody>
             {supplies.map((s, index) => (
               <TableRow key={index}>
-                <TableCell className="max-w-[250px] truncate">{s.productName || s.stockName || "Suministro"}</TableCell>
+                <TableCell className="max-w-[250px] truncate">{s.productName || s.stockName || "Insumo"}</TableCell>
                 <TableCell>{s.supplyType === "stock" ? "De Stock" : "Compra"}</TableCell>
                 <TableCell className="text-right">{s.hectareQuantity}</TableCell>
                 <TableCell className="text-right">{formatDose(s.dosagePerHectare)} {s.unit}</TableCell>

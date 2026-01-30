@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useDeliveriesActionsStore } from "../store/useDeliveriesActionsStore";
 import { formatDate } from "@/lib/format-date";
 import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery";
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 
 export const DeliverySales = () => {
 
@@ -397,6 +398,18 @@ export const DeliverySales = () => {
                     )}
                   </div>
                 </>
+              )}
+
+              {!isLoadingDeliverySales && !selectedCampaign && (
+
+                <CustomNoResultsCard
+                  title="No hay Entregas o ventas para esta campaña"
+                  message="Necesita tener cosechas en la campaña para poder crear las entregas y ventas."
+
+                />
+
+
+
               )}
 
 
