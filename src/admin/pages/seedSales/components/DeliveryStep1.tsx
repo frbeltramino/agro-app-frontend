@@ -87,18 +87,22 @@ export const DeliveryStep1 = ({ register, onClose, setStep, trigger, clearErrors
           disabled={cropsData.length === 0 || cropsCampaignLoading}
         >
           <option value={0} disabled>
-            Seleccione un cultivo
+            {cropsData.length === 0
+              ? cropsCampaignLoading
+                ? "Cargando cultivos..."
+                : "No hay cultivos con fecha y toneladas cosechadas"
+              : "Seleccione un cultivo"}
           </option>
+
           {cropsData.map((crop) => (
             <option key={crop.crop_name_id} value={crop.crop_name_id}>
               {crop.crop_name}
             </option>
           ))}
         </select>
-        {cropsData.length === 0 && (
-          <p className="text-sm text-muted-foreground mt-1">No hay cultivos cosechados</p>
-        )}
 
+
+        {/* Error de carga */}
         {cropsCampaignError && (
           <p className="text-sm text-destructive mt-1">
             Error al cargar cultivos

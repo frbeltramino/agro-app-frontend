@@ -19,6 +19,7 @@ import { useAuthStore } from "./auth/store/auth.store";
 import { TasksAndSupplies } from "./admin/pages/tasksAndSupplies/page/TasksAndSupplies";
 import { Lots } from "./admin/pages/lots/page/Lots";
 import Stock from "./admin/pages/stock/page/Stock";
+import { VariableExpenses } from "./admin/pages/variableExpenses/page/VariableExpenses";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,14 @@ export const App = () => (
             element={
               <PrivateRouteWithSidebar>
                 <SeedSalesPage />
+              </PrivateRouteWithSidebar>
+            }
+          />
+          <Route
+            path="/admin/variable/expenses"
+            element={
+              <PrivateRouteWithSidebar>
+                <VariableExpenses />
               </PrivateRouteWithSidebar>
             }
           />

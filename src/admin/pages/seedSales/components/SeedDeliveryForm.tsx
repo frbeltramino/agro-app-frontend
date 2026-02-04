@@ -11,9 +11,10 @@ import { DeliveryStep2 } from "./DeliveryStep2";
 import { useSeedSaleDelivery } from "@/admin/hooks/useSeedSaleDelivery";
 import { Delivery } from "@/interfaces/sales/seed.sale.delivery.interface";
 import { toast } from "sonner";
-import { Truck } from "lucide-react";
+import { InfoIcon, Truck } from "lucide-react";
 import { SaleSummary } from "./SaleSummary";
 import { FormSection } from "@/admin/helpers/formSectionHelper";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface seedSalesFormProps {
   isOpen: boolean;
@@ -217,6 +218,14 @@ export const SeedDeliveryForm = ({ isOpen, onClose }: seedSalesFormProps) => {
           {
             step === 1 && (
               <>
+
+                <Alert variant="info">
+                  <InfoIcon />
+                  <AlertTitle>Cultivos!</AlertTitle>
+                  <AlertDescription>
+                    Los cultivos solo aparecerán si tienen fecha y toneladas cosechadas registradas en la sección de "Cultivos".
+                  </AlertDescription>
+                </Alert>
                 <DeliveryStep1
                   register={register}
                   trigger={trigger}
