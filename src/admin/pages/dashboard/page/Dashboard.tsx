@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { TrendingUp, Wallet, PiggyBank, Target } from "lucide-react";
+import { TrendingUp, Wallet, PiggyBank } from "lucide-react";
 import { StatCard } from "../components/StatCard";
 import { ChartCard } from "../components/ChartCard";
 import { IncomeDistributionChart } from "../components/IncomeDistributionChart";
