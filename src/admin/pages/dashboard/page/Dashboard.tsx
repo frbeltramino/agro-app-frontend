@@ -13,9 +13,8 @@ import { Label } from "@/components/ui/label";
 import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
 import { formatTn } from "@/lib/format-tn";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
-
-
-
+import agroTractor from "@/assets/agro-tractor.jpg";
+import { ImageCard } from "@/admin/components/ImageCard";
 
 
 export const Dashboard = () => {
@@ -153,14 +152,7 @@ export const Dashboard = () => {
                 icon={PiggyBank}
                 isLoading={isLoadingLots}
               />
-              <StatCard
-                title="Eficiencia Promedio"
-                value={formatCurrency(0)}
-                subtitle="Margen / Ingreso"
-                icon={Target}
-                variant="secondary"
-                isLoading={isLoadingLots}
-              />
+              <ImageCard image={agroTractor} alt="Tractor" isLoading={isLoadingLots} />
             </div>
 
             {/* Main Chart */}
