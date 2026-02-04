@@ -33,7 +33,7 @@ export const CustomTasksSuppliesPagination = ({
         onClick={() => handlePageChange(currentPage - 1)}
       >
         <ChevronLeft className="h-4 w-4" />
-        Previous
+        Anterior
       </Button>
 
       {Array.from({ length: totalPages }).map((_, i) => {
@@ -56,7 +56,7 @@ export const CustomTasksSuppliesPagination = ({
         disabled={currentPage === totalPages}
         onClick={() => handlePageChange(currentPage + 1)}
       >
-        Next
+        Siguiente
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>

@@ -18,7 +18,8 @@ import { AmountInput } from "@/components/custom/CustomAmountInput"
 import { useLotStore } from "@/admin/store/lot.store";
 import { TaskSuppliesTable } from "./formTaskComponents/TaskSuppliesTable"
 import { TaskSupplyFormComponent } from "./formTaskComponents/TaskSupplyForm"
-import { Stepper } from "./formTaskComponents/StepIndicator"
+
+import { Stepper } from "@/components/custom/StepIndicator";
 import { useTaskForm } from "../hooks/useTaskForm"
 import { SidePanel } from "@/admin/components/SidePanel"
 import { useProviders } from "@/admin/hooks/useProviders"

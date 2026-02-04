@@ -1,4 +1,4 @@
-import { Home, Truck, Settings, LogOut, Flag, Warehouse } from "lucide-react";
+import { Home, Truck, Settings, LogOut, Flag, Warehouse, Receipt } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -15,15 +15,19 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CustomLogoSidebar } from "./custom/LogoSidebar";
+import { CustomLogoSidebarDark } from "./custom/LogoSidebarDark";
+import { CustomLogoSidebarLight } from "./custom/LogoSidebarLight";
 import { CustomLogoMobile } from "./custom/CustomlogoMobile";
 import { useAuthStore } from "@/auth/store/auth.store";
+import { useTheme } from "@/context/theme-context";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
   { title: "Dashboard", url: "/admin/dashboard", icon: Home },
   { title: "Campañas", url: "/admin/campaigns", icon: Flag },
   { title: "Control de Stock", url: "/admin/stock", icon: Warehouse },
   { title: "Venta de Semillas", url: "/admin/sales", icon: Truck },
+  { title: "Gastos variables", url: "/admin/variable/expenses", icon: Receipt },
   { title: "Configuración", url: "/admin/settings", icon: Settings },
 
 ];
@@ -33,7 +37,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logout, user } = useAuthStore();
-
+  const { theme } = useTheme();
   const handleLogout = () => {
     logout();
     toast({
@@ -47,11 +51,20 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader
-        className={`h-20 border-b border-border flex items-center justify-center ${open ? "px-4" : "px-0"
-          }`}
+        className={`h-20 border-b border-border flex items-center justify-center ${open ? "px-4" : "px-0"}`}
       >
-        <div className="flex items-center justify-center w-full">
-          {open ? <CustomLogoSidebar /> : <CustomLogoMobile />}
+
+        <div
+          className={cn(
+            "flex items-center justify-center w-full h-full transition-all duration-300 ease-in-out",
+            open ? "h-16 px-3" : "h-12 px-1"
+          )}
+        >
+          {theme === 'light' ?
+            open ? <CustomLogoSidebarLight /> : <CustomLogoMobile />
+            :
+            open ? <CustomLogoSidebarDark /> : <CustomLogoMobile />
+          }
         </div>
       </SidebarHeader>
 
