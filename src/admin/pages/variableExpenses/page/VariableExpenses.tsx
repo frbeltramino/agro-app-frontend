@@ -93,10 +93,10 @@ export const VariableExpenses = () => {
   }, [expensesData]);
 
   useEffect(() => {
-    if (campaigns.length > 0) {
+    if (campaigns.length > 0 && !selectedCampaign) {
       setSelectedCampaign(campaigns[0].id.toString());
     }
-  }, [campaigns, selectedCampaign, setSelectedCampaign]);
+  }, [campaigns, setSelectedCampaign]);
 
   const handleEdit = (expense: VariableExpense) => {
     setEditingExpense(expense);
