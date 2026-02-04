@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, ChevronRight, Sprout, Tractor, LeafyGreen } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ChevronRight, Sprout, LeafyGreen } from "lucide-react";
 import { toast } from "sonner";
 import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import { useCampaignStore } from "../../../store/campaign.store";
@@ -36,6 +36,9 @@ import { formatTn } from "@/lib/format-tn";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CropMobileCard } from "../components/CropMobileCard";
 import { formatDate } from "@/lib/format-date";
+import { ImageCard } from "@/admin/components/ImageCard";
+import agroCosechadora from "@/assets/agro-cosechadora.jpg";
+
 
 export const Crops = () => {
   const { selectedCampaign } = useCampaignStore();
@@ -143,11 +146,8 @@ export const Crops = () => {
               value={filteredCrops.length}
               icon={<LeafyGreen className="h-4 w-4 text-muted-foreground" />}
             />
-            <StatCard
-              title="Cocechadas"
-              value={filteredCrops.length}
-              icon={<Tractor className="h-4 w-4 text-muted-foreground" />}
-            />
+
+            <ImageCard image={agroCosechadora} alt="agrocosechadora" />
           </div>
 
           {/* Tabla */}
