@@ -65,9 +65,22 @@ export const Dashboard = () => {
 
 
   const calculateTotalCostByLote = () => {
-    const totalCost = currentData.reduce((acc, lot) => acc + lot.insumos + lot.labores + lot.costoVariable, 0);
-    return formatCurrency(totalCost);
-  }
+    const totalCost = currentData.reduce(
+      (acc, lot) =>
+        acc +
+        (Number(lot.insumos) || 0) +
+        (Number(lot.labores) || 0) +
+        (Number(lot.costoVariable) || 0),
+      0
+    );
+    const totalHa = currentData.reduce(
+      (acc, lot) => acc + (Number(lot.superficieHa) || 0),
+      0
+    );
+    // Evitar división por cero
+    if (totalHa === 0) return formatCurrency(0);
+    return formatCurrency(totalCost / totalHa);
+  };
 
   const calculateBestLot = (): LotWithMargin | null => {
     if (!hasActivity) return null;
@@ -130,13 +143,13 @@ export const Dashboard = () => {
                 title="Margen Bruto Total"
                 value={formatCurrency(0)}
                 icon={TrendingUp}
-                trend={{ value: 12.5, isPositive: true }}
+                trend={{ value: 0, isPositive: true }}
                 isLoading={isLoadingLots}
               />
               <StatCard
                 title="Costos Totales"
                 value={calculateTotalCostByLote()}
-                subtitle={`Insumos + Labores + Cosecha + Variable`}
+                subtitle={`(U$S/ha)`}
                 icon={PiggyBank}
                 isLoading={isLoadingLots}
               />
