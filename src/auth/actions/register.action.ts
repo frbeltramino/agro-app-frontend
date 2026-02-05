@@ -10,8 +10,8 @@ export const registerAction = async (email: string, password: string, name: stri
       email,
       password,
       name,
-      roles,
-      status
+      roles: roles,
+      status: status
     });
 
     return data

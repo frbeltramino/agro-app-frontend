@@ -6,7 +6,6 @@ import { PageHeader } from "../../../components/PageHeader";
 import { ProfileCard } from "../components/ProfileCard";
 import { PreferencesCard } from "../components/PreferencesCard";
 import { SecurityCard } from "../components/SecurityCard";
-import { NewUserCard } from "../components/NewUserCard";
 
 export const Settings = () => {
 
@@ -21,7 +20,6 @@ export const Settings = () => {
           <TabsTrigger value="profile">Perfil</TabsTrigger>
           <TabsTrigger value="preferences">Preferencias</TabsTrigger>
           <TabsTrigger value="security">Seguridad</TabsTrigger>
-          <TabsTrigger value="newuser">Nuevo Usuario</TabsTrigger> {/* 🔥 NUEVA PESTAÑA */}
         </TabsList>
 
         {/* PERFIL */}
@@ -43,11 +41,6 @@ export const Settings = () => {
             title="Seguridad"
             description="Gestiona tu contraseña"
           />
-        </TabsContent>
-
-        {/* 🔥 NUEVO USUARIO */}
-        <TabsContent value="newuser" className="space-y-4">
-          <NewUserCard />
         </TabsContent>
 
       </Tabs>
