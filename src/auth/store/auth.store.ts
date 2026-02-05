@@ -96,17 +96,30 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const data = await registerAction(email, password, name, roles, status);
 
-      if (!data?.user) {
-        console.warn("Usuario creado pero no se devolvió información del usuario");
-        return true;
+      if (!data?.user || !data?.token) {
+        console.warn("Usuario creado pero no se devolvió información completa");
+        return false;
       }
 
+      // ✅ Guardar token en localStorage
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("token", data.token);
+
+      // ✅ Actualizar el estado del store
+      set({
+        user: data.user,
+        token: data.token,
+        isAuthenticated: "authenticated",
+      });
+
       return true;
+
     } catch (error) {
       console.error("Error al registrar usuario:", error);
       return false;
     }
   },
+
 
   updateUserProfile: async (userId: string, name: string, email: string) => {
     try {

@@ -102,9 +102,18 @@ export const Login = () => {
           <div className="mt-4 text-center text-sm">
             <button
               type="button"
-              className="text-white/70 hover:text-white hover:underline"
+              className="text-white/70 hover:text-white hover:underline cursor-pointer"
             >
               ¿Olvidaste tu contraseña? Recupera tu cuenta
+            </button>
+          </div>
+          <div className="mt-4 text-center text-sm">
+            <button
+              type="button"
+              className="text-white/70 hover:text-white hover:underline cursor-pointer"
+              onClick={() => navigate("/auth/register")}
+            >
+              ¿No tienes cuenta? Crea una
             </button>
           </div>
         </CardContent>
