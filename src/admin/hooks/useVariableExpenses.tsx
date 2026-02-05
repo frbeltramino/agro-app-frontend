@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getVariableExpenses } from "../actions/variableExpenses/get-variable-expenses.action";
 import { createUpdateVariableExpenseAction } from "../actions/variableExpenses/create-variable-expense.action";
 import { deleteVariableExpenseAction } from "../actions/variableExpenses/delete-variable-expense.action";
 import { toast } from "sonner";
+import { VariableExpensesResponse } from "@/interfaces/variableExpenses/variable.expenses.response";
 
 interface UseVariableExpensesOptions {
   campaignId: number; // obligatorio
@@ -27,16 +28,18 @@ export const useVariableExpenses = (
 ) => {
 
   const queryClient = useQueryClient();
+  const currentPage = Number.isNaN(Number(page)) ? 1 : Number(page);
 
-  const query = useQuery({
-    queryKey: ["variable-expenses", campaignId, page],
+  const query = useQuery<VariableExpensesResponse>({
+    queryKey: ["variable-expenses", campaignId, currentPage],
     queryFn: () =>
       getVariableExpenses({
         campaignId,
-        page: isNaN(Number(+page)) ? 1 : Number(page),
+        page: currentPage,
       }),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
     enabled: campaignId > 0,
+    placeholderData: keepPreviousData,
   });
 
   const createVariableExpense = useMutation({
