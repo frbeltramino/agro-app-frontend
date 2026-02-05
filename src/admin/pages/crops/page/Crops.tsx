@@ -136,6 +136,7 @@ export const Crops = () => {
       {
         <>
           <div className="grid gap-4 md:grid-cols-3">
+            <ImageCard image={agroCosechadora} alt="agrocosechadora" />
             <StatCard
               title="Total Cultivos"
               value={filteredCrops.length}
@@ -147,7 +148,7 @@ export const Crops = () => {
               icon={<LeafyGreen className="h-4 w-4 text-muted-foreground" />}
             />
 
-            <ImageCard image={agroCosechadora} alt="agrocosechadora" />
+
           </div>
 
           {/* Tabla */}
