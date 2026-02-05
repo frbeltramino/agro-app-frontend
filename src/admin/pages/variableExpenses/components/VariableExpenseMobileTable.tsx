@@ -47,7 +47,7 @@ export const VariableExpenseMobileTable = ({
           <div key={lot.lotId}>
             {/* Header del lote */}
             <div
-              className="flex justify-between items-center mb-2 p-2 bg-card rounded-lg cursor-pointer shadow-sm"
+              className="flex justify-between items-center mb-2 p-2 bg-card rounded-lg cursor-pointer shadow-sm select-none"
               onClick={() => toggleLot(lot.lotId)}
             >
               <p className="font-semibold text-lg">Lote {lot.lotName}</p>
