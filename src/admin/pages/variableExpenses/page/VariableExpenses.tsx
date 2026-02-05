@@ -66,6 +66,9 @@ export const VariableExpenses = () => {
     page: currentPage,
   });
 
+  const expensesByLot = expensesData?.data || [];
+
+
   const handleCampaignChange = (campaignId: string) => {
     setSelectedCampaign(campaignId);
   };
@@ -81,9 +84,9 @@ export const VariableExpenses = () => {
   }, [lotsForVariableExpensesData]);
 
   useEffect(() => {
-    if (expensesData?.variableExpenses) {
-      setExpenses(expensesData.variableExpenses);
-      setExpensesPagination(expensesData.pagination);
+    if (expensesByLot) {
+      setExpenses(expensesByLot);
+      setExpensesPagination(expensesData?.pagination);
       if (selectedCampaign) {
         handleFormCampaignChange(Number(selectedCampaign))
       }
@@ -199,7 +202,7 @@ export const VariableExpenses = () => {
         {!isLoadingExpenses && selectedCampaign ? (
           <>
             <VariableExpenseTable
-              expenses={expenses}
+              expensesByLot={expenses}
               expensesPagination={expensesPagination}
               onEdit={handleEdit}
               onDelete={handleDelete}
