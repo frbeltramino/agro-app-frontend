@@ -68,7 +68,7 @@ export const VariableExpenseMobileTable = ({
                     {/* Header */}
                     <div className="flex justify-between items-start gap-2">
                       <div>
-                        <p className="font-semibold">Lote {expense.lot_id}</p>
+                        <p className="font-semibold">Lote {expense.lotName}</p>
                         <p className="text-sm text-muted-foreground">
                           {formatDate(expense.expense_date)}
                         </p>

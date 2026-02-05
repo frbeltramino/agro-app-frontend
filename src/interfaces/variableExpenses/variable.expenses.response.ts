@@ -26,6 +26,7 @@ export interface VariableExpense {
   created_at: string;
   updated_at: string;
   expense_type_name: string;
+  lotName: string;
 }
 
 export interface Pagination {
