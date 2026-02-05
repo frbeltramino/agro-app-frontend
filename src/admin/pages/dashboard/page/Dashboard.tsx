@@ -130,6 +130,7 @@ export const Dashboard = () => {
           <main className="grid gap-4 grid-cols-1 space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <ImageCard image={agroTractor} alt="Tractor" isLoading={isLoadingLots} />
               <StatCard
                 title="Ingreso Total"
                 value={formatCurrency(0)}
@@ -152,7 +153,7 @@ export const Dashboard = () => {
                 icon={PiggyBank}
                 isLoading={isLoadingLots}
               />
-              <ImageCard image={agroTractor} alt="Tractor" isLoading={isLoadingLots} />
+
             </div>
 
             {/* Main Chart */}
