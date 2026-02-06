@@ -10,12 +10,18 @@ export const updateUserProfileAction = async (
     const { data } = await agroApi.patch<MessageResponse>("/auth/updateUserProfile", {
       userId,
       name,
-      email
+      email,
     });
 
     return data.message;
+  } catch (error: any) {
+    // Unificamos todo en un solo mensaje
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "Error al actualizar usuario";
 
-  } catch (error) {
-    throw error;
+    // Lanzamos un solo error con ese mensaje
+    throw new Error(message);
   }
 };

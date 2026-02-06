@@ -10,12 +10,16 @@ export const changePasswordAction = async (
     const { data } = await agroApi.patch<MessageResponse>("/auth/changePassword", {
       userId,
       currentPassword,
-      newPassword
+      newPassword,
     });
 
     return data.message;
-
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    // Extraer mensaje del backend si existe
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    // Si no, lanzar error genérico
+    throw new Error("Error al cambiar la contraseña");
   }
 };

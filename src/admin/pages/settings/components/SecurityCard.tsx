@@ -37,13 +37,10 @@ export const SecurityCard = ({ title, description }: SecurityCardProps) => {
 
 
     if (isPasswordChanged) {
-      toast.success("Contraseña actualizada correctamente");
       setIsPosting(false);
       setFormKey(k => k + 1);
       return;
     }
-
-    toast.error("Error al actualizar contraseña");
 
     setIsPosting(false);
   };
