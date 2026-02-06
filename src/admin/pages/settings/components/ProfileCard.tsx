@@ -38,8 +38,6 @@ export const ProfileCard = ({
       return;
     }
 
-    toast.error("Error al actualizar perfil");
-
     setIsPosting(false);
 
   };

@@ -6,6 +6,7 @@ import { registerAction } from '../actions/register.action';
 import { updateUserProfileAction } from '../actions/updateUserProfile.action';
 import { changePasswordAction } from '../actions/changePassword.action';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type AuthStatus = 'authenticated' | 'not-authenticated' | 'checking';
 
@@ -96,40 +97,23 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const data = await registerAction(email, password, name, roles, status);
 
-      if (!data?.user || !data?.token) {
-        console.warn("Usuario creado pero no se devolvió información completa");
-        return false;
+      if (!data?.user) {
+        console.warn("Usuario creado pero no se devolvió información del usuario");
+        return true;
       }
 
-      // ✅ Guardar token en localStorage
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("token", data.token);
-
-      // ✅ Actualizar el estado del store
-      set({
-        user: data.user,
-        token: data.token,
-        isAuthenticated: "authenticated",
-      });
-
       return true;
-
     } catch (error) {
       console.error("Error al registrar usuario:", error);
       return false;
     }
   },
 
-
-  updateUserProfile: async (userId: string, name: string, email: string) => {
+  updateUserProfile: async (userId: string, name, email) => {
     try {
-      const message = await updateUserProfileAction(userId, name, email);
+      await updateUserProfileAction(userId, name, email);
 
-      if (!message) {
-        console.warn("Usuario actualizado pero no se devolvió mensaje");
-        return true;
-      }
-
+      // Actualizar user en store
       set({
         user: {
           ...get().user!,
@@ -139,8 +123,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       });
 
       return true;
-
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error.message); // ⚠ Solo errores
       console.error("Error al actualizar usuario:", error);
       return false;
     }
@@ -150,13 +134,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const message = await changePasswordAction(userId, currentPassword, newPassword);
 
-      if (!message) {
-        console.warn("Contraseña cambiada pero no se devolvió mensaje");
-        return false;
-      }
+      // Mostrar mensaje del backend
+      toast.success(message);
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      // Mostrar mensaje de error del backend
+      toast.error(error.message || "Error al cambiar contraseña");
       console.error("Error al cambiar contraseña:", error);
       return false;
     }
