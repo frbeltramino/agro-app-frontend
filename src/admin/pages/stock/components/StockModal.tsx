@@ -210,7 +210,6 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                       onChange={field.onChange}
                       error={fieldState.error?.message}
                       locale="es-AR"
-                      currency="USD"
                       placeholder="0,000"
                       maxDecimals={3}
                     />
@@ -234,7 +233,7 @@ export const StockModal = forwardRef<HTMLDivElement, StockModalProps>(
                       value={field.value}
                       onChange={field.onChange}
                       error={fieldState.error?.message}
-                      currency="ARS"
+                      currency="USD"
                       locale="es-AR"
                       placeholder="0,00"
                     />
