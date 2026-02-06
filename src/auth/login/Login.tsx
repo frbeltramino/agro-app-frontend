@@ -38,6 +38,27 @@ export const Login = () => {
 
   };
 
+  const handleDemoLogin = async () => {
+    setIsPosting(true);
+
+    const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
+
+    const isValid = await login(
+      demoEmail,
+      demoPassword
+    );
+
+    if (isValid) {
+      toast.success("Bienvenido al modo demo");
+      navigate("/admin/dashboard");
+      return;
+    }
+
+    toast.error("No se pudo ingresar al modo demo");
+    setIsPosting(false);
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md bg-[#171318] text-white border border-white/10">
@@ -99,22 +120,25 @@ export const Login = () => {
               )}
             </Button>
           </form>
+
           <div className="mt-4 text-center text-sm">
-            <button
+
+            <Button
               type="button"
-              className="text-white/70 hover:text-white hover:underline cursor-pointer"
+              variant="outline"
+              disabled={isPosting}
+              onClick={handleDemoLogin}
+              className="
+    w-full
+    border-white/20
+    text-white/80
+    hover:text-white
+    hover:bg-white/5
+    transition-all
+  "
             >
-              ¿Olvidaste tu contraseña? Recupera tu cuenta
-            </button>
-          </div>
-          <div className="mt-4 text-center text-sm">
-            <button
-              type="button"
-              className="text-white/70 hover:text-white hover:underline cursor-pointer"
-              onClick={() => navigate("/auth/register")}
-            >
-              ¿No tienes cuenta? Crea una
-            </button>
+              Entrar en modo Demo
+            </Button>
           </div>
         </CardContent>
       </Card>

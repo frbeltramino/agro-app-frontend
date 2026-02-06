@@ -9,7 +9,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 // import Login from "./pages/Login";
 import { Dashboard } from "./admin/pages/dashboard/page/Dashboard";
 import { Login } from "./auth/login/Login";
-import { Register } from "./auth/register/Register";
 import { SeedSalesPage } from "./admin/pages/seedSales/page/SeedSales";
 import { Settings } from "./admin/pages/settings/page/Settings";
 import { Crops } from "./admin/pages/crops/page/Crops";
@@ -84,7 +83,6 @@ export const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
           <Route
             path="/admin/dashboard"
             element={
