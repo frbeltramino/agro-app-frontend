@@ -130,10 +130,10 @@ export const Login = () => {
               onClick={handleDemoLogin}
               className="
     w-full
-    border-white/20
-    text-white/80
-    hover:text-white
-    hover:bg-white/5
+    border-muted-foreground/30
+    text-muted-foreground
+    hover:text-foreground
+    hover:bg-muted/50
     transition-all
   "
             >
