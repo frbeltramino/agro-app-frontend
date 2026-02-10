@@ -42,12 +42,19 @@ export function TaskSuppliesTable({ supplies, isAddingSupply, onEdit, onDelete }
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
+                <p className="text-xs text-muted-foreground">Dosis / Hectárea</p>
+                <p className="font-medium">{formatDose(s.dosagePerHectare)}</p>
+              </div>
+              <div>
                 <p className="text-xs text-muted-foreground">Unidad</p>
                 <p className="font-medium">{s.unit}</p>
               </div>
+
               <div>
-                <p className="text-xs text-muted-foreground">Dosis / Hectárea</p>
-                <p className="font-medium">{formatDose(s.dosagePerHectare)}</p>
+                <p className="text-xs text-muted-foreground">Total Usado</p>
+                <p className="font-medium"> {formatDose(
+                  (s.dosagePerHectare ?? 0) * (s.hectareQuantity ?? 0)
+                )} {s.unit}</p>
               </div>
             </div>
           </div>

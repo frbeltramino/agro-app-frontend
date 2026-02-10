@@ -16,7 +16,7 @@ export function Stepper({ step, steps }: StepperProps) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center border-2
     ${isActive
-                  ? "border-primary bg-primary text-white shadow-lg"
+                  ? "border-primary bg-primary text-white dark:text-gray-800 shadow-lg"
                   : isCompleted
                     ? "border-green-600 bg-green-600 text-white"
                     : "border-gray-400 bg-gray-100 text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"

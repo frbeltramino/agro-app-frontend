@@ -383,7 +383,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
           </div>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain p-2 sm:p-4 space-y-4 ">
+          <div className="flex-1 overflow-y-auto p-2 sm:p-4 min-h-0">
 
             {
               step === 1 && (
