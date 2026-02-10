@@ -44,6 +44,7 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
   const { selectedCampaign } = useCampaignStore();
   const { selectedLot } = useLotStore();
 
+
   const { register, handleSubmit, formState: { errors }, reset, setValue, control } = useForm<FormValues>({
     defaultValues: {
       id: cropToEdit?.id || 'new',
@@ -105,7 +106,19 @@ export function CropForm({ open, onOpenChange, onSubmit, campaignName, lotName, 
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) reset();
+    if (!open) {
+      reset({
+        id: "new",
+        crop_name_id: null,
+        crop_name: "",
+        start_date: formatDateForInput(new Date()),
+        end_date: null,
+        campaign_id: selectedCampaign?.id || null,
+        lot_id: selectedLot?.id || null,
+        seed_type: "",
+        real_yield: undefined,
+      });
+    }
     onOpenChange(open);
   };
 
