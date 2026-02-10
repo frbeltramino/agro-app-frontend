@@ -44,6 +44,13 @@ export function TaskSupplyFormComponent({
     }
   }, [selectedStockId, supplyType, selectedStock, setValue]);
 
+  useEffect(() => {
+    if (supplyType !== "stock") {
+      setValue("stockId", "");
+      setValue("unit", "");
+    }
+  }, [supplyType, setValue]);
+
   return (
     <div className="border rounded-lg p-4 bg-muted/30 space-y-4 w-full max-w-full">
       <h4 className="font-medium text-base text-center sm:text-left">{isEditing ? "Editar Insumo" : "Nuevo Insumo"}</h4>
