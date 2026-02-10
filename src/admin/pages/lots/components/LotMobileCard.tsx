@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
 import { Lot } from "@/interfaces/lots/lot.interface"
+import { formatTn } from "@/lib/format-tn"
 
 interface LotMobileCardProps {
   lot: Lot
@@ -24,7 +25,7 @@ export const LotMobileCard = ({
           <div>
             <h3 className="font-semibold text-sm">{lot.name}</h3>
             <p className="text-xs text-muted-foreground">
-              Área: {lot.hectares} ha
+              Área: {formatTn(lot.hectares)} ha
             </p>
           </div>
         </div>

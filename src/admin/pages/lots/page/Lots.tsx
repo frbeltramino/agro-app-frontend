@@ -37,6 +37,7 @@ import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { LotMobileCard } from "../components/LotMobileCard";
+import { formatTn } from "@/lib/format-tn";
 
 
 
@@ -227,7 +228,7 @@ export const Lots = () => {
                           }
                         >
                           <TableCell className="font-medium">{lot.name}</TableCell>
-                          <TableCell>{lot.hectares}</TableCell>
+                          <TableCell>{formatTn(lot.hectares)}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
