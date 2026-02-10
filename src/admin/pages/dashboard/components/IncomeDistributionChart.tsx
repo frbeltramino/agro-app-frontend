@@ -58,7 +58,7 @@ const normalizeLotsData = (data: Lote[]) => {
     // Costos ($/ha)
     const insumosPorHa = superficie > 0 ? lote.insumos / superficie : 0;
     const laboresPorHa = superficie > 0 ? lote.labores / superficie : 0;
-    const costoVariablePorHa = 0;
+    const costoVariablePorHa = lote.costoVariable;
     const totalCostosPorHa = insumosPorHa + laboresPorHa + costoVariablePorHa;
 
     // Ingresos ($/ha)
