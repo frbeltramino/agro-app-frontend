@@ -3,6 +3,7 @@ import { getCropsByLotIdAction } from "../actions/crops/get-crops-by-lot-id.acti
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createCropAction } from "../actions/crops/create-crop.action";
 import { deleteCropAction } from "../actions/crops/delete-crop.action";
+import { toast } from "sonner";
 
 interface UseLotsOptions {
   lotId: number; // obligatorio
@@ -32,16 +33,27 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
 
   const createCrop = useMutation({
     mutationFn: createCropAction,
-    onSuccess: () => {
+
+    onSuccess: (response) => {
+      toast.success(response.message);
+
       QueryClient.invalidateQueries({ queryKey: ["crops"] });
       QueryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
       QueryClient.invalidateQueries({ queryKey: ["campaignsForSale"] });
       QueryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
       QueryClient.invalidateQueries({ queryKey: ["lotsStats"] });
       QueryClient.invalidateQueries({ queryKey: ["lots-for-variable-expenses"] });
+      QueryClient.invalidateQueries({ queryKey: ["can-create-crop"] });
     },
-    onError: (error) => {
+
+    onError: (error: any) => {
       console.log(error);
+
+      const message =
+        error?.response?.data?.message ||
+        "Error al guardar el cultivo";
+
+      toast.error(message, { position: "top-right" });
     }
   });
 
@@ -53,6 +65,7 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
       QueryClient.invalidateQueries({ queryKey: ["campaignsForSale"] });
       QueryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
       QueryClient.invalidateQueries({ queryKey: ["lotsStats"] });
+      QueryClient.invalidateQueries({ queryKey: ["can-create-crop"] });
     },
     onError: (error) => {
       console.log(error);

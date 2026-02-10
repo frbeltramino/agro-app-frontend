@@ -38,6 +38,7 @@ import { CropMobileCard } from "../components/CropMobileCard";
 import { formatDate } from "@/lib/format-date";
 import { ImageCard } from "@/admin/components/ImageCard";
 import agroCosechadora from "@/assets/agro-cosechadora.jpg";
+import { useCanCreateCrop } from "@/admin/hooks/useCanCreateCrop";
 
 
 export const Crops = () => {
@@ -56,6 +57,9 @@ export const Crops = () => {
 
   if (isError) return <CustomNoResultsScreen message="Error al cargar cultivos" />;
 
+  const { data: canCreateCrop } = useCanCreateCrop({ lotId: selectedLot?.id, campaignId: selectedCampaign?.id });
+
+
 
   const crops = data?.crops ?? [];
 
@@ -68,14 +72,8 @@ export const Crops = () => {
     navigate(`/admin/campaigns/${selectedCampaign?.id}/lots/${selectedLot?.id}/crops/${crop.id}/TasksAndSupplies`);
   };
 
-  const handleCreateCrop = (data: any) => {
-    createCrop.mutateAsync(data, {
-      onSuccess: () => toast.success("Cultivo creado exitosamente"),
-      onError: (error) => {
-        console.log(error);
-        toast.error("Error al crear el cultivo", { position: 'top-right' });
-      }
-    },);
+  const handleCreateCrop = async (data: any) => {
+    await createCrop.mutateAsync(data);
   };
 
   const handleFormSubmit = (data: any) => {
@@ -83,6 +81,10 @@ export const Crops = () => {
   };
 
   const openCreateForm = () => {
+    if (!canCreateCrop?.canCreate) {
+      toast.error("Sólo puede haber un cultivo activo por lote");
+      return;
+    }
     setFormMode('create');
     setSelectedCrop(null);
     setIsFormOpen(true);
