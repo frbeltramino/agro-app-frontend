@@ -263,7 +263,7 @@ export const Dashboard = () => {
                           {currentData.map((item: any) => {
                             const insumosPorHa = item.insumos / item.superficieHa;
                             const laboresPorHa = item.labores / item.superficieHa;
-                            const costoVariablePorHa = 0;
+                            const costoVariablePorHa = item.costoVariable;
                             const cosechaPorHa = item.cosecha / item.superficieHa;
                             const ingresosPorHa = cosechaPorHa * item.precioPromedio;
                             let margenBrutoPorHa = 0;
