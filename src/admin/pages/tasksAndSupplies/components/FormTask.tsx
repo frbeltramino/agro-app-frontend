@@ -380,7 +380,29 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           </div>
           <div className="shrink-0 border-b bg-background p-2 sm:p-4">
             <Stepper step={step} steps={["Detalles de la labor", "Agregar Insumos"]} />
+            <div className="mt-4 rounded-lg border bg-muted/30 px-3 py-3">
+              <div className="flex items-center justify-between gap-4">
 
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Lote seleccionado
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {selectedLot?.name || "—"}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">
+                    Superficie
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {selectedLot?.hectares ?? 0} ha
+                  </p>
+                </div>
+
+              </div>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-2 sm:p-4 min-h-0">
@@ -405,7 +427,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
                   {/* Descripción */}
                   <div>
-                    <label className="block text-sm font-medium mb-1 sm:mb-2">Descripción</label>
+                    <label className="block text-sm font-medium mb-1 sm:mb-2 mt-2">Descripción</label>
                     <textarea
                       {...register("description")}
                       required={false}
@@ -444,7 +466,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
                   {/* Nota */}
                   <div>
-                    <label className="block text-sm font-medium mb-1 sm:mb-2">Nota (opcional)</label>
+                    <label className="block text-sm font-medium mb-1 mt-2 sm:mb-2">Nota (opcional)</label>
                     <textarea
                       {...register("note")}
                       rows={2}
@@ -454,7 +476,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                   </div>
 
                   {/* Costo de Mano de Obra */}
-                  <div>
+                  <div className="mt-2">
                     <Controller
                       name="laborCost"
                       control={control}
@@ -546,7 +568,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
 
           </div>
 
-          <div className="shrink-0 border-t bg-background px-4 py-4 sm:px-6">
+          <div className="shrink-0 border-t bg-background px-4 py-4 sm:px-6 mt-2">
             <div className="flex gap-2">
               {step === 1 && (
                 <>

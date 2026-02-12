@@ -275,7 +275,7 @@ export const VariableExpenseFormPanel = ({
 
           {/* Monto */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Monto *</Label>
+            <Label htmlFor="amount">USD/tn *</Label>
             <Controller
               name="amount"
               control={control}

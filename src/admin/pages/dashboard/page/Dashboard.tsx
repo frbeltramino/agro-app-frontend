@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { TrendingUp, Wallet, PiggyBank } from "lucide-react";
+import { TrendingUp, PiggyBank } from "lucide-react";
 import { StatCard } from "../components/StatCard";
 import { ChartCard } from "../components/ChartCard";
 import { IncomeDistributionChart } from "../components/IncomeDistributionChart";
@@ -129,16 +129,8 @@ export const Dashboard = () => {
         !isLoadingCampaigns && (
           <main className="grid gap-4 grid-cols-1 space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <ImageCard image={agroTractor} alt="Tractor" isLoading={isLoadingLots} />
-              <StatCard
-                title="Ingreso Total"
-                value={formatCurrency(0)}
-                subtitle="Suma de todos los cultivos"
-                icon={Wallet}
-                variant="primary"
-                isLoading={isLoadingLots}
-              />
               <StatCard
                 title="Margen Bruto Total"
                 value={formatCurrency(0)}
