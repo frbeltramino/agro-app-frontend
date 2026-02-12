@@ -274,7 +274,7 @@ export const Dashboard = () => {
                                   {item.name}
                                 </td>
                                 <td className="py-3 px-4 text-right font-medium text-foreground">
-                                  {item.superficieHa}
+                                  {formatTn(item.superficieHa)}
                                 </td>
                                 <td className="py-3 px-4 text-right text-muted-foreground">
                                   {formatCurrency(insumosPorHa)}
