@@ -83,7 +83,7 @@ export const VariableExpenseTable = ({
                       <TableHead className="font-semibold">Tipo</TableHead>
                       <TableHead className="font-semibold">Prestador</TableHead>
                       <TableHead className="font-semibold">Fecha</TableHead>
-                      <TableHead className="font-semibold text-right">Monto</TableHead>
+                      <TableHead className="font-semibold text-right">USD/tn</TableHead>
                       <TableHead className="w-[100px]"></TableHead>
                     </TableRow>
                   </TableHeader>

@@ -102,7 +102,7 @@ export function CreateSaleForm({
                   value={field.value}
                   onChange={field.onChange}
                   error={fieldState.error?.message}
-                  currency="ARS"
+                  currency="USD"
                 />
               )}
             />
