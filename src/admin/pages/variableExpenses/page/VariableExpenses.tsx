@@ -129,6 +129,7 @@ export const VariableExpenses = () => {
       id: editingExpense ? editingExpense.id : null,
       campaign_id: data.campaign_id!,
       lot_id: data.lot_id!,
+      crop_id: data.crop_id!,
       hectares: data.hectares,
       tons_harvested: data.tons_harvested,
       expense_type_id: data.expense_type_id!,

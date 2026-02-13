@@ -66,6 +66,7 @@ export const VariableExpenseFormPanel = ({
       defaultValues: {
         campaign_id: null,
         lot_id: null,
+        crop_id: null,
         hectares: 0,
         tons_harvested: 0,
         expense_type_id: null,
@@ -86,6 +87,7 @@ export const VariableExpenseFormPanel = ({
       const formData: VariableExpenseFormData = {
         campaign_id: editingExpense.campaign_id,
         lot_id: editingExpense.lot_id,
+        crop_id: editingExpense.crop_id,
         hectares: editingExpense.hectares,
         tons_harvested: editingExpense.tons_harvested,
         expense_type_id: editingExpense.expense_type_id,
@@ -98,6 +100,7 @@ export const VariableExpenseFormPanel = ({
       reset({
         campaign_id: null,
         lot_id: null,
+        crop_id: null,
         hectares: 0,
         tons_harvested: 0,
         expense_type_id: null,
@@ -117,14 +120,16 @@ export const VariableExpenseFormPanel = ({
     onCampaignChange(campaignId);
   };
 
-  const handleLotChange = (value: string) => {
-    const lotId = parseInt(value);
-    const selectedLot = lots.find((l) => l.lot_id === lotId);
-    setValue("lot_id", lotId);
-    setValue("hectares", selectedLot?.lot_hectares || 0);
-    setValue("tons_harvested", selectedLot?.real_yield || 0);
-  };
+  const handleCropChange = (value: string) => {
+    const cropId = parseInt(value);
 
+    const selectedCrop = lots.find((l) => l.crop_id === cropId);
+
+    setValue("crop_id", cropId);
+    setValue("lot_id", selectedCrop?.lot_id || null);
+    setValue("hectares", selectedCrop?.lot_hectares || 0);
+    setValue("tons_harvested", selectedCrop?.real_yield || 0);
+  };
 
 
   const onFormSubmit = (data: VariableExpenseFormData) => {
@@ -178,17 +183,20 @@ export const VariableExpenseFormPanel = ({
           <div className="space-y-2">
             <Label htmlFor="lot">Lote *</Label>
             <Select
-              value={watch("lot_id")?.toString() || ""}
-              onValueChange={handleLotChange}
+              value={watch("crop_id")?.toString() || ""}
+              onValueChange={handleCropChange}
               disabled={!selectedCampaignId}
             >
               <SelectTrigger id="lot" className="w-full">
                 <SelectValue placeholder="Seleccionar lote" />
               </SelectTrigger>
               <SelectContent>
-                {lots.map((lot) => (
-                  <SelectItem key={lot.lot_id} value={lot.lot_id.toString()}>
-                    {lot.lot_name} - {lot.crop_name}
+                {lots.map((item) => (
+                  <SelectItem
+                    key={item.crop_id}
+                    value={item.crop_id.toString()}
+                  >
+                    {item.lot_name} - {item.crop_name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -220,7 +228,12 @@ export const VariableExpenseFormPanel = ({
               name="tons_harvested"
               control={control}
               render={({ field }) => (
-                <Input {...field} disabled className="pr-10" />
+                <AmountInput
+                  {...field}
+                  className="w-full"
+                  placeholder="0,00"
+                  disabled
+                />
               )}
             />
           </div>

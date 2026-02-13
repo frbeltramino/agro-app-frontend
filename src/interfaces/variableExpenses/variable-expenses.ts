@@ -2,6 +2,7 @@
 export interface VariableExpenseFormData {
   campaign_id: number | null;
   lot_id: number | null;
+  crop_id: number | null;
   hectares: number;
   tons_harvested: number;
   expense_type_id: number | null;

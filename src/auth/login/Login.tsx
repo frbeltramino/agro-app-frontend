@@ -15,6 +15,7 @@ export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const [isPosting, setIsPosting] = useState(false);
+  const [isPostingDemo, setIsPostingDemo] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,24 +40,32 @@ export const Login = () => {
   };
 
   const handleDemoLogin = async () => {
-    setIsPosting(true);
+    if (isPostingDemo) return;
 
-    const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
-    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
+    setIsPostingDemo(true);
 
-    const isValid = await login(
-      demoEmail,
-      demoPassword
-    );
+    try {
+      const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
+      const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
 
-    if (isValid) {
+      if (!demoEmail || !demoPassword) {
+        throw new Error("Credenciales demo no configuradas");
+      }
+
+      const isValid = await login(demoEmail, demoPassword);
+
+      if (!isValid) {
+        throw new Error("Login inválido");
+      }
+
       toast.success("Bienvenido al modo demo");
       navigate("/admin/dashboard");
-      return;
+    } catch (error) {
+      console.error("Demo login error:", error);
+      toast.error("No se pudo ingresar al modo demo");
+    } finally {
+      setIsPostingDemo(false);
     }
-
-    toast.error("No se pudo ingresar al modo demo");
-    setIsPosting(false);
   };
 
   return (
@@ -126,7 +135,7 @@ export const Login = () => {
             <Button
               type="button"
               variant="outline"
-              disabled={isPosting}
+              disabled={isPostingDemo}
               onClick={handleDemoLogin}
               className="
     w-full
@@ -137,7 +146,7 @@ export const Login = () => {
     transition-all
   "
             >
-              Entrar en modo Demo
+              {isPostingDemo ? "Ingresando..." : "Probar Demo"}
             </Button>
           </div>
         </CardContent>
