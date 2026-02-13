@@ -16,6 +16,7 @@ export interface VariableExpense {
   user_id: number;
   campaign_id: number;
   lot_id: number;
+  crop_id: number;
   hectares: number;
   tons_harvested: number;
   expense_type_id: number;
@@ -27,6 +28,7 @@ export interface VariableExpense {
   updated_at: string;
   expense_type_name: string;
   lotName: string;
+  crop_name: string;
 }
 
 export interface Pagination {
@@ -35,7 +37,4 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
-export interface VariableExpensesResponse {
-  data: Datum[];
-  pagination: Pagination;
-}
+
