@@ -49,10 +49,12 @@ export const Dashboard = () => {
     }))
 
   const hasActivity = currentData.some(lot =>
-    lot.cosecha > 0 ||
-    lot.insumos > 0 ||
-    lot.labores > 0 ||
-    lot.costoVariable > 0
+    lot.cultivos.some(cultivo =>
+      cultivo.cosecha > 0 ||
+      cultivo.insumos > 0 ||
+      cultivo.labores > 0 ||
+      cultivo.costoVariable > 0
+    )
   );
 
   type LotWithMargin = {
@@ -63,22 +65,59 @@ export const Dashboard = () => {
 
 
 
-  const calculateTotalCostByLote = () => {
-    const totalCost = currentData.reduce(
-      (acc, lot) =>
-        acc +
-        (Number(lot.insumos) || 0) +
-        (Number(lot.labores) || 0) +
-        (Number(lot.costoVariable) || 0),
-      0
-    );
-    const totalHa = currentData.reduce(
-      (acc, lot) => acc + (Number(lot.superficieHa) || 0),
-      0
-    );
+  const calculateTotalCostByLoteYCultivo = () => {
+    let totalCost = 0;
+    let totalHa = 0;
+
+    currentData.forEach(lot => {
+      const lotHa = Number(lot.superficieHa) || 0;
+
+      lot.cultivos.forEach(cultivo => {
+        // Sumamos todos los costos del cultivo
+        const cultivoCost =
+          (Number(cultivo.insumos) || 0) +
+          (Number(cultivo.labores) || 0) +
+          (Number(cultivo.costoVariable) || 0);
+
+        totalCost += cultivoCost;
+      });
+
+      totalHa += lotHa;
+    });
+
     // Evitar división por cero
     if (totalHa === 0) return formatCurrency(0);
+
     return formatCurrency(totalCost / totalHa);
+  };
+
+  const calculateGrossMarginPerHa = () => {
+    let totalIngresos = 0;
+    let totalCostos = 0;
+    let totalHa = 0;
+
+    currentData.forEach(lot => {
+      const lotHa = Number(lot.superficieHa) || 0;
+      totalHa += lotHa;
+
+      lot.cultivos.forEach(cultivo => {
+        const ingresos = Number(cultivo.ingresos) || 0;
+        const costos =
+          (Number(cultivo.insumos) || 0) +
+          (Number(cultivo.labores) || 0) +
+          (Number(cultivo.costoVariable) || 0);
+
+        totalIngresos += ingresos;
+        totalCostos += costos;
+      });
+    });
+
+    if (totalHa === 0) return formatCurrency(0);
+
+    // Margen bruto total por hectárea
+    const margenBrutoPorHa = (totalIngresos - totalCostos) / totalHa;
+
+    return formatCurrency(margenBrutoPorHa);
   };
 
   const calculateBestLot = (): LotWithMargin | null => {
@@ -88,15 +127,23 @@ export const Dashboard = () => {
     let bestMarginPerHa = -Infinity;
 
     currentData.forEach(lot => {
-      const ingresos = (lot.cosecha ?? 0) * (lot.precioPromedio ?? 0);
-      const costos =
-        (lot.insumos ?? 0) +
-        (lot.labores ?? 0) +
-        (lot.costoVariable ?? 0);
+      // 🔹 Sumamos ingresos y costos de todos los cultivos
+      const ingresos = lot.cultivos.reduce(
+        (sum, c) => sum + (c.ingresos ?? 0),
+        0
+      );
+
+      const costos = lot.cultivos.reduce(
+        (sum, c) =>
+          sum +
+          (c.insumos ?? 0) +
+          (c.labores ?? 0) +
+          (c.costoVariable ?? 0),
+        0
+      );
 
       const margen = ingresos - costos;
-      const margenPorHa =
-        lot.superficieHa > 0 ? margen / lot.superficieHa : 0;
+      const margenPorHa = lot.superficieHa > 0 ? margen / lot.superficieHa : 0;
 
       if (margenPorHa > bestMarginPerHa) {
         bestMarginPerHa = margenPorHa;
@@ -133,14 +180,14 @@ export const Dashboard = () => {
               <ImageCard image={agroTractor} alt="Tractor" isLoading={isLoadingLots} />
               <StatCard
                 title="Margen Bruto Total"
-                value={formatCurrency(0)}
+                value={calculateGrossMarginPerHa()}
+                subtitle={`(U$S/ha)`}
                 icon={TrendingUp}
-                trend={{ value: 0, isPositive: true }}
                 isLoading={isLoadingLots}
               />
               <StatCard
                 title="Costos Totales"
-                value={calculateTotalCostByLote()}
+                value={calculateTotalCostByLoteYCultivo()}
                 subtitle={`(U$S/ha)`}
                 icon={PiggyBank}
                 isLoading={isLoadingLots}
@@ -241,7 +288,7 @@ export const Dashboard = () => {
                               Cosecha (tn/ha)
                             </th>
                             <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
-                              Precio Promedio (U$S/tn)
+                              Precio Promedio Ponderado (U$S/tn)
                             </th>
                             <th className="text-right py-3 px-4 text-sm font-semibold text-muted-foreground">
                               Costo Variable (U$S/ha)
@@ -252,52 +299,60 @@ export const Dashboard = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {currentData.map((item: any) => {
-                            const insumosPorHa = item.insumos / item.superficieHa;
-                            const laboresPorHa = item.labores / item.superficieHa;
-                            const costoVariablePorHa = item.costoVariable;
-                            const cosechaPorHa = item.cosecha / item.superficieHa;
-                            const ingresosPorHa = cosechaPorHa * item.precioPromedio;
-                            let margenBrutoPorHa = 0;
-                            if (item.precioPromedio > 0 && cosechaPorHa > 0) {//si hay al menos una venta en el lote se saca margen brutno sino no
-                              margenBrutoPorHa =
-                                (ingresosPorHa || 0) - (insumosPorHa || 0) - (laboresPorHa || 0) - (costoVariablePorHa || 0);
-                            }
+                          {currentData.flatMap((lote: any) =>
+                            lote.cultivos.map((cultivo: any) => {
+                              const superficie = lote.superficieHa || 0;
 
-                            return (
-                              <tr
-                                key={item.name}
-                                className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                              >
+                              const perHa = (value: number) =>
+                                superficie > 0 ? value / superficie : 0;
 
-                                <td className="py-3 px-4 font-medium text-foreground">
-                                  {item.name}
-                                </td>
-                                <td className="py-3 px-4 text-right font-medium text-foreground">
-                                  {formatTn(item.superficieHa)}
-                                </td>
-                                <td className="py-3 px-4 text-right text-muted-foreground">
-                                  {formatCurrency(insumosPorHa)}
-                                </td>
-                                <td className="py-3 px-4 text-right text-muted-foreground">
-                                  {formatCurrency(laboresPorHa)}
-                                </td>
-                                <td className="py-3 px-4 text-right text-muted-foreground">
-                                  {formatTn(cosechaPorHa)}
-                                </td>
-                                <td className="py-3 px-4 text-right text-muted-foreground">
-                                  {formatCurrency(item.precioPromedio)}
-                                </td>
-                                <td className="py-3 px-4 text-right text-muted-foreground">
-                                  {formatCurrency(costoVariablePorHa)}
-                                </td>
-                                <td className="py-3 px-4 text-right font-medium text-primary">
-                                  {margenBrutoPorHa != 0 ? formatCurrency(margenBrutoPorHa) : "—"}
-                                </td>
+                              const insumosPorHa = perHa(cultivo.insumos);
+                              const laboresPorHa = perHa(cultivo.labores);
+                              const cosechaPorHa = perHa(cultivo.cosecha);
+                              const precioPromedioPorHa = (cultivo.precioPromedioPonderado);
+                              const costoVariablePorHa = perHa(cultivo.costoVariable);
+                              const margenBrutoPorHa = perHa(cultivo.margenBruto);
 
-                              </tr>
-                            );
-                          })}
+                              return (
+                                <tr
+                                  key={`${lote.id}-${cultivo.cropId}`}
+                                  className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                                >
+                                  <td className="py-3 px-4 font-medium text-foreground">
+                                    {lote.lote} - {cultivo.cropName}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatTn(superficie)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatCurrency(insumosPorHa)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatCurrency(laboresPorHa)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatTn(cosechaPorHa)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatCurrency(precioPromedioPorHa)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    {formatCurrency(costoVariablePorHa)}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right font-medium text-primary">
+                                    {formatCurrency(margenBrutoPorHa)}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
                         </tbody>
                       </table>
                     </div>

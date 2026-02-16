@@ -146,7 +146,7 @@ export const StockTable = () => {
         <Card>
           <StockCard
             title="Total Insumos"
-            value={statsData?.active_count ? statsData.active_count : 0}
+            value={statsData?.total_items ? statsData.total_items : 0}
             description="Insumos registrados"
             isLoading={isStatsLoading}
             isStatsError={isStatsError}

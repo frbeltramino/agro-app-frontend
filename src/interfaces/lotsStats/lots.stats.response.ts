@@ -6,17 +6,22 @@ export interface Lote {
   id: number;
   lote: string;
   superficieHa: number;
-  insumos: number;
-  insumosPorCategoria: InsumosPorCategoria[];
-  labores: number;
-  cosecha: number;
-  ingresos: number;
-  precioPromedio: number;
-  costoVariable: number;
-  margenBruto: number;
+  cultivos: Cultivo[];
 }
 
-export interface InsumosPorCategoria {
-  categoria: string;
-  total: number;
+export interface Cultivo {
+  cropId: number;
+  cropName: string;
+  lotId: number;
+  cosecha: number;
+  ingresos: number;
+  semillas: number;
+  insumosSinSemillas: number;
+  insumos: number;
+  cosechaLabores: number;
+  otrasLabores: number;
+  labores: number;
+  costoVariable: number;
+  margenBruto: number;
+  precioPromedioPonderado: number;
 }
