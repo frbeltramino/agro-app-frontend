@@ -27,65 +27,34 @@ interface CustomLegendProps {
   niveles: Nivel[];
 }
 
-const normalizeLotsData = (data: Lote[]) => {
-  const categoriasSet = new Set<string>();
-
-  // 1️⃣ Recorrer todos los lotes para recolectar categorías
-  data.forEach((lote) => {
-    lote.insumosPorCategoria?.forEach((i) => {
-      categoriasSet.add(i.categoria);
-    });
-  });
-
-  const categoriasArray = Array.from(categoriasSet);
-
-  // 2️⃣ Normalizar cada lote
-  const normalized = data.map((lote) => {
-    const categoriasObj: Record<string, number> = {};
-    const superficie = lote.superficieHa || 0;
-
-    // Inicializar todas las categorías en 0
-    categoriasArray.forEach((cat) => {
-      categoriasObj[cat] = 0;
-    });
-
-    // Si hay datos, asignarlos
-    lote.insumosPorCategoria?.forEach((i) => {
-      const valorPorHa = superficie > 0 ? i.total / superficie : 0;
-      categoriasObj[i.categoria] = Number(valorPorHa.toFixed(2));
-    });
-
-    // Costos ($/ha)
-    const insumosPorHa = superficie > 0 ? lote.insumos / superficie : 0;
-    const laboresPorHa = superficie > 0 ? lote.labores / superficie : 0;
-    const costoVariablePorHa = lote.costoVariable;
-    const totalCostosPorHa = insumosPorHa + laboresPorHa + costoVariablePorHa;
-
-    // Ingresos ($/ha)
-    const rendimientoPorHa = superficie > 0 ? lote.cosecha / superficie : 0;
-    const ingresosPorHa = rendimientoPorHa * lote.precioPromedio;
-
-    // Margen bruto
-    const margenBrutoPorHa = ingresosPorHa - totalCostosPorHa;
-
-    // Flag para mostrar la barra
-    const showMargin = ingresosPorHa > 0;
-
-    return {
-      ...lote,
-      insumos: Number(insumosPorHa.toFixed(2)),
-      labores: Number(laboresPorHa.toFixed(2)),
-      costoVariable: Number(costoVariablePorHa.toFixed(2)),
-      ingresos: Number(ingresosPorHa.toFixed(2)),
-      margenBruto: Number(margenBrutoPorHa.toFixed(2)),
-      showMargin,
-      ...categoriasObj,
-    };
-  });
-
+const normalizeLotsDataByCultivo = (data: Lote[]) => {
   return {
-    data: normalized,
-    categorias: categoriasArray,
+    data: data.flatMap((lote) => {
+      const superficie = lote.superficieHa || 0;
+
+      return lote.cultivos.map((cultivo) => {
+        const perHa = (value: number) =>
+          superficie > 0 ? +(value / superficie).toFixed(2) : 0;
+
+        return {
+          id: `${lote.id}-${cultivo.cropId}`,
+          label: `${lote.lote} - ${cultivo.cropName}`,
+          superficieHa: superficie,
+
+          semillas: perHa(cultivo.semillas),
+          insumosSinSemillas: perHa(cultivo.insumosSinSemillas),
+
+          cosechaLabores: perHa(cultivo.cosechaLabores),
+          otrasLabores: perHa(cultivo.otrasLabores),
+
+          costoVariable: perHa(cultivo.costoVariable),
+          ingresos: perHa(cultivo.ingresos),
+          margenBruto: perHa(cultivo.margenBruto),
+
+          showMargin: cultivo.ingresos > 0,
+        };
+      });
+    }),
   };
 };
 
@@ -95,8 +64,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     // Separate costs from margin
     const costItems = payload.filter((p: any) => {
       if (p.dataKey === "margenBruto") return false;
-      if (p.dataKey === "insumos") return false;
-      if (p.dataKey === "cosecha") return false;
+      // if (p.dataKey === "insumos") return false;
+      // if (p.dataKey === "cosecha") return false;
       return true;
     });
     const marginItem = payload.find(
@@ -187,7 +156,7 @@ const CustomLegend = ({ niveles }: CustomLegendProps) => (
 
 export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) => {
 
-  const { data: chartData, categorias } = normalizeLotsData(data);
+  const { data: chartData } = normalizeLotsDataByCultivo(data);
 
   const width = useWindowWidth();
   const { theme } = useTheme();
@@ -209,27 +178,11 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
               stroke={darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
             />
             <XAxis
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{
-                fill: darkMode ? "#FFFFFF" : "#222222", // blanco en dark, oscuro en light
-                fontSize: 13,
+              dataKey="label"
+              tickFormatter={(value: string) => {
+                if (isMobile) return value.length > 12 ? value.slice(0, 12) + "…" : value;
+                return value;
               }}
-              dy={isMobile ? 10 : 20} // mueve los ticks en mobile
-              interval={0} // muestra todos los ticks
-              tickFormatter={(value: string, index: number) => {
-                const ha = chartData[index]?.superficieHa;
-
-                const label = `${value} (${ha} ha)`;
-
-                if (isMobile) {
-                  return label.length > 12 ? label.slice(0, 12) + "…" : label;
-                }
-
-                return label;
-              }}
-
             />
             <YAxis
               axisLine={false}
@@ -245,44 +198,26 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
 
 
             {/* Stacked Cost Bar */}
+            {/* INSUMOS */}
+            <Bar dataKey="semillas" name="Semillas" stackId="costos" fill="var(--chart-semillas)" />
+            <Bar dataKey="insumosSinSemillas" name="Resto de Insumos" stackId="costos" fill="var(--chart-insumos)" />
 
 
-            {categorias.map((categoria) => (
-              <Bar
-                key={categoria}
-                dataKey={categoria}
-                name={categoria}
-                stackId="costos"
-                fill="var(--chart-insumos)"
-              />))}
+            {/* LABORES */}
+            <Bar dataKey="cosechaLabores" name="Labor de Cosecha" stackId="costos" fill="var(--chart-labor-cosecha)" />
+            <Bar dataKey="otrasLabores" name="Otras Labores" stackId="costos" fill="var(--chart-labores)" />
 
-            <Bar
-              dataKey="labores"
-              name="Labores"
-              stackId="costos"
-              fill="var(--chart-labores)"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="costoVariable"
-              name="Costo Variable"
-              stackId="costos"
-              fill="var(--chart-variable)"
-              radius={[4, 4, 0, 0]}
-            />
+
+            {/* VARIABLE */}
+            <Bar dataKey="costoVariable" name="Costo Variable" stackId="costos" fill="var(--chart-variable)" />
 
             {/* Margin Bar (separate) */}
-            {chartData.map((lote) =>
-              lote.showMargin ? (
-                <Bar
-                  key={`margen-${lote.id}`}
-                  dataKey="margenBruto"
-                  name="Margen Bruto"
-                  fill="var(--chart-margin)"
-                  radius={[4, 4, 0, 0]}
-                />
-              ) : null
-            )}
+            <Bar
+              dataKey="margenBruto"
+              name="Margen Bruto"
+              fill="var(--chart-margin)"
+              radius={[4, 4, 0, 0]}
+            />
 
 
           </BarChart>
@@ -292,8 +227,10 @@ export const IncomeDistributionChart = ({ data }: IncomeDistributionChartProps) 
           <div className="mt-4 pb-2">
             <CustomLegend
               niveles={[
-                { label: "Insumos", color: "var(--chart-insumos)" },
-                { label: "Labores", color: "var(--chart-labores)" },
+                { label: "Semillas", color: "var(--chart-semillas)" },
+                { label: "Resto de Insumos", color: "var(--chart-insumos)" },
+                { label: "Labor de Cosecha", color: "var(--chart-labor-cosecha)" },
+                { label: "Otras Labores", color: "var(--chart-labores)" },
                 { label: "Costo Variable", color: "var(--chart-variable)" },
                 { label: "Margen Bruto", color: "var(--chart-margin)" },
               ]}
