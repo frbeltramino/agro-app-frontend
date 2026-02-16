@@ -48,12 +48,12 @@ export const Dashboard = () => {
       name: lot.lote,
     }))
 
-  const hasActivity = currentData.some(lot =>
-    lot.cultivos.some(cultivo =>
-      cultivo.cosecha > 0 ||
-      cultivo.insumos > 0 ||
-      cultivo.labores > 0 ||
-      cultivo.costoVariable > 0
+  const hasActivity = Array.isArray(currentData) && currentData.some(lot =>
+    Array.isArray(lot.cultivos) && lot.cultivos.some(cultivo =>
+      (cultivo.cosecha || 0) > 0 ||
+      (cultivo.insumos || 0) > 0 ||
+      (cultivo.labores || 0) > 0 ||
+      (cultivo.costoVariable || 0) > 0
     )
   );
 
@@ -66,32 +66,34 @@ export const Dashboard = () => {
 
 
   const calculateTotalCostByLoteYCultivo = () => {
+    if (!Array.isArray(currentData) || currentData.length === 0) return formatCurrency(0);
+
     let totalCost = 0;
     let totalHa = 0;
 
     currentData.forEach(lot => {
       const lotHa = Number(lot.superficieHa) || 0;
-
-      lot.cultivos.forEach(cultivo => {
-        // Sumamos todos los costos del cultivo
-        const cultivoCost =
-          (Number(cultivo.insumos) || 0) +
-          (Number(cultivo.labores) || 0) +
-          (Number(cultivo.costoVariable) || 0);
-
-        totalCost += cultivoCost;
-      });
-
       totalHa += lotHa;
+
+      if (Array.isArray(lot.cultivos)) {
+        lot.cultivos.forEach(cultivo => {
+          const insumos = Number(cultivo.insumos) || 0;
+          const labores = Number(cultivo.labores) || 0;
+          const costoVariable = Number(cultivo.costoVariable) || 0;
+
+          totalCost += insumos + labores + costoVariable;
+        });
+      }
     });
 
-    // Evitar división por cero
     if (totalHa === 0) return formatCurrency(0);
 
     return formatCurrency(totalCost / totalHa);
   };
 
   const calculateGrossMarginPerHa = () => {
+    if (!Array.isArray(currentData) || currentData.length === 0) return formatCurrency(0);
+
     let totalIngresos = 0;
     let totalCostos = 0;
     let totalHa = 0;
@@ -100,21 +102,21 @@ export const Dashboard = () => {
       const lotHa = Number(lot.superficieHa) || 0;
       totalHa += lotHa;
 
-      lot.cultivos.forEach(cultivo => {
-        const ingresos = Number(cultivo.ingresos) || 0;
-        const costos =
-          (Number(cultivo.insumos) || 0) +
-          (Number(cultivo.labores) || 0) +
-          (Number(cultivo.costoVariable) || 0);
+      if (Array.isArray(lot.cultivos)) {
+        lot.cultivos.forEach(cultivo => {
+          const ingresos = Number(cultivo.ingresos) || 0;
+          const insumos = Number(cultivo.insumos) || 0;
+          const labores = Number(cultivo.labores) || 0;
+          const costoVariable = Number(cultivo.costoVariable) || 0;
 
-        totalIngresos += ingresos;
-        totalCostos += costos;
-      });
+          totalIngresos += ingresos;
+          totalCostos += insumos + labores + costoVariable;
+        });
+      }
     });
 
     if (totalHa === 0) return formatCurrency(0);
 
-    // Margen bruto total por hectárea
     const margenBrutoPorHa = (totalIngresos - totalCostos) / totalHa;
 
     return formatCurrency(margenBrutoPorHa);
