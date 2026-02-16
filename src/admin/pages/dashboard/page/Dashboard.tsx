@@ -4,14 +4,14 @@ import { StatCard } from "../components/StatCard";
 import { ChartCard } from "../components/ChartCard";
 import { IncomeDistributionChart } from "../components/IncomeDistributionChart";
 import { InsightCard } from "../components/InsightCard";
-// import { TableSummaryMobile } from "../components/TableSummaryMobile";
+import { TableSummaryMobile } from "../components/TableSummaryMobile";
 import { PageHeader } from "@/admin/components/PageHeader";
 import { useLotsStats } from "@/admin/hooks/useLotsStats";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { useCampaigns } from "../../../hooks/useCampaigns";
 import { Label } from "@/components/ui/label";
 import { CustomFullScreenLoading } from "@/components/custom/CustomFullScreenLoading";
-// import { formatTn } from "@/lib/format-tn";
+import { formatTn } from "@/lib/format-tn";
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import agroTractor from "@/assets/agro-tractor.jpg";
 import { ImageCard } from "@/admin/components/ImageCard";
@@ -48,12 +48,14 @@ export const Dashboard = () => {
       name: lot.lote,
     }))
 
-  const hasActivity = Array.isArray(currentData) && currentData.some(lot =>
-    Array.isArray(lot.cultivos) && lot.cultivos.some(cultivo =>
-      (cultivo.cosecha || 0) > 0 ||
-      (cultivo.insumos || 0) > 0 ||
-      (cultivo.labores || 0) > 0 ||
-      (cultivo.costoVariable || 0) > 0
+  const hasCultivos = currentData.some(lot => lot.cultivos.length > 0);
+
+  const hasActivity = currentData.some(lot =>
+    lot.cultivos.some(c =>
+      c.cosecha > 0 ||
+      c.insumos > 0 ||
+      c.labores > 0 ||
+      c.costoVariable > 0
     )
   );
 
@@ -259,7 +261,7 @@ export const Dashboard = () => {
               isLoading={isLoadingLots}
             >
               {
-                !isLoadingLots && currentData.length === 0 && (
+                !isLoadingLots && !hasCultivos && (
                   <CustomNoResultsCard
                     title="No se encontraron lotes con cosechas realizadas"
                     message="Aquí podrás ver los lotes con cosechas realizadas"
@@ -267,11 +269,11 @@ export const Dashboard = () => {
                 )
               }
               {
-                !isLoadingLots && currentData.length > 0 && (
+                !isLoadingLots && hasCultivos && (
                   <>
                     <div className="hidden md:block overflow-x-auto">
                       {/*desktop*/}
-                      {/* <table className="w-full">
+                      <table className="w-full">
                         <thead>
                           <tr className="border-b border-border">
                             <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
@@ -335,11 +337,11 @@ export const Dashboard = () => {
                             })
                           )}
                         </tbody>
-                      </table> */}
+                      </table>
                     </div>
                     {/*mobile*/}
                     <div className="block md:hidden w-full">
-                      {/* <TableSummaryMobile data={currentData} /> */}
+                      <TableSummaryMobile data={currentData} />
                     </div>
                   </>
                 )
