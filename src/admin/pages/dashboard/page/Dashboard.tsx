@@ -302,16 +302,15 @@ export const Dashboard = () => {
                         </thead>
                         <tbody>
                           {currentData.flatMap((lote: any) =>
-                            lote.cultivos.map((cultivo: any) => {
+                            (lote.cultivos ?? []).map((cultivo: any) => {
                               const superficie = lote.superficieHa || 0;
 
-                              const perHa = (value: number) =>
-                                superficie > 0 ? value / superficie : 0;
+                              const perHa = (value: number) => superficie > 0 ? value / superficie : 0;
 
                               const insumosPorHa = perHa(cultivo.insumos);
                               const laboresPorHa = perHa(cultivo.labores);
                               const cosechaPorHa = perHa(cultivo.cosecha);
-                              const precioPromedioPorHa = (cultivo.precioPromedioPonderado);
+                              const precioPromedioPorHa = cultivo.precioPromedioPonderado;
                               const costoVariablePorHa = perHa(cultivo.costoVariable);
                               const margenBrutoPorHa = perHa(cultivo.margenBruto);
 
