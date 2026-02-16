@@ -271,7 +271,7 @@ export const Dashboard = () => {
                   <>
                     <div className="hidden md:block overflow-x-auto">
                       {/*desktop*/}
-                      <table className="w-full">
+                      {/* <table className="w-full">
                         <thead>
                           <tr className="border-b border-border">
                             <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
@@ -335,11 +335,11 @@ export const Dashboard = () => {
                             })
                           )}
                         </tbody>
-                      </table>
+                      </table> */}
                     </div>
                     {/*mobile*/}
                     <div className="block md:hidden w-full">
-                      <TableSummaryMobile data={currentData} />
+                      {/* <TableSummaryMobile data={currentData} /> */}
                     </div>
                   </>
                 )
