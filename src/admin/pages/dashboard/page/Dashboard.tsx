@@ -301,55 +301,35 @@ export const Dashboard = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {currentData.flatMap((lote: any) =>
-                            (lote.cultivos ?? []).map((cultivo: any) => {
-                              const superficie = lote.superficieHa || 0;
+                          {(currentData ?? []).flatMap((lote: any) =>
+                            (lote?.cultivos ?? []).map((cultivo: any) => {
+                              const superficie = lote?.superficieHa || 0;
 
                               const perHa = (value: number) => superficie > 0 ? value / superficie : 0;
 
                               const insumosPorHa = perHa(cultivo.insumos);
                               const laboresPorHa = perHa(cultivo.labores);
                               const cosechaPorHa = perHa(cultivo.cosecha);
-                              const precioPromedioPorHa = cultivo.precioPromedioPonderado;
+                              const precioPromedioPorHa = cultivo.precioPromedioPonderado || 0;
                               const costoVariablePorHa = perHa(cultivo.costoVariable);
                               const margenBrutoPorHa = perHa(cultivo.margenBruto);
 
                               return (
                                 <tr
-                                  key={`${lote.id}-${cultivo.cropId}`}
+                                  key={`${lote?.id ?? Math.random()}-${cultivo?.cropId ?? Math.random()}`}
                                   className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                                 >
                                   <td className="py-3 px-4 font-medium text-foreground">
-                                    {lote.lote} - {cultivo.cropName}
+                                    {lote?.lote ?? "—"} - {cultivo?.cropName ?? "—"}
                                   </td>
 
-                                  <td className="py-3 px-4 text-right">
-                                    {formatTn(superficie)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right">
-                                    {formatCurrency(insumosPorHa)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right">
-                                    {formatCurrency(laboresPorHa)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right">
-                                    {formatTn(cosechaPorHa)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right">
-                                    {formatCurrency(precioPromedioPorHa)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right">
-                                    {formatCurrency(costoVariablePorHa)}
-                                  </td>
-
-                                  <td className="py-3 px-4 text-right font-medium text-primary">
-                                    {formatCurrency(margenBrutoPorHa)}
-                                  </td>
+                                  <td className="py-3 px-4 text-right">{formatTn(superficie)}</td>
+                                  <td className="py-3 px-4 text-right">{formatCurrency(insumosPorHa)}</td>
+                                  <td className="py-3 px-4 text-right">{formatCurrency(laboresPorHa)}</td>
+                                  <td className="py-3 px-4 text-right">{formatTn(cosechaPorHa)}</td>
+                                  <td className="py-3 px-4 text-right">{formatCurrency(precioPromedioPorHa)}</td>
+                                  <td className="py-3 px-4 text-right">{formatCurrency(costoVariablePorHa)}</td>
+                                  <td className="py-3 px-4 text-right font-medium text-primary">{formatCurrency(margenBrutoPorHa)}</td>
                                 </tr>
                               );
                             })
