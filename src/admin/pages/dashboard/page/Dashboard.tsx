@@ -313,7 +313,7 @@ export const Dashboard = () => {
                               const laboresPorHa = perHa(cultivo.labores);
                               const cosechaPorHa = perHa(cultivo.cosecha);
                               const precioPromedioPorHa = cultivo.precioPromedioPonderado || 0;
-                              const costoVariablePorHa = perHa(cultivo.costoVariable);
+                              const costoVariablePorHa = cultivo.costoVariable;
                               const margenBrutoPorHa = perHa(cultivo.margenBruto);
 
                               return (
