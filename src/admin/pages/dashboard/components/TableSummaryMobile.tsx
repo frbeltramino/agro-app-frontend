@@ -21,10 +21,10 @@ export const TableSummaryMobile = ({ data }: MobileTableProps) => {
           const costoVariablePorHa = cultivo.costoVariable;
 
           // Ingresos por ha = cosecha/ha * precio promedio por tonelada
-          const ingresosPorHa = cosechaPorHa * (cultivo.precioPromedioPonderado || 0);
+
 
           // Margen bruto por ha
-          const margenBrutoPorHa = ingresosPorHa - insumosPorHa - laboresPorHa - costoVariablePorHa;
+          const margenBrutoPorHa = perHa(cultivo.ingresos) - perHa(cultivo.insumos) - perHa(cultivo.labores) - cultivo.costoVariable;
 
           return (
             <div key={`${lote.id}-${cultivo.cropId}`} className="bg-card border border-border rounded-xl p-4 shadow-sm">
