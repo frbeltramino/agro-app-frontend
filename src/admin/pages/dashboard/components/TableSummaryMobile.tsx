@@ -18,7 +18,7 @@ export const TableSummaryMobile = ({ data }: MobileTableProps) => {
           const insumosPorHa = perHa(cultivo.insumos);
           const laboresPorHa = perHa(cultivo.labores);
           const cosechaPorHa = perHa(cultivo.cosecha);
-          const costoVariablePorHa = perHa(cultivo.costoVariable);
+          const costoVariablePorHa = cultivo.costoVariable;
 
           // Ingresos por ha = cosecha/ha * precio promedio por tonelada
           const ingresosPorHa = cosechaPorHa * (cultivo.precioPromedioPonderado || 0);
