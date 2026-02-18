@@ -47,7 +47,7 @@ const normalizeLotsDataByCultivo = (data: Lote[]) => {
           cosechaLabores: perHa(cultivo.cosechaLabores),
           otrasLabores: perHa(cultivo.otrasLabores),
 
-          costoVariable: perHa(cultivo.costoVariable),
+          costoVariable: cultivo.costoVariable,
           ingresos: perHa(cultivo.ingresos),
           margenBruto: perHa(cultivo.margenBruto),
 
