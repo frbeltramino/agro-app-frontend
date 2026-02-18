@@ -331,7 +331,9 @@ export const Dashboard = () => {
                                   <td className="py-3 px-4 text-right">{formatTn(cosechaPorHa)}</td>
                                   <td className="py-3 px-4 text-right">{formatCurrency(precioPromedioPorHa)}</td>
                                   <td className="py-3 px-4 text-right">{formatCurrency(costoVariablePorHa)}</td>
-                                  <td className="py-3 px-4 text-right font-medium text-primary">{formatCurrency(margenBrutoPorHa)}</td>
+                                  <td className="py-3 px-4 text-right font-medium text-primary">
+                                    {precioPromedioPorHa ? formatCurrency(margenBrutoPorHa) : "—"}
+                                  </td>
                                 </tr>
                               );
                             })

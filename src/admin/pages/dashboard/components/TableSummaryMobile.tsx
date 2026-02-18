@@ -63,7 +63,11 @@ export const TableSummaryMobile = ({ data }: MobileTableProps) => {
 
                 <div className="col-span-2 flex flex-col">
                   <span className="font-semibold">Margen Bruto (U$S/ha)</span>
-                  <span className="text-primary font-medium">{margenBrutoPorHa !== 0 ? formatCurrency(margenBrutoPorHa) : "—"}</span>
+                  {cultivo.precioPromedioPonderado ? (
+                    <span className="text-primary font-medium">{formatCurrency(margenBrutoPorHa)}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </div>
               </div>
             </div>
