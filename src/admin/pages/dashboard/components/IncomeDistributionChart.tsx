@@ -75,6 +75,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       (sum: number, entry: any) => sum + entry.value,
       0
     );
+    const ingresos = payload[0]?.payload?.ingresos;
+
 
     //const cosechaTn = payload[0]?.payload?.cosecha;
 
@@ -116,6 +118,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           </div>
         </div>
 
+        {/* Ingresos */}
+        {ingresos !== undefined && (
+          <div className="mb-4">
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground">Ingresos</span>
+              <span className="font-semibold text-green-600">{formatCurrency(ingresos)}/ha</span>
+            </div>
+          </div>
+        )}
+
         {/* Margin Section */}
         {marginItem && (
           <div className="pt-3 border-t border-border">
@@ -128,7 +141,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 <span className="text-sm font-medium text-foreground">{marginItem.name}</span>
               </div>
               <span className="font-medium text-primary">
-                {formatCurrency(marginItem.value)}/ha
+                {formatCurrency(ingresos - totalCostos)}/ha
               </span>
             </div>
 
