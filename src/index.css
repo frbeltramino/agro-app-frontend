@@ -81,6 +81,7 @@
  --chart-6: oklch(0.52 0.105 223.128);
  --chart-7: oklch(0.72 0.18 175); /* verde azulado */
 --chart-8: oklch(0.72 0.17 255); /* azul violeta */
+--chart-9: oklch(0.72 0.20 50); /* Cosecha - naranja fuerte */
 
   /* === ALIAS SEMÁNTICOS === */
   --chart-margin: var(--chart-1);
@@ -88,7 +89,7 @@
   --chart-labores: var(--chart-3);
   --chart-cosecha: var(--chart-4);
   --chart-variable: var(--chart-5);
-    --chart-labor-cosecha: var(--chart-7);
+    --chart-labor-cosecha: var(--chart-9);
   --chart-semillas: var(--chart-8);
 
     /* Custom gradients */
@@ -138,13 +139,14 @@
 --chart-6: oklch(0.52 0.105 223.128);
 --chart-7: oklch(0.72 0.18 175); /* verde azulado */
 --chart-8: oklch(0.72 0.17 255); /* azul violeta */
+--chart-9: oklch(0.72 0.20 50); /* Cosecha - naranja fuerte */
 
   --chart-margin: var(--chart-1);
   --chart-insumos: var(--chart-6);
   --chart-labores: var(--chart-3);
   --chart-cosecha: var(--chart-4);
   --chart-variable: var(--chart-5);
-  --chart-labor-cosecha: var(--chart-7);
+  --chart-labor-cosecha: var(--chart-9);
   --chart-semillas: var(--chart-8);
 
 }
