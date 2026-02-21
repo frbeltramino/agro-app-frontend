@@ -1,9 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, ChevronRight, Download } from "lucide-react"
+import { Edit, Trash2, ChevronRight } from "lucide-react"
 import { Campaign } from "@/interfaces/campaigns/campaign.interface"
-import { ReportDialog } from "../page/Campaings"
-import { useState } from "react"
+
 
 
 interface Props {
@@ -22,8 +21,7 @@ export const CampaignMobileCard = ({
   getStatusBadge,
 }: Props) => {
 
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [reportCampaign, setReportCampaign] = useState<Campaign | null>(null);
+
   return (
     <>
       <Card className="overflow-hidden">
@@ -45,17 +43,7 @@ export const CampaignMobileCard = ({
 
           <div className="flex justify-between items-center pt-2">
             <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsReportDialogOpen(true);
-                  setReportCampaign(campaign);
-                }}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+
               <Button size="icon" variant="ghost" onClick={onEdit}>
                 <Edit className="h-4 w-4" />
               </Button>
@@ -71,11 +59,7 @@ export const CampaignMobileCard = ({
         </CardContent>
       </Card>
 
-      <ReportDialog
-        isOpen={isReportDialogOpen}
-        setIsOpen={setIsReportDialogOpen}
-        reportCampaign={reportCampaign}
-      />
+
     </>
 
   )
