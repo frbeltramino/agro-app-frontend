@@ -25,6 +25,7 @@ export const useSeedSaleDelivery = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["seedSales"] });
       queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
     onError: (error) => {
       console.log(error);

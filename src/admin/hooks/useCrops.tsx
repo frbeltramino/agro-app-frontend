@@ -44,6 +44,7 @@ export const useCrops = ({ lotId }: UseLotsOptions) => {
       QueryClient.invalidateQueries({ queryKey: ["lotsStats"] });
       QueryClient.invalidateQueries({ queryKey: ["lots-for-variable-expenses"] });
       QueryClient.invalidateQueries({ queryKey: ["can-create-crop"] });
+      QueryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
 
     onError: (error: any) => {

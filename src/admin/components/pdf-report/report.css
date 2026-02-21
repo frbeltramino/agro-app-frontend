@@ -1,0 +1,71 @@
+.report-container {
+  background: #ffffff;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
+  padding: 32px;
+}
+
+.report-header {
+  background: #1f5f3b;
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.report-section-title {
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-bottom: 2px solid #1f5f3b;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0;
+    padding: 0;
+    font-size: 12pt;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 4px 6px !important;
+    text-align: left;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group; /* Que los encabezados se repitan en cada página */
+  }
+
+  tr {
+    page-break-inside: avoid; /* Que no corte filas */
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .overflow-x-auto {
+    overflow: visible !important; /* Para que no recorte tablas */
+  }
+
+  .flex, .grid {
+    display: block !important; /* Flex y grid no siempre se imprimen bien */
+  }
+
+   @page {
+    size: A4 landscape; /* o portrait */
+    margin: 15mm;
+  }
+
+
+}

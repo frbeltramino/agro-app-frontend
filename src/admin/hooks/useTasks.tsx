@@ -35,6 +35,7 @@ export const useTasks = ({ cropId, page, limit, type, search }: UseTasksOptions)
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["supply"] });
       queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
     onError: (error) => {
       console.log(error);
