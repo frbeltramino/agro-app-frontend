@@ -64,6 +64,7 @@ export const useSeedSales = ({
       queryClient.invalidateQueries({ queryKey: ["crops-to-sale"] });
       queryClient.invalidateQueries({ queryKey: ["crop-sale-availability"] });
       queryClient.invalidateQueries({ queryKey: ["lotsStats"] });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
     onError: (error) => {
       console.log(error);
