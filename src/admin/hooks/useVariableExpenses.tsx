@@ -52,6 +52,7 @@ export const useVariableExpenses = (
       queryClient.invalidateQueries({
         queryKey: ["variable-expenses", campaignId],
       });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
 
     onError: (error: any) => {
@@ -68,6 +69,7 @@ export const useVariableExpenses = (
       queryClient.invalidateQueries({
         queryKey: ["variable-expenses", campaignId]
       });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
     },
     onError: (error) => {
       console.log(error);

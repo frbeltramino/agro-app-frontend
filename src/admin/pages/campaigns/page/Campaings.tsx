@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, ChevronRight } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ChevronRight, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useCampaigns } from "../../../hooks/useCampaigns"; // Hook que trae la data de campañas
 
@@ -32,15 +32,18 @@ import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CampaignMobileCard } from "../components/CampaignMobileCard";
+import { CampaignReportPage } from "@/admin/components/pdf-report/pages/CampaignReportPage";
+import * as Dialog from "@radix-ui/react-dialog";
 
 export const Campaigns = () => {
-
 
   const [searchParams, setSearchParams] = useSearchParams();
   const { setSelectedCampaign } = useCampaignStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState<any | null>(null);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [reportCampaign, setReportCampaign] = useState<Campaign | null>(null);
 
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -236,6 +239,17 @@ export const Campaigns = () => {
                                 size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setIsReportDialogOpen(true);
+                                  setReportCampaign(campaign);
+                                }}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleEditCampaign(campaign);
                                 }}
                               >
@@ -263,6 +277,8 @@ export const Campaigns = () => {
                               >
                                 <ChevronRight className="h-4 w-4" />
                               </Button>
+
+
                             </div>
                           </TableCell>
                         </TableRow>
@@ -299,6 +315,36 @@ export const Campaigns = () => {
         onCancel={() => setIsDeleteDialogOpen(false)}
 
       />
+
+      <ReportDialog
+        isOpen={isReportDialogOpen}
+        setIsOpen={setIsReportDialogOpen}
+        reportCampaign={reportCampaign}
+      />
+
     </div>
   );
 };
+
+export const ReportDialog = ({
+  isOpen,
+  setIsOpen,
+  reportCampaign,
+}: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  reportCampaign: Campaign | null;
+}) => {
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 max-w-[90vw] w-[1100px] max-h-[90vh] overflow-auto -translate-x-1/2 -translate-y-1/2 bg-background p-6 rounded-xl shadow-lg">
+          <Dialog.Close className="absolute top-2 right-2 cursor-pointer">✕</Dialog.Close>
+          <CampaignReportPage reportCampaign={reportCampaign} />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+

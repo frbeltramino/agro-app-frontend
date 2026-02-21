@@ -30,6 +30,7 @@ export const useCampaigns = () => {
     mutationFn: createUpdateCampaignAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
 
     },
     onError: (error) => {
@@ -39,7 +40,11 @@ export const useCampaigns = () => {
 
   const deleteMutation = useMutation({
     mutationFn: deleteCampaignAction,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaigns'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ["reportByCampaign"] });
+    }
+
   });
 
 
