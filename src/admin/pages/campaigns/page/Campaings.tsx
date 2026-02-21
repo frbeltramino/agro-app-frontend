@@ -338,10 +338,21 @@ export const ReportDialog = ({
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 max-w-[90vw] w-[1100px] max-h-[90vh] overflow-auto -translate-x-1/2 -translate-y-1/2 bg-background p-6 rounded-xl shadow-lg">
-          <Dialog.Close className="absolute top-2 right-2 cursor-pointer">✕</Dialog.Close>
-          <CampaignReportPage reportCampaign={reportCampaign} />
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <Dialog.Content className="fixed z-50 inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[1100px] sm:max-w-[94vw] sm:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl bg-card text-card-foreground border border-border/60 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+
+          {/* Header fijo */}
+          <div className="flex items-center justify-between p-4 sm:p-6 pb-0 shrink-0">
+            <Dialog.Title className="text-lg font-semibold">Reporte de Campaña</Dialog.Title>
+            <Dialog.Close className="w-8 h-8 flex items-center justify-center rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+              ✕
+            </Dialog.Close>
+          </div>
+
+          {/* Contenido scrolleable */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 overscroll-contain">
+            <CampaignReportPage reportCampaign={reportCampaign} />
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
