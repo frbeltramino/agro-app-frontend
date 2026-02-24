@@ -2,7 +2,7 @@ import React from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Package } from "lucide-react";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 import { formatTn } from "@/lib/format-tn";
 import { formatDate } from "@/lib/format-date";
@@ -22,7 +22,6 @@ export const TasksCardDesktop = ({
   tasks,
   expandedWorks,
   toggleWorkExpansion,
-  onEdit,
   onDelete,
 }: TasksCardDesktopProps) => {
   if (!tasks || tasks.length === 0) {
@@ -39,9 +38,11 @@ export const TasksCardDesktop = ({
             <TableHead>Descripción</TableHead>
             <TableHead>Fecha de realización</TableHead>
             <TableHead>Proveedor</TableHead>
-            <TableHead>Costo M/O</TableHead>
-            <TableHead>Costo total</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
+            <TableHead>MO / ha</TableHead>
+            <TableHead>Ha</TableHead>
+            <TableHead>MO Total</TableHead>
+            <TableHead>Total</TableHead>
+            <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,15 +62,17 @@ export const TasksCardDesktop = ({
                   <TableCell>{task.description || "No hay descripción"}</TableCell>
                   <TableCell>{formatDate(task.date)}</TableCell>
                   <TableCell>{task.provider_name ?? "-"}</TableCell>
+                  <TableCell>{formatCurrency(Number(task.labor_cost_per_hectare))}</TableCell>
+                  <TableCell>{formatTn(Number(task.hectares))}</TableCell>
                   <TableCell>{formatCurrency(Number(task.laborCost))}</TableCell>
                   <TableCell>{formatCurrency(Number(task.total_price))}</TableCell>
 
 
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
+                      {/* <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
                         <Edit className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                       <Button variant="destructive" size="icon" onClick={() => onDelete(task)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -80,7 +83,7 @@ export const TasksCardDesktop = ({
                 {/* FILA EXPANDIBLE */}
                 {isOpen && (
                   <TableRow>
-                    <TableCell colSpan={8} className="bg-muted/30 p-0">
+                    <TableCell colSpan={10} className="bg-muted/30 p-0">
                       <div className="p-4">
                         <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                           <Package className="h-4 w-4" /> Insumos utilizados en esta labor

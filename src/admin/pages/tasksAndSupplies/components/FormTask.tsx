@@ -61,6 +61,8 @@ interface FormValues {
   date: string;
   note?: string;
   laborCost?: number | undefined;
+  hectares?: number | undefined;
+  labor_cost_per_hectare?: number | undefined;
   supplies: TaskSupplyForm[];
 }
 
@@ -81,6 +83,8 @@ interface TaskFormProps {
     total_price: number
     date: string
     note?: string
+    hectares?: number | undefined;
+    labor_cost_per_hectare?: number | undefined;
     laborCost?: number
     status: string
     created_at: string
@@ -139,6 +143,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         description: "",
         date: "",
         note: "",
+        hectares: selectedLot?.hectares ?? undefined,
+        labor_cost_per_hectare: undefined,
         laborCost: undefined,
         supplies: [],
       },
@@ -256,6 +262,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           description: data.description?.trim() !== "" ? data.description : null,
           performed_at: data.date ?? null,
           note: data.note ?? null,
+          labor_cost_per_hectare: data.labor_cost_per_hectare ? parseAmount(data.labor_cost_per_hectare) : undefined,
+          hectares: data.hectares ? parseAmount(data.hectares) : undefined,
           laborCost: data.laborCost ? parseAmount(data.laborCost) : undefined,
           supplies: taskSupplies.length > 0 ? taskSupplies : [],
         };
@@ -311,6 +319,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           description: taskToEdit.description || "",
           date: taskToEdit.date || taskToEdit.performed_at || "",
           note: taskToEdit.note || "",
+          hectares: selectedLot?.hectares ?? undefined,
+          labor_cost_per_hectare: taskToEdit?.labor_cost_per_hectare ?? undefined,
           laborCost: taskToEdit?.laborCost ?? undefined,
           supplies: taskToEdit.supplies?.map(mapTaskSupplyToForm) || [],
         });
@@ -322,6 +332,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           date: "",
           note: "",
           laborCost: undefined,
+          hectares: selectedLot?.hectares ?? undefined,
+          labor_cost_per_hectare: undefined,
           supplies: [],
         });
       }
@@ -337,6 +349,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           date: "",
           note: "",
           laborCost: undefined,   // o undefined si querés
+          hectares: selectedLot?.hectares ?? undefined,
+          labor_cost_per_hectare: undefined,
           supplies: [],
         }, { keepDefaultValues: false });
 
@@ -361,6 +375,21 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         setStep(2);
       }
     };
+
+    const watchHectares = watch("hectares");
+    const watchLaborPerHa = watch("labor_cost_per_hectare");
+
+    useEffect(() => {
+      if (
+        watchHectares !== undefined &&
+        watchLaborPerHa !== undefined &&
+        watchHectares > 0 &&
+        watchLaborPerHa >= 0
+      ) {
+        const total = watchHectares * watchLaborPerHa;
+        setValue("laborCost", total);
+      }
+    }, [watchHectares, watchLaborPerHa, setValue]);
 
     return (
       <SidePanel
@@ -476,6 +505,51 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                   </div>
 
                   {/* Costo de Mano de Obra */}
+                  {/* Hectáreas */}
+                  <div className="mt-4">
+                    <Controller
+                      name="hectares"
+                      control={control}
+                      rules={{
+                        min: { value: 0, message: "Debe ser mayor o igual a 0" },
+                      }}
+                      render={({ field, fieldState }) => (
+                        <AmountInput
+                          label="Cantidad de Hectáreas"
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                          currency=""
+                          locale="es-AR"
+                          placeholder="0,00"
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Precio por hectárea */}
+                  <div className="mt-2">
+                    <Controller
+                      name="labor_cost_per_hectare"
+                      control={control}
+                      rules={{
+                        min: { value: 0, message: "Debe ser positivo" },
+                      }}
+                      render={({ field, fieldState }) => (
+                        <AmountInput
+                          label="Precio de Mano de Obra por Hectárea"
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={fieldState.error?.message}
+                          currency="USD"
+                          locale="es-AR"
+                          placeholder="0,00"
+                        />
+                      )}
+                    />
+                  </div>
+
+
                   <div className="mt-2">
                     <Controller
                       name="laborCost"
