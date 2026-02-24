@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Package } from "lucide-react";
 import { useState } from "react";
 import { formatTn } from "@/lib/format-tn";
 import { formatCurrency } from "@/lib/currency-formatter-usd";
@@ -15,7 +15,7 @@ interface TasksCardMobileProps {
   onDelete: (task: CropTask) => void;
 }
 
-export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProps) => {
+export const TasksCardMobile = ({ tasks, onDelete }: TasksCardMobileProps) => {
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
 
   const toggleTask = (taskId: number) => {
@@ -64,9 +64,9 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                 </span>
               </div>
               <div className="flex gap-2">
-                <Button size="icon" variant="ghost" onClick={() => onEdit(task)}>
+                {/* <Button size="icon" variant="ghost" onClick={() => onEdit(task)}>
                   <Edit className="h-4 w-4" />
-                </Button>
+                </Button> */}
                 <Button size="icon" variant="ghost" onClick={() => onDelete(task)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
