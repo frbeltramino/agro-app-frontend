@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/currency-formatter-usd";
 import { formatTn } from "@/lib/format-tn";
 import { Datum } from "@/interfaces/variableExpenses/variable.expenses.response";
 import { useState } from "react";
+import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 
 interface VariableExpenseMobileTableProps {
   expensesByLot: Datum[];
@@ -48,9 +49,11 @@ export const VariableExpenseMobileTable = ({
 
   if (!expensesByLot.length) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-6">
-        No hay gastos cargados
-      </p>
+      <CustomNoResultsCard
+        title="No hay gastos variables cargados para esta campaña"
+        message="Necesita tener cosechas en la campaña para poder crear los gastos variables."
+
+      />
     );
   }
 

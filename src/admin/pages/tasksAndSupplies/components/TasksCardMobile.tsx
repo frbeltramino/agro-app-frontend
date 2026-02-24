@@ -54,6 +54,12 @@ export const TasksCardMobile = ({ tasks, onEdit, onDelete }: TasksCardMobileProp
                   • {task.provider_name ?? "-"}
                 </span>
                 <span className="text-xs text-muted-foreground">
+                  • MO: {formatCurrency(Number(task.labor_cost_per_hectare))}/ha
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  • Sup.: {formatTn(Number(task.hectares))} ha
+                </span>
+                <span className="text-xs text-muted-foreground">
                   • Costo: {formatCurrency(Number(task.total_price))}
                 </span>
               </div>

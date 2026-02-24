@@ -21,14 +21,14 @@ export function MasterLotSelect({
 
 }: MasterLotSelectProps) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<MasterLotFormValues>({
-    defaultValues: { name: "", default_surface: 0 }
+    defaultValues: { name: "", default_surface: undefined }
   });
 
   useEffect(() => {
     if (!open) return;
 
 
-    reset({ name: "", default_surface: 0 });
+    reset({ name: "", default_surface: undefined });
 
   }, [open, reset]);
 

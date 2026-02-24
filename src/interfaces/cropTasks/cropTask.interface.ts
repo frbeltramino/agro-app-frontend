@@ -5,6 +5,8 @@ export interface CropTask {
   description: string;
   total_price: number;
   laborCost: number;
+  hectares: number;
+  labor_cost_per_hectare: number;
   date: string;
   note: null | string;
   status: string;
