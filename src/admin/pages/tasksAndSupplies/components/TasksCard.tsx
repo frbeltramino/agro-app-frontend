@@ -18,6 +18,7 @@ import { DeleteDialog } from "@/admin/components/DeleteDialog"
 import { TasksCardMobile } from "./TasksCardMobile"
 import { TasksCardDesktop } from "./TasksCardDesktop"
 import { formatDate } from "@/lib/format-date";
+import { useSelectedTaskStore } from "../store/useSelectedTaskStore";
 
 
 
@@ -25,8 +26,9 @@ export const TasksCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingItem, setDeletingItem] = useState<any | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
-  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+
+
+  const { selectedTask, setSelectedTask, formMode, setFormMode } = useSelectedTaskStore();
   const [, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const [openTaskForm, setOpenTaskForm] = useState(false)
@@ -87,9 +89,8 @@ export const TasksCard = () => {
 
   const openEditForm = (task: CropTask) => {
     setFormMode('edit');
-    setSelectedTask(task);
+    setSelectedTask(task); // no se borra hasta cerrar
     setOpenTaskForm(true);
-    console.log(task);
   };
 
   const handleOpenDeleteDialog = (task: CropTask) => {

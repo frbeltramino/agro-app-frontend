@@ -21,6 +21,7 @@ interface ProductInUseDialogProps {
 }
 
 export function SupplyInUseDialog({ isOpen, onCancel, onContinue, productName, usedInTasks }: ProductInUseDialogProps) {
+  const tasksWithType = usedInTasks?.filter(task => task.task_type_name);
   return (
     <AlertDialog open={isOpen} onOpenChange={onCancel}>
       <AlertDialogContent>
@@ -41,15 +42,15 @@ export function SupplyInUseDialog({ isOpen, onCancel, onContinue, productName, u
           </p>
         </div>
 
-        {usedInTasks && usedInTasks.length > 0 && (
+        {tasksWithType && tasksWithType.length > 0 && (
           <div className="my-2 p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
             <p className="text-sm font-medium mb-2 text-amber-800 dark:text-amber-200">
               Este producto se encuentra en las siguientes tareas:
             </p>
             <ul className="list-disc list-inside text-sm text-amber-800 dark:text-amber-200 space-y-1">
-              {usedInTasks.map((task) => (
+              {tasksWithType.map((task) => (
                 <li key={task.id}>
-                  <strong>{task.task_description}</strong>
+                  <strong>{task.task_type_name}</strong>
                 </li>
               ))}
             </ul>

@@ -47,7 +47,6 @@ export function TaskSupplyFormComponent({
   useEffect(() => {
     if (supplyType !== "stock") {
       setValue("stockId", "");
-      setValue("unit", "");
     }
   }, [supplyType, setValue]);
 
@@ -113,7 +112,7 @@ export function TaskSupplyFormComponent({
             </div>
 
             <div >
-              <Label className="text-sm mb-1.5">Nombre del Producto *</Label>
+              <Label className="text-sm mb-1.5 mt-1.5">Nombre del Producto *</Label>
               <input
                 type="text"
                 {...register(`productName`)}
@@ -124,7 +123,7 @@ export function TaskSupplyFormComponent({
             </div>
 
             <div>
-              <Label className="text-sm mb-1.5">Categoría *</Label>
+              <Label className="text-sm mb-1.5 mt-1.5">Categoría *</Label>
               <input
                 type="text"
 
@@ -134,7 +133,7 @@ export function TaskSupplyFormComponent({
               />
             </div>
             <div >
-              <Label className="text-sm mb-1.5">Unidad *</Label>
+              <Label className="text-sm mb-1.5 mt-1.5">Unidad *</Label>
               <input
                 type="text"
                 {...register(`unit`)}
@@ -153,26 +152,27 @@ export function TaskSupplyFormComponent({
               value={watch(`master_supply_id`) || ""}
             />
 
-            <Controller
-              control={control}
-              name={`pricePerUnit`}
-              rules={{
-                required: "El precio es requerido",
-                min: { value: 0, message: "El precio debe ser positivo" },
-              }}
-              render={({ field, fieldState }) => (
-                <AmountInput
-                  label="Precio por Unidad *"
-                  value={field.value != null && field.value !== "" ? Number(field.value) : undefined}
-                  onChange={field.onChange}
-                  currency="USD"
-                  locale="es-AR"
-                  placeholder="0,00"
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-
+            <div className="space-y-2 mt-2">
+              <Controller
+                control={control}
+                name={`pricePerUnit`}
+                rules={{
+                  required: "El precio es requerido",
+                  min: { value: 0, message: "El precio debe ser positivo" },
+                }}
+                render={({ field, fieldState }) => (
+                  <AmountInput
+                    label={`Precio por unidad (${supplyType === "stock" ? selectedStock?.unit ?? "" : watch(`unit`) ?? "unidad"}) *`}
+                    value={field.value != null && field.value !== "" ? Number(field.value) : undefined}
+                    onChange={field.onChange}
+                    currency="USD"
+                    locale="es-AR"
+                    placeholder="0,00"
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </div>
 
           </>
         )}

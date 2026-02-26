@@ -2,7 +2,7 @@ import React from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Trash2, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit, Trash2, Package } from "lucide-react";
 import { CropTask } from "@/interfaces/cropTasks/cropTask.interface";
 import { formatTn } from "@/lib/format-tn";
 import { formatDate } from "@/lib/format-date";
@@ -23,6 +23,7 @@ export const TasksCardDesktop = ({
   expandedWorks,
   toggleWorkExpansion,
   onDelete,
+  onEdit,
 }: TasksCardDesktopProps) => {
   if (!tasks || tasks.length === 0) {
     return <p className="text-muted-foreground">No se encontraron tareas</p>;
@@ -70,9 +71,9 @@ export const TasksCardDesktop = ({
 
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      {/* <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
+                      <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
                         <Edit className="h-4 w-4" />
-                      </Button> */}
+                      </Button>
                       <Button variant="destructive" size="icon" onClick={() => onDelete(task)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
