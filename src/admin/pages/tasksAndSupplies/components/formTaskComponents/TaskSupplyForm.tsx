@@ -47,7 +47,6 @@ export function TaskSupplyFormComponent({
   useEffect(() => {
     if (supplyType !== "stock") {
       setValue("stockId", "");
-      setValue("unit", "");
     }
   }, [supplyType, setValue]);
 

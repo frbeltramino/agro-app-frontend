@@ -37,7 +37,6 @@ export const MasterSupplySelect = ({
   const [search, setSearch] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const MAX_RESULTS = 20;
   const [isFocused, setIsFocused] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -106,12 +105,10 @@ export const MasterSupplySelect = ({
 
   const filteredSupplies =
     search !== ""
-      ? supplies
-        .filter((s) =>
-          s.name.toLowerCase().includes(search.toLowerCase())
-        )
-        .slice(0, MAX_RESULTS)
-      : supplies.slice(0, MAX_RESULTS);
+      ? supplies.filter((s) =>
+        s.name.toLowerCase().includes(search.toLowerCase())
+      )
+      : supplies;
 
   const handleKeyDown = (e: React.KeyboardEvent, field?: any) => {
     if (!filteredSupplies.length) return;
