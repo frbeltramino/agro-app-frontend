@@ -23,6 +23,8 @@ import { Stepper } from "@/components/custom/StepIndicator";
 import { useTaskForm } from "../hooks/useTaskForm"
 import { SidePanel } from "@/admin/components/SidePanel"
 import { useProviders } from "@/admin/hooks/useProviders"
+import { CropTask } from "@/interfaces/cropTasks/cropTask.interface"
+import { useSelectedTaskStore } from "../store/useSelectedTaskStore"
 
 interface TaskSupplyForm {
   supplyType: "stock" | "purchase";
@@ -74,25 +76,7 @@ interface TaskFormProps {
 
   taskTypes?: string[]
 
-  taskToEdit?: {
-    id: number
-    crop_id: number
-    task_type_id: number
-    provider_id: number
-    description?: string
-    total_price: number
-    date: string
-    note?: string
-    hectares?: number | undefined;
-    labor_cost_per_hectare?: number | undefined;
-    laborCost?: number
-    status: string
-    created_at: string
-    updated_at: string
-    performed_at: string
-    type: string
-    supplies: TaskSupplyEdit[]
-  }
+  taskToEdit?: CropTask | undefined | null
 }
 
 export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
@@ -104,7 +88,8 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       taskToEdit
     }
   ) => {
-
+    const { selectedTask } = useSelectedTaskStore();
+    taskToEdit = selectedTask || null;
     const { data: categoriesData } = useSupplyCategories();
     const { data: taskTypesData, createTaskTypeMutation } = useTaskTypes();
     const { data: providersData, createProviderMutation } = useProviders();
@@ -162,8 +147,20 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       },
     });
 
+
+
     const handleConfirmSupply = () => {
       const newSupply = supplyForm.getValues();
+
+      if (
+        newSupply.supplyType === "stock" &&
+        editingIndex === null &&
+        usedStockIds.includes(Number(newSupply.stockId))
+      ) {
+        toast.error("Este insumo de stock ya fue agregado a la labor");
+        return;
+      }
+
       if (newSupply.stockId && stock) {
         const foundStock = stock.find(s => s.id === Number(newSupply.stockId));
         if (foundStock) {
@@ -193,6 +190,10 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
     };
     const watchSupplies = watch("supplies");
 
+    const usedStockIds = watchSupplies
+      .filter(s => s.supplyType === "stock" && s.stockId)
+      .map(s => Number(s.stockId));
+
     const handleOpenAddSupply = () => {
       setEditingIndex(null);
       supplyForm.reset({
@@ -209,7 +210,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
       setCreateNewSupply(true); // abre el formulario
     };
 
-    const createArrayOfSupplies = async (data: FormValues, taskToEdit?: any) => {
+    const createArrayOfSupplies = async (data: FormValues, taskToEdit?: CropTask | null) => {
       const stockSupplies = data.supplies.filter((s) => s.supplyType === "stock");
       const purchaseSupplies = data.supplies.filter((s) => s.supplyType === "purchase");
 
@@ -308,10 +309,13 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
         dosagePerHectare: s.dose_per_ha,
         hectareQuantity: s.hectares,
       });
-
     useEffect(() => {
-      setStep(1)
+      if (!open) return;
+
+      setStep(1);
+
       if (taskToEdit) {
+        // reset en edición
         reset({
           id: taskToEdit.id,
           task_type_id: taskToEdit.task_type_id?.toString() || "",
@@ -325,6 +329,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           supplies: taskToEdit.supplies?.map(mapTaskSupplyToForm) || [],
         });
       } else {
+        // reset en creación
         reset({
           task_type_id: "",
           provider_id: "",
@@ -337,10 +342,12 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
           supplies: [],
         });
       }
-    }, [taskToEdit, reset]);
+    }, [open, taskToEdit, reset, selectedLot?.hectares]);
 
     const handleOpenChange = (open: boolean) => {
+      taskToEdit = null;
       if (!open) {
+
         // Limpiar formulario principal
         reset({
           task_type_id: "",
@@ -537,7 +544,7 @@ export const TaskForm = forwardRef<HTMLDivElement, TaskFormProps>(
                       }}
                       render={({ field, fieldState }) => (
                         <AmountInput
-                          label="Precio de Mano de Obra por Hectárea"
+                          label="Precio de Mano de Obra / ha (opcional)"
                           value={field.value}
                           onChange={field.onChange}
                           error={fieldState.error?.message}
