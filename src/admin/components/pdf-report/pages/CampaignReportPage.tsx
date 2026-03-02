@@ -1,123 +1,147 @@
-
-import { FileDown } from "lucide-react";
+import { FileDown, } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ReportHeader } from "../components/ReportHeader";
-import { SummaryCards } from "../components/SummaryCards";
-import { LotsSection } from "../components/LotsSection";
-import { ExpensesSection } from "../components/ExpensesSection";
-import { DeliveriesSalesSection } from "../components/DeliveriesSalesSection";
-import { LaborsSection } from "../components/LaborsSection";
 
-// import "../report.css";
 
 import { useReportByCampaign } from "@/admin/hooks/useReportByCampaign";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CustomErrorSection } from "@/components/custom/CustomErrorSection";
 import { Campaign } from "@/interfaces/campaigns/campaign.interface";
 
-import { useRef } from "react";
-import { useReactToPrint } from "react-to-print";
-import { CustomLogoMobile } from "@/components/custom/CustomlogoMobile";
+
 import { ReportEmptySection } from "../components/ReportEmptySection";
-import { formatTn } from "@/lib/format-tn";
+
+import { buildReportTemplate } from "../templates/report_template_new.ts";
+
+import * as Dialog from "@radix-ui/react-dialog";
+import { useState } from "react";
+
+
+
 
 interface Props {
   reportCampaign: Campaign | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export const CampaignReportPage = ({ reportCampaign }: Props) => {
-  const reportRef = useRef<HTMLDivElement>(null);
+export const CampaignReportPage = ({ reportCampaign,
+  open,
+  onOpenChange }: Props) => {
+  const [isPrinting, setIsPrinting] = useState(false);
 
-  const { data: reportData, isLoading, isError } = useReportByCampaign({ campaignId: reportCampaign ? reportCampaign.id : null });
+  const { data: reportData, isLoading, isError } =
+    useReportByCampaign({
+      campaignId: reportCampaign ? reportCampaign.id : null,
+    });
 
-  const handleExportPDF = useReactToPrint({
-    contentRef: reportRef,
-    documentTitle: `Reporte-${reportCampaign?.name}`,
-  });
+  const handleExportPDF = () => {
+    if (!reportData?.length) return;
 
-  if (isLoading) return <CustomLoadingCard />;
-  if (isError) return <CustomErrorSection message="Error al generar el reporte" />;
-
-
-  if (!reportData) {
-    return (
-      <ReportEmptySection
-        title="Reporte de Campaña"
-        message="No se pudo obtener información de esta campaña."
-        icon={<FileDown className="w-4 h-4" />}
-      />
+    const html = buildReportTemplate(
+      reportData,
+      reportCampaign?.name
     );
-  }
+
+    setIsPrinting(true);
+
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("El navegador bloqueó la ventana emergente.");
+      setIsPrinting(false);
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+
+    // Detectar cuando se cierre la ventana
+    const interval = setInterval(() => {
+      if (printWindow.closed) {
+        clearInterval(interval);
+        setIsPrinting(false);
+      }
+    }, 500);
+  };
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-8">
-      <div className="max-w-[1100px] mx-auto">
-        {/* Botón de exportar PDF */}
-        <div className="hidden sm:block">
-          <div className="flex justify-end mb-4 no-print ">
-            <Button onClick={handleExportPDF} className="gap-2">
-              <FileDown className="w-4 h-4" />
-              Exportar PDF
-            </Button>
-          </div>
-        </div>
 
 
-        {/* MOBILE VIEW: Solo nombre y botón PDF */}
-        <div className="sm:hidden flex flex-col items-center justify-center h-auto min-h-0 text-center p-4">
-          <Button onClick={handleExportPDF} className="gap-2">
-            <FileDown className="w-4 h-4" /> Descargar PDF
-          </Button>
-        </div>
+
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+        <Dialog.Content className="fixed z-50 inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[1100px] sm:max-w-[95vw] sm:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl bg-white text-black border border-border/60">
+
+          <div className="flex items-center justify-between px-6 py-6 border-b border-border shrink-0 h-16">
+            <div className="flex items-center gap-2">
+              <Dialog.Title className="text-lg sm:text-xl font-semibold">
+                Reporte de Campaña
+
+              </Dialog.Title>
+
+            </div>
 
 
-        <div ref={reportRef} className="bg-card rounded-xl shadow-lg border border-border p-6 sm:p-8">
+            <div className="flex items-center gap-2">
 
-          <ReportHeader reportCampaign={reportCampaign} />
-
-          {/* Resumen general */}
-          <SummaryCards reportData={reportData} />
-          <LotsSection reportData={reportData} />
-
-
-          {/* Secciones por lote y cultivo */}
-          {reportData.map((lot) => (
-
-            <section key={lot.lot_id} className="mb-6">
-              <h2 className="text-lg font-bold mb-2">{lot.lot_name} — {formatTn(lot.hectares)} ha</h2>
-
-              {lot.crops.map((crop) => (
-                <div key={crop.crop_id} className="mb-4 pl-4 border-l-2 border-muted-foreground">
-                  <h3 className="font-semibold mb-1">{crop.crop_name} — {formatTn(crop.real_yield)} tn</h3>
-
-                  <LaborsSection crops={[crop]} />
-                  <ExpensesSection crops={[crop]} />
-                  <DeliveriesSalesSection crops={[crop]} />
-                </div>
-              ))}
-            </section>
-
-          ))}
-
-          {/* Footer */}
-
-          <div className="mt-8 pt-6 border-t border-border flex flex-col items-center gap-3 text-xs text-muted-foreground">
-            <p className="text-center">
-              {`Este reporte fue generado automáticamente · ${reportCampaign?.name} · AgroHuracán`}
-            </p>
-
-            <div className="h-6 w-auto">
-              <CustomLogoMobile />
+              <Button
+                onClick={handleExportPDF}
+                className="gap-2 px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <FileDown className="w-4 h-4" />
+                <span >Exportar PDF</span>
+              </Button>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ✕
+                </button>
+              </Dialog.Close>
             </div>
           </div>
 
-        </div>
+          {/* CONTENIDO */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            {isLoading && <CustomLoadingCard />}
 
-      </div>
-    </div>
+            {isError && (
+              <CustomErrorSection message="Error al generar el reporte" />
+            )}
+
+            {!isLoading && !isError && !reportData && (
+              <ReportEmptySection
+                title="Reporte de Campaña"
+                message="No se pudo obtener información de esta campaña."
+                icon={<FileDown className="w-4 h-4" />}
+              />
+            )}
+
+            {!isLoading && !isError && reportData && reportData?.length > 0 && (
+              <div id="print-area">
+                <div dangerouslySetInnerHTML={{
+                  __html: buildReportTemplate(
+                    reportData,
+                    reportCampaign?.name
+                  ),
+                }} />
+              </div>
+            )}
+          </div>
+
+          {isPrinting && (
+            <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center text-white text-lg rounded-2xl">
+              Para continuar, cierre la ventana de impresión.
+            </div>
+          )}
+
+
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root >
+
   );
 };
-
-
-
-
