@@ -33,7 +33,6 @@ import { CustomNoResultsCard } from "@/components/custom/CustomNoResultsCard";
 import { CustomLoadingCard } from "@/components/custom/CustomLoadingCard";
 import { CampaignMobileCard } from "../components/CampaignMobileCard";
 import { CampaignReportPage } from "@/admin/components/pdf-report/pages/CampaignReportPage";
-import * as Dialog from "@radix-ui/react-dialog";
 
 export const Campaigns = () => {
 
@@ -87,16 +86,26 @@ export const Campaigns = () => {
     totalPages: 1,
   };
 
-  type CampaignStatus = "active" | "inactive";
+  const getStatusBadge = (campaign: Campaign) => {
+    // PRIORIDAD 1: si tiene fecha fin → Finalizada
+    if (campaign.end_date) {
+      return (
+        <Badge variant="secondary">
+          Finalizada
+        </Badge>
+      );
+    }
 
-  const getStatusBadge = (status: CampaignStatus) => {
-    if (status === "active") {
+    // PRIORIDAD 2: si está activa
+    if (campaign.status === "active") {
       return (
         <Badge className="bg-green-600 text-white hover:bg-green-700">
           Activa
         </Badge>
       );
     }
+
+    // PRIORIDAD 3: eliminada/inactiva
     return (
       <Badge variant="destructive">
         Eliminada
@@ -200,6 +209,8 @@ export const Campaigns = () => {
                         setIsDeleteDialogOpen(true)
                       }}
                       onSelect={() => handleSelectCampaign(campaign)}
+                      setIsReportDialogOpen={setIsReportDialogOpen}
+                      setReportCampaign={setReportCampaign}
                     />
                   ))}
                 </div>
@@ -231,7 +242,7 @@ export const Campaigns = () => {
                           <TableCell>{new Date(campaign.start_date).toLocaleDateString()}</TableCell>
                           <TableCell>{campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "No hay fecha de fin"}</TableCell>
                           <TableCell className="hidden md:table-cell">{campaign.notes || "No hay notas"}</TableCell>
-                          <TableCell>{getStatusBadge(campaign.status as CampaignStatus)}</TableCell>
+                          <TableCell>  {getStatusBadge(campaign)}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -316,46 +327,12 @@ export const Campaigns = () => {
 
       />
 
-      <ReportDialog
-        isOpen={isReportDialogOpen}
-        setIsOpen={setIsReportDialogOpen}
-        reportCampaign={reportCampaign}
+      <CampaignReportPage
+        reportCampaign={reportCampaign}   // tu campaña seleccionada
+        open={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
       />
 
     </div>
   );
 };
-
-export const ReportDialog = ({
-  isOpen,
-  setIsOpen,
-  reportCampaign,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  reportCampaign: Campaign | null;
-}) => {
-  return (
-    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed z-50 inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[1100px] sm:max-w-[94vw] sm:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl bg-card text-card-foreground border border-border/60 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-
-          {/* Header fijo */}
-          <div className="flex items-center justify-between p-4 sm:p-6 pb-0 shrink-0">
-            <Dialog.Title className="text-lg font-semibold">Reporte de Campaña</Dialog.Title>
-            <Dialog.Close className="w-8 h-8 flex items-center justify-center rounded-full bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-              ✕
-            </Dialog.Close>
-          </div>
-
-          {/* Contenido scrolleable */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 overscroll-contain">
-            <CampaignReportPage reportCampaign={reportCampaign} />
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-};
-

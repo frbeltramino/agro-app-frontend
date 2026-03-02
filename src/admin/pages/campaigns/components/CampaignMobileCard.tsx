@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, ChevronRight } from "lucide-react"
+import { Edit, Trash2, ChevronRight, Download } from "lucide-react"
 import { Campaign } from "@/interfaces/campaigns/campaign.interface"
 
 
@@ -10,7 +10,9 @@ interface Props {
   onEdit: () => void
   onDelete: () => void
   onSelect: () => void
-  getStatusBadge: (status: "active" | "inactive") => React.ReactNode
+  getStatusBadge: (campaign: Campaign) => React.ReactNode
+  setIsReportDialogOpen: (open: boolean) => void
+  setReportCampaign: (campaign: Campaign) => void
 }
 
 export const CampaignMobileCard = ({
@@ -19,6 +21,8 @@ export const CampaignMobileCard = ({
   onDelete,
   onSelect,
   getStatusBadge,
+  setIsReportDialogOpen,
+  setReportCampaign,
 }: Props) => {
 
 
@@ -38,11 +42,23 @@ export const CampaignMobileCard = ({
                   : "Sin fecha"}
               </p>
             </div>
-            {getStatusBadge(campaign.status as any)}
+            {getStatusBadge(campaign)}
           </div>
 
           <div className="flex justify-between items-center pt-2">
             <div className="flex gap-2">
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsReportDialogOpen(true);
+                  setReportCampaign(campaign);
+                }}
+              >
+                <Download className="h-4 w-4" />
+              </Button>
 
               <Button size="icon" variant="ghost" onClick={onEdit}>
                 <Edit className="h-4 w-4" />

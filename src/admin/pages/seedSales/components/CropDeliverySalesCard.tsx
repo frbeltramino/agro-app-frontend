@@ -113,7 +113,7 @@ export function CropDeliverySalesCard({ crop }: CropDeliverySalesCardProps) {
               <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted p-1 rounded-xl">
                 <TabsTrigger
                   value="deliveries"
-                  className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+                  className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium cursor-pointer"
                 >
                   <Truck className="w-4 h-4" />
                   Entregas ({crop.seed_deliveries.length})
@@ -121,7 +121,7 @@ export function CropDeliverySalesCard({ crop }: CropDeliverySalesCardProps) {
 
                 <TabsTrigger
                   value="sales"
-                  className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+                  className="gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium cursor-pointer"
                 >
                   <DollarSign className="w-4 h-4" />
                   Ventas ({crop.seed_sales.length})
